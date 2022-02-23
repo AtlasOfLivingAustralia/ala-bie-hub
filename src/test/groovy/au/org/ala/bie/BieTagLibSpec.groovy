@@ -36,7 +36,7 @@ class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     }
 
     def setupSpec() {
-        URL url = new File('grails-app/i18n').toURI().toURL()
+        URL url = new File('classpath:messages').toURI().toURL()
         messageSource = new ResourceBundleMessageSource()
         messageSource.bundleClassLoader = new URLClassLoader(url)
         messageSource.basename = 'messages'
