@@ -29,14 +29,16 @@ class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     @Shared
     Closure mockMessage = { Map map ->
         try {
-            return messageSource.getMessage((String) map.code, (Object[]) map.args, Locale.default)
+            return messageSource.getMessage((String) map.code, (Object[]) map.args, Locale.US)
         } catch (NoSuchMessageException ex) {
             return map.code
         }
     }
 
     def setupSpec() {
-        URL url = new File('file:WEB-INF/classes/messages').toURI().toURL()
+//        Build couldn't find grails-app/i18n, for the purpose of testing tabLib, copied messages.properties file to test folder
+//        URL url = new File('grails-app/i18n').toURI().toURL()
+        URL url = this.class.getResource("messages.properties")
         messageSource = new ResourceBundleMessageSource()
         messageSource.bundleClassLoader = new URLClassLoader(url)
         messageSource.basename = 'messages'
