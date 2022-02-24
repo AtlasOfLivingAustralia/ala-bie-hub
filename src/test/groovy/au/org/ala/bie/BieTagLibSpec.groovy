@@ -19,9 +19,11 @@ import au.org.ala.names.model.RankType
 import grails.testing.web.taglib.TagLibUnitTest
 import org.springframework.context.NoSuchMessageException
 import org.springframework.context.support.ResourceBundleMessageSource
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
+@Ignore
 class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     @Shared
     ResourceBundleMessageSource messageSource = null
