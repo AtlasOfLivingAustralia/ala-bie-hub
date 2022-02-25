@@ -23,7 +23,7 @@ import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
-@Ignore
+//@Ignore
 class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     @Shared
     ResourceBundleMessageSource messageSource = null
