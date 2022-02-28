@@ -26,14 +26,14 @@ class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     @Shared
     StaticMessageSource messageSource = new StaticMessageSource()
 
-    @Shared
-    Closure mockMessage = { Map map ->
-        try {
-            return messageSource.getMessage((String) map.code, (Object[]) map.args, Locale.default)
-        } catch (NoSuchMessageException ex) {
-            return map.code
-        }
-    }
+//    @Shared
+//    Closure mockMessage = { Map map ->
+//        try {
+//            return messageSource.getMessage((String) map.code, (Object[]) map.args, Locale.default)
+//        } catch (NoSuchMessageException ex) {
+//            return map.code
+//        }
+//    }
 
     def setupSpec() {
         messageSource.addMessage('taxonomicStatus.name.format', Locale.default, '<span class="taxon-name">{0}</span>')
@@ -47,7 +47,13 @@ class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     }
 
     def setup() {
-        tagLib.metaClass.message = mockMessage
+        tagLib.metaClass.message = { Map map ->
+            try {
+                return messageSource.getMessage((String) map.code, (Object[]) map.args, Locale.default)
+            } catch (NoSuchMessageException ex) {
+                return map.code
+            }
+        }
     }
 
     def "test formatSciName 1"() {
