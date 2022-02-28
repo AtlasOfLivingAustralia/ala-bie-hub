@@ -18,15 +18,15 @@ package au.org.ala.bie
 import au.org.ala.names.model.RankType
 import grails.testing.web.taglib.TagLibUnitTest
 import org.springframework.context.NoSuchMessageException
+import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.context.support.ResourceBundleMessageSource
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
 //@Ignore
 class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     @Shared
-    ResourceBundleMessageSource messageSource = null
+    ReloadableResourceBundleMessageSource messageSource = null
 
     @Shared
     Closure mockMessage = { Map map ->
@@ -40,19 +40,20 @@ class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     def setupSpec() {
 //        Build couldn't find grails-app/i18n, for the purpose of testing tabLib, copied messages.properties file to test folder
 //        URL url = new File('grails-app/i18n').toURI().toURL()
-        String resourceName = "messages.properties";
-
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(resourceName).getFile());
-        String absolutePath = file.getAbsolutePath();
-
-        System.out.println("absolutePath: " + absolutePath);
-        URL url = file.toURI().toURL()
-        System.out.println("url: "+url);
-        messageSource = new ResourceBundleMessageSource()
-        messageSource.bundleClassLoader = new URLClassLoader(url)
-        messageSource.basename = 'messages'
+//        String resourceName = "messages.properties";
+//
+//        ClassLoader classLoader = getClass().getClassLoader();
+//        File file = new File(classLoader.getResource(resourceName).getFile());
+//        String absolutePath = file.getAbsolutePath();
+//
+//        System.out.println("absolutePath: " + absolutePath);
+//        URL url = file.toURI().toURL()
+//        System.out.println("url: "+url);
+        messageSource = new ReloadableResourceBundleMessageSource()
+//        messageSource.bundleClassLoader = new URLClassLoader(url)
+//        messageSource.basename = 'messages'
         messageSource.setDefaultEncoding("utf-8")
+        messageSource.setBasenames("classpath:messages")
     }
 
     def setup() {
