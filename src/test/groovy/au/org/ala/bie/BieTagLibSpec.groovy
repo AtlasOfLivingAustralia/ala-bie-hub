@@ -18,13 +18,13 @@ package au.org.ala.bie
 import au.org.ala.names.model.RankType
 import grails.testing.web.taglib.TagLibUnitTest
 import org.springframework.context.NoSuchMessageException
-import org.springframework.context.support.StaticMessageSource
+import org.springframework.context.support.ResourceBundleMessageSource
 import spock.lang.Shared
 import spock.lang.Specification
 
 class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     @Shared
-    StaticMessageSource messageSource = new StaticMessageSource()
+    ResourceBundleMessageSource messageSource = null
 
     @Shared
     Closure mockMessage = { Map map ->
@@ -36,14 +36,11 @@ class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     }
 
     def setupSpec() {
-        messageSource.addMessage('taxonomicStatus.name.format', Locale.default, '<span class="taxon-name">{0}</span>')
-        messageSource.addMessage('taxonomicStatus.synonym.format', Locale.default, '<span class="synonym-name">{0} <span class="accepted-name">(accepted&nbsp;name:&nbsp;{1})</span></span>')
-        messageSource.addMessage('taxonomicStatus.heterotypicSynonym.format', Locale.default, '<span class="heterotypic-name synonym-name">{0} <span class="accepted-name">(accepted&nbsp;name:&nbsp;{1})</span></span>')
-        messageSource.addMessage('label.in', Locale.default, 'in')
-        messageSource.addMessage('commonStatus.preferred.detail', Locale.default, 'The preferred common name for this species')
-        messageSource.addMessage('commonStatus.preferred', Locale.default, 'preferred')
-        messageSource.addMessage('commonStatus.common.detail', Locale.default, 'A general common name for this species')
-        messageSource.addMessage('commonStatus.common', Locale.default, 'common')
+        URL url = new File('grails-app/i18n').toURI().toURL()
+        messageSource = new ResourceBundleMessageSource()
+        messageSource.bundleClassLoader = new URLClassLoader(url)
+        messageSource.basename = 'messages'
+        messageSource.setDefaultEncoding("utf-8")
     }
 
     def setup() {
