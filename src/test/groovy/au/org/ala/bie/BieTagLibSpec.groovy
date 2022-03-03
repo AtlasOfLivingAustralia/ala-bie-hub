@@ -21,29 +21,21 @@ import org.springframework.context.NoSuchMessageException
 import org.springframework.context.support.StaticMessageSource
 import spock.lang.Shared
 import spock.lang.Specification
-import org.springframework.context.*
 
 class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     @Shared
     StaticMessageSource messageSource = new StaticMessageSource()
 
-//    @Shared
-//    Closure mockMessage = { Map map ->
-//        try {
-//            return messageSource.getMessage((String) map.code, (Object[]) map.args, Locale.default)
-//        } catch (NoSuchMessageException ex) {
-//            return map.code
-//        }
-//    }
-
-    static void mockMessageTag(artefact, MessageSource messageSource) {
-        artefact.metaClass.message = { attrs ->
-            messageSource.getMessage(attrs.code, attrs.args as Object[], Locale.default)
+    @Shared
+    Closure mockMessage = { Map map ->
+        try {
+            return messageSource.getMessage((String) map.code, (Object[]) map.args, Locale.default)
+        } catch (NoSuchMessageException ex) {
+            return map.code
         }
     }
 
     def setupSpec() {
-        messageSource.useCodeAsDefaultMessage = true
         messageSource.addMessage('taxonomicStatus.name.format', Locale.default, '<span class="taxon-name">{0}</span>')
         messageSource.addMessage('taxonomicStatus.synonym.format', Locale.default, '<span class="synonym-name">{0} <span class="accepted-name">(accepted&nbsp;name:&nbsp;{1})</span></span>')
         messageSource.addMessage('taxonomicStatus.heterotypicSynonym.format', Locale.default, '<span class="heterotypic-name synonym-name">{0} <span class="accepted-name">(accepted&nbsp;name:&nbsp;{1})</span></span>')
@@ -54,12 +46,9 @@ class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
         messageSource.addMessage('commonStatus.common', Locale.default, 'common')
     }
 
-//    def setup() {
-//        tagLib.metaClass.message = mockMessage
-//    }
-
     def setup() {
-        mockMessageTag(tagLib, messageSource)
+        config.languageCodesUrl = 'file:grails-app/conf/languages.json'
+        tagLib.metaClass.message = mockMessage
     }
 
     def "test formatSciName 1"() {
