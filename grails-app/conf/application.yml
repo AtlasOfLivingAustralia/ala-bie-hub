@@ -38,9 +38,9 @@ management:
 grails:
     config:
         locations:
-            - file:///data/bie-hub/config/bie-hub-config.properties
-            - file:///data/bie-hub/config/bie-hub-config.yml
-            - file:///data/bie-hub/config/bie-hub-config.groovy
+            - file:///data/ala-bie-hub/config/ala-bie-hub-config.properties
+            - file:///data/ala-bie-hub/config/ala-bie-hub-config.yml
+            - file:///data/ala-bie-hub/config/ala-bie-hub-config.groovy
     mime:
         disable:
             accept:
@@ -99,7 +99,7 @@ management:
 ---
 #Required so that the gbif-ecat library does not bugger up initialisation from its internal application.properties
 app:
-    name: bie-hub
+    name: ala-bie-hub
     dataDir: /tmp/gbif-ecat
 security:
     cas:
@@ -177,7 +177,7 @@ bieService:
     queryContext:
     apiKey:
 googleMapsApiKey: "<key value>"
-languageCodesUrl: file:///data/bie-hub/config/languages.json
+languageCodesUrl: file:///data/ala-bie-hub/config/languages.json
 geocode.querySuffix:
 occurrenceCounts:
     enabled: true

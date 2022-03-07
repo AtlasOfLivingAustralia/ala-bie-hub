@@ -6,7 +6,7 @@ import org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverte
 import java.nio.charset.Charset
 
 def loggingDir = (System.getProperty('catalina.base') ? System.getProperty('catalina.base') + '/logs' : './logs')
-def appName = 'bie-hub'
+def appName = 'ala-bie-hub'
 final TOMCAT_LOG = 'TOMCAT_LOG'
 final FULL_STACKTRACE = 'FULL_STACKTRACE'
 final STDOUT = 'STDOUT'
