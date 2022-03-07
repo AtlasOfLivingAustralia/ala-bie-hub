@@ -44,7 +44,6 @@ class BieTagLibSpec extends Specification implements TagLibUnitTest<BieTagLib> {
     }
 
     def setup() {
-        config.languageCodesUrl = 'file:grails-app/conf/languages.json'
         tagLib.metaClass.message = mockMessage
     }
 

@@ -177,7 +177,7 @@ bieService:
     queryContext:
     apiKey:
 googleMapsApiKey: "<key value>"
-languageCodesUrl: file:///data/ala-bie-hub/config/languages.json
+languageCodesUrl: /languages.json
 geocode.querySuffix:
 occurrenceCounts:
     enabled: true
@@ -225,7 +225,7 @@ external:
         page:
             # {0} = page id
             service: https://eol.org/api/pages/1.0/{0,number,#0}.json?language={1}&images_per_page=0&videos_per_page=0&sounds_per_page=0&maps_per_page=0&texts_per_page=30&subjects=overview&licenses=all&details=true&references=true&vetted=0&cache_ttl=
-    blacklist: file:./src/test/resources/test-blacklist.json # ask Doug
+    blacklist: file:./src/test/resources/test-blacklist.json
 ---
 headerAndFooter:
     baseURL: "https://www.ala.org.au/commonui-bs3-2019"
