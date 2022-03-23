@@ -143,6 +143,7 @@ dependencies {
     compile group: "au.org.ala.plugins.grails", name: "images-client-plugin", version: "1.2"
 
     compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
+    runtime group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 }
 
 bootRun {
