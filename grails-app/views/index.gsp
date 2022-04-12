@@ -17,7 +17,7 @@
 <html>
 <head>
     <meta name="breadcrumb" content="${ message(code: 'label.search') }"/>
-    <meta name="layout" content="${grailsApplication.config.skin.layout}"/>
+    <meta name="layout" content="ala-main"/>
     <title><g:message code="page.index.title" args="${[ grailsApplication.config.skin.orgNameLong ]}"/></title>
     <asset:script type="text/javascript">
         // global var to pass GSP vars into JS file

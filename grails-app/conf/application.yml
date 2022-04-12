@@ -57,22 +57,22 @@ grails:
             csv: text/csv
             form: application/x-www-form-urlencoded
             html:
-              - text/html
-              - application/xhtml+xml
+                - text/html
+                - application/xhtml+xml
             js: text/javascript
             json:
-              - application/json
-              - text/json
+                - application/json
+                - text/json
             multipartForm: multipart/form-data
             pdf: application/pdf
             rss: application/rss+xml
             text: text/plain
             hal:
-              - application/hal+json
-              - application/hal+xml
+                - application/hal+json
+                - application/hal+xml
             xml:
-              - text/xml
-              - application/xml
+                - text/xml
+                - application/xml
     urlmapping:
         cache:
             maxsize: 1000
@@ -109,7 +109,6 @@ security:
 
 skin:
     homeUrl: http://www.ala.org.au
-    layout: ala
     orgNameLong: Atlas of Living Australia
     fluidLayout: true
     orgNameShort: Atlas of Living Australia
@@ -227,6 +226,10 @@ external:
             service: https://eol.org/api/pages/1.0/{0,number,#0}.json?language={1}&images_per_page=0&videos_per_page=0&sounds_per_page=0&maps_per_page=0&texts_per_page=30&subjects=overview&licenses=all&details=true&references=true&vetted=0&cache_ttl=
     blacklist: file:./src/test/resources/test-blacklist.json
 ---
+#headerAndFooter:
+#    baseURL: "https://www.ala.org.au/commonui-bs3-2019"
+#    version: 2
+# Header and footer
 headerAndFooter:
-    baseURL: "https://www.ala.org.au/commonui-bs3-2019"
-    version: "2"
+    baseURL: https://www-test.ala.org.au/commonui-bs3-2019
+    version: 2

@@ -34,8 +34,47 @@ class BootStrap {
             }
             return trimString
         }
+
+//        initConfig()
     }
 
     def destroy = {
     }
+
+//    void initConfig(){
+//        //Check if qualityProfile is used
+//        if ( grailsApplication.config.dataquality.enabled ) {
+//            if (grailsApplication.config.dataquality.baseUrl) {
+//                QualityServiceRpcApi api
+//                DataProfilesApi dataProfilesApi
+//                def apiClient = new ApiClient()
+//                apiClient.adapterBuilder.baseUrl(grailsApplication.config.dataquality.baseUrl)
+//
+//                api = apiClient.createService(QualityServiceRpcApi)
+//                def profile = (QualityProfile) responseOrThrow(api.activeProfile(null))
+//                if (profile) {
+//                    grailsApplication.config.with {
+//                        qualityProfile = profile.shortName
+//                    }
+//                    log.info("Quality Profile: " + grailsApplication.config.qualityProfile)
+//                }
+//            } else {
+//                log.warn("Data quality is enabled, but the url of data quality service is not defined!")
+//            }
+//        }
+//    }
+//
+//    private <T> T responseOrThrow(Call<T> call) {
+//        def response
+//        try {
+//            response = call.execute()
+//        } catch (IOException e) {
+//            log.error("IOException executing call {}", call.request(), e)
+//        }
+//        if (response.successful) {
+//            return response.body()
+//        } else {
+//            log.error("Non-successful call {} returned response {}", call.request(), response)
+//        }
+//    }
 }
