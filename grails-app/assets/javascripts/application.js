@@ -12,11 +12,21 @@
 
 if (typeof jQuery !== 'undefined') {
     (function($) {
-        $(document).ajaxStart(function() {
+        $('#spinner').ajaxStart(function() {
             $('#spinner').fadeIn();
         }).ajaxStop(function() {
             $('#spinner').fadeOut();
         });
     })(jQuery);
 }
+
+// if (typeof jQuery !== 'undefined') {
+//     (function($) {
+//         $('#spinner').ajaxStart(function() {
+//             $(this).fadeIn();
+//         }).ajaxStop(function() {
+//             $(this).fadeOut();
+//         });
+//     })(jQuery);
+// }
 
