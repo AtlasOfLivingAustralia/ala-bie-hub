@@ -109,6 +109,7 @@ security:
 
 skin:
     homeUrl: http://www.ala.org.au
+    layout: ala-main
     orgNameLong: Atlas of Living Australia
     fluidLayout: true
     orgNameShort: Atlas of Living Australia
@@ -127,10 +128,13 @@ serverName: http://devt.ala.org.au:8080
 projectNameShort: Atlas
 projectName: Atlas of Living Australia
 biocache:
-    baseURL: "https://biocache.ala.org.au"
+    baseURL: https://biocache.ala.org.au
 biocacheService:
     baseURL: https://biocache-ws.ala.org.au/ws
     queryContext:
+dataquality:
+    enabled: false
+    baseUrl: https://data-quality-service.ala.org.au/data-profiles
 spatial:
     baseURL: https://spatial.ala.org.au
 layersService:
