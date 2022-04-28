@@ -5,5 +5,3 @@ This is the BIE (Biodiversity Information Explorer) front end - merge of old ala
 
 THE BIE handles general search duties and serves taxon/species pages.
 For more details on the architecture see [BIE index](http://github.com/AtlasOfLivingAustralia/bie-index)
-
-
