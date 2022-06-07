@@ -20,6 +20,7 @@ import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.grails.web.json.JSONObject
 import org.owasp.html.HtmlPolicyBuilder
 import org.owasp.html.PolicyFactory
 
@@ -53,8 +54,10 @@ class ExternalSiteService implements GrailsConfigurationAware {
     /** Allowed attributes for HTML */
     String allowedAttributes
     /** Blacklist for external sites */
-    Blacklist blacklist;
+    Blacklist blacklist
+    String ausTraitsBase
 
+    def webClientService
 
     @Override
     void setConfiguration(Config config) {
@@ -69,8 +72,9 @@ class ExternalSiteService implements GrailsConfigurationAware {
         updateFile = config.getProperty("update.file.location")
         allowedElements = config.getProperty("eol.html.allowedElements")
         allowedAttributes = config.getProperty("eol.html.allowAttributes")
-        def blacklistURL = config.getProperty('external.blacklist', URL)
+        def blacklistURL = config.getProperty("external.blacklist", URL)
         blacklist = blacklistURL ? Blacklist.read(blacklistURL) : null
+        ausTraitsBase = config.getProperty("ausTraits.baseURL")
     }
 
     /**
@@ -144,6 +148,21 @@ class ExternalSiteService implements GrailsConfigurationAware {
             }
         }
         return [start: start, rows: rows, search: search, max: max, more: more, results: results]
+    }
+
+    def searchAusTraits(def params) {
+        def url = ausTraitsBase + "/trait-summary?taxon=" + params.s
+        if (params.guid.indexOf("apni") > 0) {
+            url += "&APNI_ID=" + params.guid
+        }
+
+        def json = webClientService.getJson(url)
+        if (json instanceof JSONObject && json.has("error")) {
+            log.warn "failed to get json, request error: " + json.error
+            return [:]
+        } else {
+            return json
+        }
     }
 
     def searchEol(String name, String filter) {

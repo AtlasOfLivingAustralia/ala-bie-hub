@@ -13,10 +13,8 @@
  * rights and limitations under the License.
  */
 
-function showSpeciesPage() {
-
+function showSpeciesPage(traitsTabSet) {
     //console.log("Starting show species page");
-
     //load content
     loadOverviewImages();
     loadMap();
@@ -31,10 +29,12 @@ function showSpeciesPage() {
     addAlerts();
     loadBhl();
     loadTrove(SHOW_CONF.troveUrl, SHOW_CONF.scientificName, SHOW_CONF.synonyms, 'trove-integration','trove-result-list','previousTrove','nextTrove');
+    if (traitsTabSet && SHOW_CONF.kingdom == 'Plantae') {
+        loadAusTraits();
+    }
 }
 
 function loadSpeciesLists(){
-
     //console.log('### loadSpeciesLists #### ' + SHOW_CONF.speciesListUrl + '/ws/species/' + SHOW_CONF.guid);
     $.getJSON(SHOW_CONF.speciesListUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function( data ) {
         for(var i = 0; i < data.length; i++) {
@@ -96,7 +96,6 @@ function addAlerts(){
 }
 
 function loadMap() {
-
     if(SHOW_CONF.map != null){
         return;
     }
@@ -217,12 +216,51 @@ function fitMapToBounds() {
 //    });
 //}
 
-function loadDataProviders(){
+function loadAusTraits() {
+    $.ajax({url: SHOW_CONF.ausTraitsUrl}).done(function (data) {
+        // $.getJSON(SHOW_CONF.ausTraitsUrl, function(data){
+        if (data.numeric_traits && data.categorical_traits) {
+            $.each(data.categorical_traits, function (idx, traitValue) {
+                var tableRow = "<tr><td>";
+                tableRow += capitalise(replaceUnderscore(traitValue.trait_name)) + "</td><td>"
+                tableRow += traitValue.trait_values + "</td></tr>";
+                $('#categorical-traits tbody').append(tableRow);
+            });
 
-    var url = SHOW_CONF.biocacheServiceUrl  +
-        '/occurrences/search.json?q=lsid:' +
-        SHOW_CONF.guid +
-        '&pageSize=0&flimit=-1';
+            $.each(data.numeric_traits, function (idx, traitValue) {
+                var tableRow = "<tr><td>";
+                tableRow += capitalise(replaceUnderscore(traitValue.trait_name)) + "</td><td>"
+                tableRow += traitValue.mean_type + "</td><td>"
+                tableRow += traitValue.mean + "</td><td>"
+                tableRow += traitValue.unit + "</td><td>"
+                tableRow += traitValue.n_sites + "</td><td>"
+                tableRow += traitValue.n_datasets + "</td></tr>";
+                $('#numeric-traits tbody').append(tableRow);
+            });
+
+        } else {
+            $("#traitsRecords").html("<h3>" + jQuery.i18n.prop("no.traits.found") + "</h3>");
+        }
+
+    }).error(function (jqXHR, textStatus, errorThrown) {
+        console.warn("error " + textStatus);
+        console.warn("incoming Text " + jqXHR.responseText);
+    });
+}
+
+function replaceUnderscore(name) {
+    return name.replaceAll('_', ' ');
+}
+
+/* capitalises the first letter of the passed string */
+function capitalise(item) {
+    return item.replace(/^./, function (str) {
+        return str.toUpperCase();
+    })
+}
+
+function loadDataProviders(){
+    var url = SHOW_CONF.biocacheServiceUrl  + '/occurrences/search.json?q=lsid:' + SHOW_CONF.guid + '&pageSize=0&flimit=-1';
 
     if(SHOW_CONF.mapQueryContext){
        url = url + '&fq=' + SHOW_CONF.mapQueryContext;
@@ -230,14 +268,10 @@ function loadDataProviders(){
 
     url = url + '&facet=on&facets=data_resource_uid&callback=?';
 
-    var uiUrl = SHOW_CONF.biocacheUrl  +
-        '/occurrences/search?q=lsid:' +
-        SHOW_CONF.guid;
-
+    var uiUrl = SHOW_CONF.biocacheUrl  + '/occurrences/search?q=lsid:' + SHOW_CONF.guid;
     $.getJSON(url, function(data){
 
         if(data.totalRecords > 0) {
-
             var datasetCount = data.facetResults[0].fieldResult.length;
 
             //exclude the "Unknown facet value"
@@ -253,15 +287,12 @@ function loadDataProviders(){
             $.each(data.facetResults[0].fieldResult, function (idx, facetValue) {
                 //console.log(data.facetResults[0].fieldResult);
                 if(facetValue.count > 0){
-
                     var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
                     var dataResourceUrl =  SHOW_CONF.collectoryUrl + "/public/show/" + uid;
                     var tableRow = "<tr><td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
 
                     //console.log(uid);
                     $.getJSON(SHOW_CONF.collectoryUrl + "/ws/dataResource/" + uid, function(collectoryData) {
-
-
                         if(collectoryData.provider){
                             tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
                         }
@@ -280,7 +311,6 @@ function loadDataProviders(){
 }
 
 function loadIndigenousData() {
-
     if(!SHOW_CONF.profileServiceUrl || SHOW_CONF.profileServiceUrl == ""){
         return;
     }
@@ -321,7 +351,6 @@ function loadIndigenousData() {
 
                 if(profile.thumbnailUrl) {
                     panel.find(".main-image").removeClass("hide");
-
                     panel.find(".image-embedded").append("<img src='" + profile.thumbnailUrl + "' alt='" + profile.collection.title + " main image'>");
                 }
 

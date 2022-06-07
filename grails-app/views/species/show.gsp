@@ -23,7 +23,14 @@
 <g:set var="guid" value="${tc?.previousGuid ?: tc?.taxonConcept?.guid ?: ''}"/>
 <g:set var="scientificName" value="${tc?.taxonConcept?.nameString ?: ''}" />
 <g:set var="taxonRank" value="${tc?.taxonConcept?.rankString?.capitalize() ?: ''}" />
-<g:set var="tabs" value="${grailsApplication.config.show.tabs.split(',')}"/>
+<g:set var="kingdom" value="${tc?.classification?.kingdom ?: ''}" />
+<g:if test="${kingdom == 'Plantae'}">
+    <g:set var="tabs" value="${grailsApplication.config.show.tabs.split(',')}"/>
+    <g:set var="ausTraitsDownloadUrl" value="${grailsApplication.config.ausTraits.baseURL}/download-taxon-data?taxon=${tc?.taxonConcept?.nameString}"/>
+</g:if>
+<g:else>
+    <g:set var="tabs" value="${grailsApplication.config.show.tabs.replace('ausTraits':'').split(',')}"/>
+</g:else>
 <g:set var="jsonLink" value="${grailsApplication.config.bie.index.url}/species/${tc?.taxonConcept?.guid}.json"/>
 <g:set var="sciNameFormatted"><bie:formatSciName rankId="${tc?.taxonConcept?.rankID}"
                                                  nameFormatted="${tc?.taxonConcept?.nameFormatted}"
@@ -418,11 +425,12 @@
         mapOutline: ${grailsApplication.config.map.outline ?: 'false'},
         mapEnvOptions: "${grailsApplication.config.map.env?.options?:'color:' + grailsApplication.config.map.records.colour+ ';name:circle;size:4;opacity:0.8'}",
         troveUrl: "${raw(grailsApplication.config.literature?.trove?.api + '/result?zone=book&encoding=json&key=' + grailsApplication.config.literature?.trove?.apikey )}",
-        bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}"
+        bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}",
+        ausTraitsUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraits', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}"
     };
 
     $(function(){
-        showSpeciesPage();
+        showSpeciesPage(${grailsApplication.config.show.tabs.indexOf('ausTraits') != -1});
     });
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {

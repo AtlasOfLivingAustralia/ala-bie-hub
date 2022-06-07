@@ -148,6 +148,10 @@ regions:
     baseURL: https://regions.ala.org.au
 bhl:
     baseURL: https://www.biodiversitylibrary.org
+ausTraits:
+    baseURL: http://tcyfjstumgmyag96.dev.austraits.cloud.edu.au
+    homeURL: https://austraits.org/
+    sourceURL: https://zenodo.org/record/5112001#.Yp2RVahBwuX
 speciesList:
     baseURL: https://lists.ala.org.au
     preferredSpeciesListDruid:
@@ -208,7 +212,7 @@ literature:
         api: https://api.trove.nla.gov.au
         apikey: "<key value>"
 show:
-    tabs: overview,gallery,names,classification,records,literature,sequences,data-partners
+    tabs: overview,gallery,names,classification,records,literature,sequences,data-partners,ausTraits
 
 vernacularName:
     # A category of vernacular names pulled out from the standard list and given special display treatment

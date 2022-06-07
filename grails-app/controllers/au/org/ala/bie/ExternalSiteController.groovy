@@ -92,6 +92,11 @@ class ExternalSiteController {
         }
     }
 
+    def ausTraits() {
+        def results = externalSiteService.searchAusTraits(params)
+        render results as JSON
+    }
+
     def scholar = {
         def searchStrings = params.list("s")
         def searchParams = "\"" + searchStrings.join("\" OR \"") + "\""
