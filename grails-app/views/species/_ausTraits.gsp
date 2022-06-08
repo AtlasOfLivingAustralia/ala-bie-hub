@@ -35,7 +35,7 @@
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-footer">
+        <div class="panel-footer" style="border-radius:3px;border-top:none;">
             <p class="source">Source: <a href="${grailsApplication.config.ausTraits.sourceURL}" class="sourceText">Zenodo</a></p>
             <p class="rights">Rights holder: <span class="rightsText">AusTraits</span></p>
             <p class="provider">Provided by: <a href="${grailsApplication.config.ausTraits.homeURL}" class="providedBy">AusTraits</a></p>
