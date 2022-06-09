@@ -1,8 +1,12 @@
 <section class="tab-pane fade" id="ausTraits">
-    <div id="download-button-area" class="pull-right">
+    <div id="download-button-area" class="pull-right btn-group btn-group-vertical">
         <a href="${ausTraitsDownloadUrl}"
-           id="downloadRecords" class="btn btn-default"><i class="fa fa-download"></i>
+           id="downloadRecords" class="btn btn-default"><i class="glyphicon glyphicon-arrow-down"></i>
             <g:message code="aus.traits.download.records"/>
+        </a>
+        <a class="btn btn-default" style="text-align:left;" target="_blank"
+           href="https://edit-test.ala.org.au/austraits-definitions/">
+            <g:message code="aus.traits.definitions"/>
         </a>
     </div>
 
