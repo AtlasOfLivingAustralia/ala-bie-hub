@@ -5,7 +5,7 @@
             <g:message code="aus.traits.download.records"/>
         </a>
         <a class="btn btn-default" style="text-align:left;" target="_blank"
-           href="https://edit-test.ala.org.au/austraits-definitions/">
+           href="${grailsApplication.config.ausTraits.definitionsURL}">
             <g:message code="aus.traits.definitions"/>
         </a>
     </div>
