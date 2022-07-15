@@ -20,6 +20,7 @@ import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.apache.tika.language.LanguageIdentifier
 import org.owasp.html.HtmlPolicyBuilder
 import org.owasp.html.PolicyFactory
 
@@ -171,7 +172,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
                 if (result?.taxonConcept) {
                     def dataObjects = result?.taxonConcept?.dataObjects ?: []
                     if (eolLanguage) {
-                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage }
+                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage && isContentInLanguage(dto.description , eolLanguage, dto.title) }
                     }
                     if (blacklist) {
                         dataObjects = dataObjects.findAll { dto -> !blacklist.isBlacklisted(name, dto.source, dto.title) }
@@ -181,6 +182,19 @@ class ExternalSiteService implements GrailsConfigurationAware {
             }
         }
         return result
+    }
+    /**
+     * Checks and returns whether the text content is in the specified language
+     * @param content
+     * @param language
+     * @param title
+     * @return
+     */
+    Boolean isContentInLanguage(String content, String language, String title){
+        def lid = new LanguageIdentifier(content)
+        log.warn("Content Language Detection for " + title)
+        log.warn( "Expected language: " + language +  "   Detected language: " + lid.getLanguage())
+        return lid.getLanguage() == language
     }
 
     /**
