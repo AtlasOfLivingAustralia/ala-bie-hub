@@ -20,7 +20,10 @@ import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import org.apache.tika.language.LanguageIdentifier
+import org.apache.tika.langdetect.optimaize.OptimaizeLangDetector
+import org.apache.tika.language.detect.LanguageDetector
+import org.apache.tika.language.detect.LanguageResult
+import org.jsoup.Jsoup
 import org.owasp.html.HtmlPolicyBuilder
 import org.owasp.html.PolicyFactory
 
@@ -184,17 +187,20 @@ class ExternalSiteService implements GrailsConfigurationAware {
         return result
     }
     /**
-     * Checks and returns whether the text content is in the specified language
+     *
      * @param content
      * @param language
      * @param title
-     * @return
+     * @return boolean
      */
     Boolean isContentInLanguage(String content, String language, String title){
-        def lid = new LanguageIdentifier(content)
+        LanguageDetector detector = new OptimaizeLangDetector().loadModels()
+        // remove any html tags to prevent mis-detection
+        def cleanedContent  = Jsoup.parse(content).text()
+        LanguageResult result = detector.detect(cleanedContent)
         log.warn("Content Language Detection for " + title)
-        log.warn( "Expected language: " + language +  "   Detected language: " + lid.getLanguage())
-        return lid.getLanguage() == language
+        log.warn( "Expected language: " + language +  ".   Detected language: " + result.getLanguage())
+        return result.getLanguage() == language
     }
 
     /**
