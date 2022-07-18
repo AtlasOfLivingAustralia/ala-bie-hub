@@ -198,9 +198,11 @@ class ExternalSiteService implements GrailsConfigurationAware {
         // remove any html tags to prevent mis-detection
         def cleanedContent  = Jsoup.parse(content).text()
         LanguageResult result = detector.detect(cleanedContent)
-        log.warn("Content Language Detection for " + title)
-        log.warn( "Expected language: " + language +  ".   Detected language: " + result.getLanguage())
-        return result.getLanguage() == language
+        def isoLangCode = result.getLanguage()
+        if(isoLangCode != language){
+            log.warn( "Expected language: " + language +  ".   Detected language: " + isoLangCode)
+        }
+        return isoLangCode== language
     }
 
     /**
