@@ -175,7 +175,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
                 if (result?.taxonConcept) {
                     def dataObjects = result?.taxonConcept?.dataObjects ?: []
                     if (eolLanguage) {
-                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage && isContentInLanguage(dto.description , eolLanguage, dto.title) }
+                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage && isContentInLanguage(dto.description , eolLanguage) }
                     }
                     if (blacklist) {
                         dataObjects = dataObjects.findAll { dto -> !blacklist.isBlacklisted(name, dto.source, dto.title) }
@@ -193,7 +193,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
      * @param title
      * @return boolean
      */
-    Boolean isContentInLanguage(String content, String language, String title){
+    Boolean isContentInLanguage(String content, String language){
         LanguageDetector detector = new OptimaizeLangDetector().loadModels()
         // remove any html tags to prevent mis-detection
         def cleanedContent  = Jsoup.parse(content).text()

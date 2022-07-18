@@ -145,7 +145,6 @@ dependencies {
     compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
 
     implementation 'org.apache.tika:tika-core:2.4.1'
-    implementation 'org.apache.tika:tika-langdetect:2.4.1'
     implementation 'org.apache.tika:tika-langdetect-optimaize:2.4.1'
 
 }
