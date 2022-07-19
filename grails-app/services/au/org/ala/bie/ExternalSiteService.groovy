@@ -197,12 +197,25 @@ class ExternalSiteService implements GrailsConfigurationAware {
         LanguageDetector detector = new OptimaizeLangDetector().loadModels()
         // remove any html tags to prevent mis-detection
         def cleanedContent  = Jsoup.parse(content).text()
-        LanguageResult result = detector.detect(cleanedContent)
-        def isoLangCode = result.getLanguage()
-        if(isoLangCode != language){
-            log.warn( "Expected language: " + language +  ".   Detected language: " + isoLangCode)
+        // detectionList contains the list of lang codes detected on each segment of the text content
+        def detectionList = []
+        def isoLangCode = ""
+         /**
+          * The detector doesn't always the detect the language in the content as expected.
+          * In case of mixed content e.g. mostly Korean with some English, if the detector detects the English with higher confidence than Korean, English will be returned as the result.
+          * Since there isn't a native method of detecting the percentage of content per language in a given text string, we need to segment the text content to sensible chunks.
+         */
+        if(cleanedContent.length() >= 50){
+            for(int i = 0; i < cleanedContent.length() - 50; i += 50) {
+                def subStr = cleanedContent.substring(i, i+50)
+                def ll = detector.detect(subStr).getLanguage()
+                detectionList.add(ll)
+            }
+            isoLangCode = detectionList.countBy { it }.max { it.value }.key
+        } else{
+            isoLangCode = detector.detect(cleanedContent).getLanguage()
         }
-        return isoLangCode== language
+        return isoLangCode == language
     }
 
     /**
