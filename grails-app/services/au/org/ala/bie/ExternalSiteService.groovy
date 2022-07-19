@@ -20,6 +20,10 @@ import grails.config.Config
 import grails.core.support.GrailsConfigurationAware
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.apache.tika.langdetect.optimaize.OptimaizeLangDetector
+import org.apache.tika.language.detect.LanguageDetector
+import org.apache.tika.language.detect.LanguageResult
+import org.jsoup.Jsoup
 import org.owasp.html.HtmlPolicyBuilder
 import org.owasp.html.PolicyFactory
 
@@ -171,7 +175,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
                 if (result?.taxonConcept) {
                     def dataObjects = result?.taxonConcept?.dataObjects ?: []
                     if (eolLanguage) {
-                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage }
+                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage && isContentInLanguage(dto.description , eolLanguage) }
                     }
                     if (blacklist) {
                         dataObjects = dataObjects.findAll { dto -> !blacklist.isBlacklisted(name, dto.source, dto.title) }
@@ -181,6 +185,24 @@ class ExternalSiteService implements GrailsConfigurationAware {
             }
         }
         return result
+    }
+    /**
+     *
+     * @param content
+     * @param language
+     * @param title
+     * @return boolean
+     */
+    Boolean isContentInLanguage(String content, String language){
+        LanguageDetector detector = new OptimaizeLangDetector().loadModels()
+        // remove any html tags to prevent mis-detection
+        def cleanedContent  = Jsoup.parse(content).text()
+        LanguageResult result = detector.detect(cleanedContent)
+        def isoLangCode = result.getLanguage()
+        if(isoLangCode != language){
+            log.warn( "Expected language: " + language +  ".   Detected language: " + isoLangCode)
+        }
+        return isoLangCode== language
     }
 
     /**
