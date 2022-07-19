@@ -190,7 +190,6 @@ class ExternalSiteService implements GrailsConfigurationAware {
      *
      * @param content
      * @param language
-     * @param title
      * @return boolean
      */
     Boolean isContentInLanguage(String content, String language){
@@ -205,9 +204,9 @@ class ExternalSiteService implements GrailsConfigurationAware {
           * In case of mixed content e.g. mostly Korean with some English, if the detector detects the English with higher confidence than Korean, English will be returned as the result.
           * Since there isn't a native method of detecting the percentage of content per language in a given text string, we need to segment the text content to sensible chunks.
          */
-        if(cleanedContent.length() >= 50){
-            for(int i = 0; i < cleanedContent.length() - 50; i += 50) {
-                def subStr = cleanedContent.substring(i, i+50)
+        if(cleanedContent.length() >= 10){
+            for(int i = 0; i < cleanedContent.length() - 10; i += 10) {
+                def subStr = cleanedContent.substring(i, i+10)
                 def ll = detector.detect(subStr).getLanguage()
                 detectionList.add(ll)
             }
