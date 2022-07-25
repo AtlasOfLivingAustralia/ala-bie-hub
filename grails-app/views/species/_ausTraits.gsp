@@ -11,12 +11,14 @@
     </div>
 
     <div id="traitsRecords" class="result-list">
+        <div id="traits-description"></div>
         <h2><g:message code="aus.traits.categorical.heading"/></h2>
         <table id="categorical-traits" class="table name-table  table-responsive">
             <thead>
             <tr>
                 <th><g:message code="aus.traits.categorical.name"/></th>
                 <th><g:message code="aus.traits.categorical.value"/></th>
+                <th><g:message code="aus.traits.categorical.definition"/></th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -27,11 +29,11 @@
             <thead>
             <tr>
                 <th><g:message code="aus.traits.numeric.name"/></th>
-                <th><g:message code="aus.traits.numeric.mean.type"/></th>
+                <th><g:message code="aus.traits.numeric.min"/></th>
                 <th><g:message code="aus.traits.numeric.mean"/></th>
+                <th><g:message code="aus.traits.numeric.max"/></th>
                 <th><g:message code="aus.traits.numeric.unit"/></th>
-                <th><g:message code="aus.traits.numeric.nsites"/></th>
-                <th><g:message code="aus.traits.numeric.ndatasets"/></th>
+                <th><g:message code="aus.traits.numeric.definition"/></th>
             </tr>
             </thead>
             <tbody></tbody>

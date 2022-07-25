@@ -217,24 +217,26 @@ function fitMapToBounds() {
 //}
 
 function loadAusTraits() {
-    $.ajax({url: SHOW_CONF.ausTraitsUrl}).done(function (data) {
+    $.ajax({url: SHOW_CONF.ausTraitsSummaryUrl}).done(function (data) {
         // $.getJSON(SHOW_CONF.ausTraitsUrl, function(data){
         if (data.numeric_traits && data.categorical_traits) {
             $.each(data.categorical_traits, function (idx, traitValue) {
                 var tableRow = "<tr><td>";
                 tableRow += capitalise(replaceUnderscore(traitValue.trait_name)) + "</td><td>"
-                tableRow += traitValue.trait_values + "</td></tr>";
+                tableRow += traitValue.trait_values+ "</td><td>"
+                tableRow += "<a target='_blank' href=" + traitValue.definition + "> Link</a></td></tr>";
+
                 $('#categorical-traits tbody').append(tableRow);
             });
 
             $.each(data.numeric_traits, function (idx, traitValue) {
                 var tableRow = "<tr><td>";
                 tableRow += capitalise(replaceUnderscore(traitValue.trait_name)) + "</td><td>"
-                tableRow += traitValue.mean_type + "</td><td>"
+                tableRow += traitValue.min + "</td><td>"
                 tableRow += traitValue.mean + "</td><td>"
+                tableRow += traitValue.max + "</td><td>"
                 tableRow += traitValue.unit + "</td><td>"
-                tableRow += traitValue.n_sites + "</td><td>"
-                tableRow += traitValue.n_datasets + "</td></tr>";
+                tableRow += "<a target='_blank' href=" + traitValue.definition + "> Link</a></td></tr>"
                 $('#numeric-traits tbody').append(tableRow);
             });
 
@@ -246,6 +248,17 @@ function loadAusTraits() {
         console.warn("error " + textStatus);
         console.warn("incoming Text " + jqXHR.responseText);
     });
+
+    $.ajax({url:SHOW_CONF.ausTraitsCountUrl}).done(function (data) {
+        if (data.explanation && data.explanation[0]){
+            $('#traits-description').html("<span>"+data.explanation[0]+"</span>")
+        }
+    }).error(function (jqXHR, textStatus, errorThrown) {
+        console.warn("error " + textStatus);
+        console.warn("incoming Text " + jqXHR.responseText);
+    });
+
+
 }
 
 function replaceUnderscore(name) {

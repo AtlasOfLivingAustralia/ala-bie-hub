@@ -92,8 +92,13 @@ class ExternalSiteController {
         }
     }
 
-    def ausTraits() {
-        def results = externalSiteService.searchAusTraits(params)
+    def ausTraitsSummary() {
+        def results = externalSiteService.getAusTraitsSummary(params)
+        render results as JSON
+    }
+
+    def ausTraitsCount(){
+        def results = externalSiteService.getAusTraitsCount(params)
         render results as JSON
     }
 

@@ -149,7 +149,7 @@ regions:
 bhl:
     baseURL: https://www.biodiversitylibrary.org
 ausTraits:
-    baseURL: http://tcyfjstumgmyag96.dev.austraits.cloud.edu.au
+    baseURL: http://iown9QEFX7Ty7YfD.dev.austraits.cloud.edu.au
     homeURL: https://austraits.org/
     sourceURL: https://zenodo.org/record/5112001#.Yp2RVahBwuX
     definitionsURL: https://edit-test.ala.org.au/austraits-definitions/

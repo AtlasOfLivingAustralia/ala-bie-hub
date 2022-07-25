@@ -426,7 +426,8 @@
         mapEnvOptions: "${grailsApplication.config.map.env?.options?:'color:' + grailsApplication.config.map.records.colour+ ';name:circle;size:4;opacity:0.8'}",
         troveUrl: "${raw(grailsApplication.config.literature?.trove?.api + '/result?zone=book&encoding=json&key=' + grailsApplication.config.literature?.trove?.apikey )}",
         bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}",
-        ausTraitsUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraits', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}"
+        ausTraitsSummaryUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsSummary', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
+        ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}"
     };
 
     $(function(){

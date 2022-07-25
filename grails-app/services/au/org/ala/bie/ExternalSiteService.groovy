@@ -150,11 +150,27 @@ class ExternalSiteService implements GrailsConfigurationAware {
         return [start: start, rows: rows, search: search, max: max, more: more, results: results]
     }
 
-    def searchAusTraits(def params) {
+    def getAusTraitsSummary(def params) {
         def url = ausTraitsBase + "/trait-summary?taxon=" + URLEncoder.encode(params.s, "UTF-8")
+        url = handleAusTraitsAPNI(url, params)
+        return fetchAusTraits(url)
+    }
+
+    def getAusTraitsCount(def params){
+        String url = ausTraitsBase + "/trait-count?taxon=" + URLEncoder.encode(params.s, "UTF-8")
+        url = handleAusTraitsAPNI(url, params)
+        return fetchAusTraits(url)
+
+    }
+
+    def handleAusTraitsAPNI(String url, def params){
         if (params.guid.indexOf("apni") > 0) {
             url += "&APNI_ID=" + params.guid.split('/').last()
         }
+        return url
+    }
+
+    def fetchAusTraits(String url) {
         def json = webClientService.getJson(url)
         if (json instanceof JSONObject && json.has("error")) {
             log.warn "failed to get json, request error: " + json.error
