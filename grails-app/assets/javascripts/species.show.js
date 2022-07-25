@@ -223,18 +223,19 @@ function loadAusTraits() {
             $.each(data.categorical_traits, function (idx, traitValue) {
                 var tableRow = "<tr><td>";
                 tableRow += capitalise(replaceUnderscore(traitValue.trait_name)) + "</td><td>"
-                tableRow += traitValue.trait_values+ "</td><td>"
+                tableRow += replaceUnderscore(traitValue.trait_values) + "</td><td>"
                 tableRow += "<a target='_blank' href=" + traitValue.definition + "> Link</a></td></tr>";
 
                 $('#categorical-traits tbody').append(tableRow);
             });
 
             $.each(data.numeric_traits, function (idx, traitValue) {
+                console.log(traitValue.min, traitValue.mean, traitValue.max)
                 var tableRow = "<tr><td>";
                 tableRow += capitalise(replaceUnderscore(traitValue.trait_name)) + "</td><td>"
-                tableRow += traitValue.min + "</td><td>"
-                tableRow += traitValue.mean + "</td><td>"
-                tableRow += traitValue.max + "</td><td>"
+                tableRow += (traitValue.min || " - " ) + "</td><td>"
+                tableRow += (traitValue.mean || " - " )+ "</td><td>"
+                tableRow += (traitValue.max  || " - " ) + "</td><td>"
                 tableRow += traitValue.unit + "</td><td>"
                 tableRow += "<a target='_blank' href=" + traitValue.definition + "> Link</a></td></tr>"
                 $('#numeric-traits tbody').append(tableRow);
