@@ -16,7 +16,7 @@ plugins {
     id "com.gorylenko.gradle-git-properties" version "2.2.3"
 }
 
-version "2.0.1-SNAPSHOT"
+version "2.0.2-SNAPSHOT"
 group "au.org.ala"
 
 apply plugin:"eclipse"
@@ -143,6 +143,9 @@ dependencies {
     compile group: "au.org.ala.plugins.grails", name: "images-client-plugin", version: "1.2"
 
     compile "com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1"
+
+    implementation 'org.apache.tika:tika-core:2.4.1'
+    implementation 'org.apache.tika:tika-langdetect-optimaize:2.4.1'
 
 }
 
