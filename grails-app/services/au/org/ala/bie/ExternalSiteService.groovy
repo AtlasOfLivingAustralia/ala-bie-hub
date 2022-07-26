@@ -21,6 +21,10 @@ import grails.core.support.GrailsConfigurationAware
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.grails.web.json.JSONObject
+import org.apache.tika.langdetect.optimaize.OptimaizeLangDetector
+import org.apache.tika.language.detect.LanguageDetector
+import org.apache.tika.language.detect.LanguageResult
+import org.jsoup.Jsoup
 import org.owasp.html.HtmlPolicyBuilder
 import org.owasp.html.PolicyFactory
 
@@ -205,7 +209,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
                 if (result?.taxonConcept) {
                     def dataObjects = result?.taxonConcept?.dataObjects ?: []
                     if (eolLanguage) {
-                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage }
+                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage && isContentInLanguage(dto.description , eolLanguage) }
                     }
                     if (blacklist) {
                         dataObjects = dataObjects.findAll { dto -> !blacklist.isBlacklisted(name, dto.source, dto.title) }
@@ -215,6 +219,36 @@ class ExternalSiteService implements GrailsConfigurationAware {
             }
         }
         return result
+    }
+    /**
+     *
+     * @param content
+     * @param language
+     * @return boolean
+     */
+    Boolean isContentInLanguage(String content, String language){
+        LanguageDetector detector = new OptimaizeLangDetector().loadModels()
+        // remove any html tags to prevent mis-detection
+        def cleanedContent  = Jsoup.parse(content).text()
+        // detectionList contains the list of lang codes detected on each segment of the text content
+        def detectionList = []
+        def isoLangCode = ""
+         /**
+          * The detector doesn't always the detect the language in the content as expected.
+          * In case of mixed content e.g. mostly Korean with some English, if the detector detects the English with higher confidence than Korean, English will be returned as the result.
+          * Since there isn't a native method of detecting the percentage of content per language in a given text string, we need to segment the text content to sensible chunks.
+         */
+        if(cleanedContent.length() >= 10){
+            for(int i = 0; i < cleanedContent.length() - 10; i += 10) {
+                def subStr = cleanedContent.substring(i, i+10)
+                def ll = detector.detect(subStr).getLanguage()
+                detectionList.add(ll)
+            }
+            isoLangCode = detectionList.countBy { it }.max { it.value }.key
+        } else{
+            isoLangCode = detector.detect(cleanedContent).getLanguage()
+        }
+        return isoLangCode == language
     }
 
     /**
