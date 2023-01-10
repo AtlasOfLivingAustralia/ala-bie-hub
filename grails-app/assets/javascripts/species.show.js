@@ -15,6 +15,7 @@
 
 function showSpeciesPage(traitsTabSet) {
     //console.log("Starting show species page");
+
     //load content
     loadOverviewImages();
     loadMap();
@@ -35,6 +36,7 @@ function showSpeciesPage(traitsTabSet) {
 }
 
 function loadSpeciesLists(){
+
     //console.log('### loadSpeciesLists #### ' + SHOW_CONF.speciesListUrl + '/ws/species/' + SHOW_CONF.guid);
     $.getJSON(SHOW_CONF.speciesListUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function( data ) {
         for(var i = 0; i < data.length; i++) {
@@ -96,6 +98,7 @@ function addAlerts(){
 }
 
 function loadMap() {
+
     if(SHOW_CONF.map != null){
         return;
     }
@@ -171,7 +174,7 @@ function updateOccurrenceCount() {
 }
 
 function fitMapToBounds() {
-    var jsonUrl = SHOW_CONF.biocacheServiceUrl + "/mapping/bounds.json?q=lsid:" + SHOW_CONF.guid + "&callback=?";
+    var jsonUrl = SHOW_CONF.biocacheServiceUrl + "/mapping/bounds.json?q=lsid:" + SHOW_CONF.guid;
     $.getJSON(jsonUrl, function(data) {
         if (data.length == 4 && data[0] != 0 && data[1] != 0) {
             //console.log("data", data);
@@ -274,18 +277,26 @@ function capitalise(item) {
 }
 
 function loadDataProviders(){
-    var url = SHOW_CONF.biocacheServiceUrl  + '/occurrences/search.json?q=lsid:' + SHOW_CONF.guid + '&pageSize=0&flimit=-1';
+
+    var url = SHOW_CONF.biocacheServiceUrl  +
+        '/occurrences/search?q=lsid:' +
+        SHOW_CONF.guid +
+        '&pageSize=0&flimit=-1';
 
     if(SHOW_CONF.mapQueryContext){
        url = url + '&fq=' + SHOW_CONF.mapQueryContext;
     }
 
-    url = url + '&facet=on&facets=data_resource_uid&callback=?';
+    url = url + '&facet=on&facets=data_resource_uid';
 
-    var uiUrl = SHOW_CONF.biocacheUrl  + '/occurrences/search?q=lsid:' + SHOW_CONF.guid;
+    var uiUrl = SHOW_CONF.biocacheUrl  +
+        '/occurrences/search?q=lsid:' +
+        SHOW_CONF.guid;
+
     $.getJSON(url, function(data){
 
         if(data.totalRecords > 0) {
+
             var datasetCount = data.facetResults[0].fieldResult.length;
 
             //exclude the "Unknown facet value"
@@ -301,12 +312,15 @@ function loadDataProviders(){
             $.each(data.facetResults[0].fieldResult, function (idx, facetValue) {
                 //console.log(data.facetResults[0].fieldResult);
                 if(facetValue.count > 0){
+
                     var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
                     var dataResourceUrl =  SHOW_CONF.collectoryUrl + "/public/show/" + uid;
                     var tableRow = "<tr><td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
 
                     //console.log(uid);
                     $.getJSON(SHOW_CONF.collectoryUrl + "/ws/dataResource/" + uid, function(collectoryData) {
+
+
                         if(collectoryData.provider){
                             tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
                         }
@@ -325,6 +339,7 @@ function loadDataProviders(){
 }
 
 function loadIndigenousData() {
+
     if(!SHOW_CONF.profileServiceUrl || SHOW_CONF.profileServiceUrl == ""){
         return;
     }
@@ -365,6 +380,7 @@ function loadIndigenousData() {
 
                 if(profile.thumbnailUrl) {
                     panel.find(".main-image").removeClass("hide");
+
                     panel.find(".image-embedded").append("<img src='" + profile.thumbnailUrl + "' alt='" + profile.collection.title + " main image'>");
                 }
 
@@ -545,8 +561,8 @@ function loadOverviewImages(){
     if (SHOW_CONF.preferredImageId) {
         hasPreferredImage = true;
         var prefUrl = SHOW_CONF.biocacheServiceUrl  +
-            '/occurrences/search.json?q=images:' + SHOW_CONF.preferredImageId +
-            '&fq=-assertion_user_id:*&im=true&facet=off&pageSize=1&start=0&callback=?';
+            '/occurrences/search?q=images:' + SHOW_CONF.preferredImageId +
+            '&fq=-assertion_user_id:*&im=true&facet=off&pageSize=1&start=0';
         $.getJSON(prefUrl, function(data){
             // console.log("prefUrl", prefUrl, data);
             if (data && data.totalRecords > 0) {
@@ -568,9 +584,9 @@ function loadOverviewImages(){
     }
 
     var url = SHOW_CONF.biocacheServiceUrl  +
-        '/occurrences/search.json?q=lsid:' +
+        '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
-        '&fq=multimedia:"Image"&fq=geospatial_kosher:true&fq=-user_assertions:50001&fq=-user_assertions:50005&im=true&facet=off&pageSize=5&start=0&callback=?';
+        '&fq=multimedia:"Image"&fq=geospatial_kosher:true&fq=-user_assertions:50001&fq=-user_assertions:50005&im=true&facet=off&pageSize=5&start=0';
     //console.log('Loading images from: ' + url);
 
     $.getJSON(url, function(data){
@@ -667,10 +683,10 @@ function loadGalleryType(category, start) {
 
     //TODO a toggle between LSID based searches and names searches
     var url = SHOW_CONF.biocacheServiceUrl  +
-        '/occurrences/search.json?q=lsid:' +
+        '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
         (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "") + '&fq=multimedia:"Image"&pageSize=' + pageSize +
-        '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true&callback=?';
+        '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true';
 
     //console.log("URL: " + url);
 

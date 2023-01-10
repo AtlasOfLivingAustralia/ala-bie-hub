@@ -184,11 +184,11 @@ function injectBiocacheResults() {
         queryToUse = queryToUse.replace("urn:","lsid:urn:");
     }
 
-    var url = SEARCH_CONF.biocacheServicesUrl + "/occurrences/search.json?q=" + queryToUse + "&start=0&pageSize=0&facet=off&qc="
+    var url = SEARCH_CONF.biocacheServicesUrl + "/occurrences/search?q=" + queryToUse + "&start=0&pageSize=0&facet=off&qc="
         + SEARCH_CONF.biocacheQueryContext;
     $.ajax({
         url: url,
-        dataType: 'jsonp',
+        dataType: 'json',
         success:  function(data) {
             var maxItems = parseInt(data.totalRecords, 10);
             var url = SEARCH_CONF.biocacheUrl + "/occurrences/search?q=" + queryToUse;

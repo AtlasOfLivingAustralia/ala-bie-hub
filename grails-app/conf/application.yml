@@ -91,6 +91,7 @@ grails:
                 scriptlet: html
                 taglib: none
                 staticparts: none
+    serverURL: http://localhost:8080
 management:
     endpoints:
         jmx:
@@ -105,7 +106,7 @@ security:
     cas:
         #    applyUriFiltersToTicketValidation: false
         casServerName: https://auth.ala.org.au
-        appServerName: http://devt.ala.org.au:8080
+        appServerName: http://localhost:8080
 
 skin:
     homeUrl: http://www.ala.org.au
@@ -124,7 +125,7 @@ bie:
 
 facets: idxtype,rank,speciesGroup,locatedInHubCountry,imageAvailable,conservationStatusAUS_s,conservationStatusACT_s,conservationStatusNSW_s,conservationStatusQLD_s,conservationStatusVIC_s,conservationStatusTAS_s,conservationStatusSA_s,conservationStatusWA_s,conservationStatusNT_s
 speciesParent: https://lists.ala.org.au/iconic-species
-serverName: http://devt.ala.org.au:8080
+serverName: http://localhost:8080
 projectNameShort: Atlas
 projectName: Atlas of Living Australia
 biocache:
@@ -242,3 +243,18 @@ external:
 headerAndFooter:
     baseURL: https://www-test.ala.org.au/commonui-bs3-2019
     version: 2
+
+security:
+    cas:
+        enabled: false
+    oidc:
+        enabled: true
+        discoveryUri: https://auth-test.ala.org.au/cas/oidc/.well-known
+        scope: openid,profile,email,ala,roles, user_defined
+    #        allowUnsignedIdTokens: true
+    jwt:
+        enabled: true
+        discoveryUri: https://auth-test.ala.org.au/cas/oidc/.well-known
+        fallbackToLegacyBehaviour: true
+
+

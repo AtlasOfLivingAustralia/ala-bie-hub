@@ -16,7 +16,8 @@ plugins {
     id "com.gorylenko.gradle-git-properties" version "2.2.3"
 }
 
-version "2.0.2-SNAPSHOT"
+
+version "2.1.0-SNAPSHOT"
 group "au.org.ala"
 
 apply plugin:"eclipse"
@@ -126,18 +127,18 @@ dependencies {
         exclude group: "com.squareup.okhttp3", module: "okhttp"
     }
     compile "org.grails.plugins:external-config:2.0.0"
-    compile group: 'au.org.ala', name: 'ala-name-matching-model', version: '4.1', changing: true
+    compile group: 'au.org.ala', name: 'ala-name-matching-model', version: '4.2', changing: true
     compile "commons-httpclient:commons-httpclient:3.1"
     compile "org.codehaus.jackson:jackson-core-asl:1.8.6"
     compile "org.codehaus.jackson:jackson-mapper-asl:1.8.6"
     compile "org.jsoup:jsoup:1.8.3"
-    compile group: "org.grails.plugins", name: "ala-bootstrap3", version: "3.2.3", changing: true
-    compile(group: "org.grails.plugins", name: "ala-auth", version:"3.2.3", changing: true) {
+    compile group: "org.grails.plugins", name: "ala-bootstrap3", version: "4.1.0", changing: true
+    compile(group: "org.grails.plugins", name: "ala-auth", version:"5.1.1", changing: true) {
         exclude group: "javax.servlet", module: "servlet-api"
     }
     compile "au.org.ala:data-quality-filter-service-client:1.0.0"
 
-    compile group: "org.grails.plugins", name: "ala-admin-plugin", version: "2.2", changing: true
+    compile group: "org.grails.plugins", name: "ala-admin-plugin", version: "2.3.0", changing: true
     compile group: "au.org.ala.plugins.grails", name: "ala-citation-plugin", version: "1.0"
     runtime group: "au.org.ala.plugins.grails", name: "ala-charts-plugin", version: "2.1.1"
     compile group: "au.org.ala.plugins.grails", name: "images-client-plugin", version: "1.2"
