@@ -13,6 +13,7 @@
     <div id="traitsRecords" class="result-list">
         <div id="traits-description"></div>
         <h2><g:message code="aus.traits.categorical.heading"/></h2>
+        <span><i><g:message code="aus.traits.categorical.conflict_disclaimer"/></i></span>
         <table id="categorical-traits" class="table name-table  table-responsive">
             <thead>
             <tr>
