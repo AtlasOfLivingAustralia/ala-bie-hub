@@ -19,7 +19,7 @@
             <tr>
                 <th><g:message code="aus.traits.categorical.name"/></th>
                 <th><g:message code="aus.traits.categorical.value"/></th>
-                <th><g:message code="aus.traits.categorical.definition"/></th>
+                <th class="centered-cell"><g:message code="aus.traits.categorical.definition"/></th>
             </tr>
             </thead>
             <tbody></tbody>
@@ -30,11 +30,11 @@
             <thead>
             <tr>
                 <th><g:message code="aus.traits.numeric.name"/></th>
-                <th><g:message code="aus.traits.numeric.min"/></th>
-                <th><g:message code="aus.traits.numeric.mean"/></th>
-                <th><g:message code="aus.traits.numeric.max"/></th>
-                <th><g:message code="aus.traits.numeric.unit"/></th>
-                <th><g:message code="aus.traits.numeric.definition"/></th>
+                <th class="centered-cell"><g:message code="aus.traits.numeric.min"/></th>
+                <th class="centered-cell"><g:message code="aus.traits.numeric.mean"/></th>
+                <th class="centered-cell"><g:message code="aus.traits.numeric.max"/></th>
+                <th class="centered-cell"><g:message code="aus.traits.numeric.unit"/></th>
+                <th class="centered-cell"><g:message code="aus.traits.numeric.definition"/></th>
             </tr>
             </thead>
             <tbody></tbody>
