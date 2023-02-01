@@ -264,8 +264,8 @@ function loadAusTraits() {
     });
 
     $.ajax({url:SHOW_CONF.ausTraitsCountUrl}).done(function (data) {
-        if (data.explanation && data.explanation[0]){
-            $('#traits-description').html("<span>"+data.explanation[0]+"</span>")
+        if (data.explanation){
+            $('#traits-description').html("<span>"+data.explanation+"</span>")
         }
     }).error(function (jqXHR, textStatus, errorThrown) {
         console.warn("error " + textStatus);
