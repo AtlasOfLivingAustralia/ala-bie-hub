@@ -271,19 +271,22 @@ function loadAusTraits() {
         console.warn("error " + textStatus);
         console.warn("incoming Text " + jqXHR.responseText);
     });
-
-
 }
 
-function replaceUnderscore(name) {
-    return name.replaceAll('_', ' ');
-}
-
-/* capitalises the first letter of the passed string */
-function capitalise(item) {
-    return item.replace(/^./, function (str) {
-        return str.toUpperCase();
-    })
+/**
+ * Toggle the Austraits summary section and update the toggle action text accordingly
+ */
+function toggleTraitsSummary(){
+    const summary = $('#austraits-summary');
+    const summaryToggle = $('#austraits-summary-toggle');
+    const expanded = summary.attr('aria-expanded')
+    if(expanded === "true"){
+        summary.collapse('hide');
+        summaryToggle.text("See More")
+    } else{
+        summary.collapse('show');
+        summaryToggle.text("See Less")
+    }
 }
 
 function loadDataProviders(){

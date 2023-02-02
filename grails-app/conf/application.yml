@@ -154,6 +154,7 @@ ausTraits:
     homeURL: https://austraits.org/
     sourceURL: https://zenodo.org/record/7368074
     definitionsURL: https://traitecoevo.github.io/austraits.build/articles/Trait_definitions.html
+alaCitingURL: https://support.ala.org.au/support/solutions/articles/6000261662-citing-the-ala#website
 speciesList:
     baseURL: https://lists.ala.org.au
     preferredSpeciesListDruid:
