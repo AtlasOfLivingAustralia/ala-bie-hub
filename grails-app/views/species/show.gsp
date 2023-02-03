@@ -451,5 +451,10 @@
     }
 });
 </asset:script>
+
+<g:if test="${grailsApplication.config.survey.speciesPage}">
+    <g:render template="survey"/>
+</g:if>
+
 </body>
 </html>

@@ -50,5 +50,10 @@
         </div>
     </div>
 </section><!--end .inner-->
+
+<g:if test="${grailsApplication.config.survey.indexPage}">
+    <g:render template="species/survey"/>
+</g:if>
+
 </body>
 </html>
