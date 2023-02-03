@@ -156,7 +156,7 @@ function loadMap() {
  * Update the total records count for the occurrence map in heading text
  */
 function updateOccurrenceCount() {
-    $.getJSON(SHOW_CONF.biocacheServiceUrl + '/occurrences/search?q=lsid:' + SHOW_CONF.guid + "&qualityProfile=default&fq=" + SHOW_CONF.mapQueryContext, function( data ) {
+    $.getJSON(SHOW_CONF.biocacheServiceUrl + '/occurrences/search?q=lsid:' + SHOW_CONF.guid + "&qualityProfile="+SHOW_CONF.qualityProfile+"&fq=" + SHOW_CONF.mapQueryContext, function( data ) {
         if (data) {
             if(data.totalRecords > 0){
                 $('.occurrenceRecordCount').html(data.totalRecords.toLocaleString());
