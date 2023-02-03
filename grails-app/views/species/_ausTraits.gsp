@@ -60,7 +60,7 @@
             <p class="source">Source: <a href="${grailsApplication.config.ausTraits.sourceURL}" class="sourceText">Zenodo</a></p>
             <p class="rights">Rights holder: <span class="rightsText">AusTraits</span></p>
             <p class="provider">Provided by: <a href="${grailsApplication.config.ausTraits.homeURL}" class="providedBy">AusTraits</a></p>
-            <h4>How to cite AustTraits data</h4>
+            <h4>How to cite AusTraits data</h4>
             <p>
                 <span> Falster, Gallagher et al (2021) AusTraits, a curated plant trait database for the Australian flora. Scientific Data 8: 254, <a href="https://doi.org/10.1038/s41597-021-01006-6" target="_blank" class="providedBy">https://doi.org/10.1038/s41597-021-01006-6</a>
                 </span>  - followed by the ALA url and access date<br>
