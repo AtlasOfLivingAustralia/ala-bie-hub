@@ -94,7 +94,7 @@
                     <g:set var="mapUrl">${grailsApplication.config.spatial.baseURL}?q=lsid:${tc?.taxonConcept?.guid}${grailsApplication.config.qualityProfile ? '&qualityProfile=' + grailsApplication.config.qualityProfile : ''}</g:set>
                 </g:if>
                 <g:else>
-                    <g:set var="mapUrl">${biocacheUrl}/occurrences/search?q=lsid:${tc?.taxonConcept?.guid}#tab_mapView</g:set>
+                    <g:set var="mapUrl">${biocacheUrl}/occurrences/search?q=lsid:${tc?.taxonConcept?.guid}${grailsApplication.config.qualityProfile ? '&qualityProfile=' + grailsApplication.config.qualityProfile : ''}#tab_mapView</g:set>
                 </g:else>
 
                 <div class="map-buttons">

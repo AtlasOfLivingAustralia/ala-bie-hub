@@ -156,17 +156,14 @@ function loadMap() {
  * Update the total records count for the occurrence map in heading text
  */
 function updateOccurrenceCount() {
-    $.getJSON(SHOW_CONF.biocacheServiceUrl + '/occurrences/taxaCount?guids=' + SHOW_CONF.guid + "&fq=" + SHOW_CONF.mapQueryContext, function( data ) {
+    $.getJSON(SHOW_CONF.biocacheServiceUrl + '/occurrences/search?q=lsid:' + SHOW_CONF.guid + "&qualityProfile="+SHOW_CONF.qualityProfile+"&fq=" + SHOW_CONF.mapQueryContext, function( data ) {
         if (data) {
-            $.each( data, function( key, value ) {
-                if (value && typeof value == "number") {
-                    $('.occurrenceRecordCount').html(value.toLocaleString());
-                    return false;
-                } else if (value == 0) {
-                    // hide charts if no records
-                    $("#recordBreakdowns").html("<h3>" + jQuery.i18n.prop("no.records.found") + "</h3>");
-                }
-            });
+            if(data.totalRecords > 0){
+                $('.occurrenceRecordCount').html(data.totalRecords.toLocaleString());
+            } else{
+                // hide charts if no records
+                $("#recordBreakdowns").html("<h3>" + jQuery.i18n.prop("no.records.found") + "</h3>");
+            }
         }
     });
 }
