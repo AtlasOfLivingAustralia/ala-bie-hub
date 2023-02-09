@@ -170,6 +170,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
 
     def generateAusTraitsDownloadUrl(def params){
         String  url = ausTraitsBase + "/download-taxon-data?taxon=" + URLEncoder.encode(params.s, "UTF-8")
+        url = handleAusTraitsAPNI(url, params)
         return url
     }
 

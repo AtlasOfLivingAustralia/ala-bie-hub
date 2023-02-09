@@ -26,7 +26,7 @@
 <g:set var="kingdom" value="${tc?.classification?.kingdom ?: ''}" />
 <g:if test="${kingdom == 'Plantae'}">
     <g:set var="tabs" value="${grailsApplication.config.show.tabs.split(',')}"/>
-    <g:set var="ausTraitsDownloadUrl" value="${raw(createLink(controller: 'externalSite', action: 'ausTraitsCSVDownload', params: [s: tc?.taxonConcept?.nameString ?: '']))}"/>
+    <g:set var="ausTraitsDownloadUrl" value="${raw(createLink(controller: 'externalSite', action: 'ausTraitsCSVDownload', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}"/>
 </g:if>
 <g:else>
     <g:set var="tabs" value="${grailsApplication.config.show.tabs.replace('ausTraits':'').split(',')}"/>

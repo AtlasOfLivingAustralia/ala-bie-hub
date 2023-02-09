@@ -150,7 +150,7 @@ regions:
 bhl:
     baseURL: https://www.biodiversitylibrary.org
 ausTraits:
-    baseURL: http://uqseyvd3sa26qsuf.dev.austraits.cloud.edu.au
+    baseURL: http://traitdata.austraits.cloud.edu.au
     homeURL: https://austraits.org/
     sourceURL: https://zenodo.org/record/7368074
     definitionsURL: https://traitecoevo.github.io/austraits.build/articles/Trait_definitions.html
