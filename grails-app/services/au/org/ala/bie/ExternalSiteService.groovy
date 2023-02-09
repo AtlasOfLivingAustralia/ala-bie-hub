@@ -17,6 +17,7 @@ package au.org.ala.bie
 
 import au.org.ala.citation.BHLAdaptor
 import grails.config.Config
+import grails.converters.JSON
 import grails.core.support.GrailsConfigurationAware
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -167,6 +168,11 @@ class ExternalSiteService implements GrailsConfigurationAware {
 
     }
 
+    def generateAusTraitsDownloadUrl(def params){
+        String  url = ausTraitsBase + "/download-taxon-data?taxon=" + URLEncoder.encode(params.s, "UTF-8")
+        return url
+    }
+
     def handleAusTraitsAPNI(String url, def params){
         if (params.guid.indexOf("apni") > 0) {
             url += "&APNI_ID=" + params.guid.split('/').last()
@@ -176,12 +182,12 @@ class ExternalSiteService implements GrailsConfigurationAware {
 
     def fetchAusTraits(String url) {
         def json = webClientService.getJson(url)
+        // return a JSON with a simple error key if there is an error with fetching it.
         if (json instanceof JSONObject && json.has("error")) {
             log.warn "failed to get json, request error: " + json.error
-            return [:]
-        } else {
-            return json
+            return JSON.parse("{'error': 'Error fetching content from source'}")
         }
+        return json
     }
 
     def searchEol(String name, String filter) {

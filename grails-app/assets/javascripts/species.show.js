@@ -221,8 +221,12 @@ function fitMapToBounds() {
 
 function loadAusTraits() {
     $.ajax({url: SHOW_CONF.ausTraitsSummaryUrl}).done(function (data) {
-        // $.getJSON(SHOW_CONF.ausTraitsUrl, function(data){
-        if (data.numeric_traits && data.categorical_traits) {
+        // handle if traits  controller returns an error
+        if (data.error){
+            $("#traitsRecords").html("<p style='font-size: small'>" + jQuery.i18n.prop("no.traits.connection") +" You can find more infomation on AusTraits   <a target='_blank' href='"+SHOW_CONF.ausTraitsHomeUrl+"'>here</a>. </p>");
+            $("#download-button-area").hide()
+            $(".panel-footer").hide();
+        } else if (data.numeric_traits && data.categorical_traits) {
             $.each(data.categorical_traits, function (idx, traitValue) {
                 var tableRow = "<tr><td>";
                 tableRow += traitValue.trait_name + "</td><td>"

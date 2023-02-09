@@ -26,7 +26,7 @@
 <g:set var="kingdom" value="${tc?.classification?.kingdom ?: ''}" />
 <g:if test="${kingdom == 'Plantae'}">
     <g:set var="tabs" value="${grailsApplication.config.show.tabs.split(',')}"/>
-    <g:set var="ausTraitsDownloadUrl" value="${grailsApplication.config.ausTraits.baseURL}/download-taxon-data?taxon=${tc?.taxonConcept?.nameString}"/>
+    <g:set var="ausTraitsDownloadUrl" value="${raw(createLink(controller: 'externalSite', action: 'ausTraitsCSVDownload', params: [s: tc?.taxonConcept?.nameString ?: '']))}"/>
 </g:if>
 <g:else>
     <g:set var="tabs" value="${grailsApplication.config.show.tabs.replace('ausTraits':'').split(',')}"/>
@@ -427,7 +427,8 @@
         troveUrl: "${raw(grailsApplication.config.literature?.trove?.api + '/result?zone=book&encoding=json&key=' + grailsApplication.config.literature?.trove?.apikey )}",
         bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}",
         ausTraitsSummaryUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsSummary', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
-        ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}"
+        ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
+        ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}"
     };
 
     $(function(){
