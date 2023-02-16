@@ -36,9 +36,24 @@
             }
         }
 
+        var localStorageEnabled = true
+        try {
+            if (localStorage.getItem("${grailsApplication.config.survey.url}")) {
+                surveySeen = true
+            }
+        } catch (e) {
+            localStorageEnabled = false
+        }
+
+        // do not show if cannot track
+        if (!navigator.cookieEnabled && !localStorageEnabled) {
+            surveySeen = true
+        }
+
         if (!surveySeen) {
             var expiry = new Date(new Date().getTime() + ${grailsApplication.config.survey.cookieAge}*86400000).toUTCString()
-            document.cookie = "${grailsApplication.config.survey.url}=true; expires=" + expiry + ";"
+            document.cookie = "${grailsApplication.config.survey.url}=true; expires=" + expiry + "; path=/;"
+            localStorageEnabled && localStorage.setItem("${grailsApplication.config.survey.url}", 'true');
             $('#surveyModal').modal('show');
         }
 
