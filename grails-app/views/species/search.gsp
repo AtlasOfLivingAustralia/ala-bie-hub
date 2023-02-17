@@ -423,5 +423,9 @@
     </asset:script>
 </g:if>
 
+<g:if test="${grailsApplication.config.survey.searchPage}">
+    <g:render template="survey"/>
+</g:if>
+
 </body>
 </html>

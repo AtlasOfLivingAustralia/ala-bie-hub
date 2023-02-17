@@ -23,7 +23,14 @@
 <g:set var="guid" value="${tc?.previousGuid ?: tc?.taxonConcept?.guid ?: ''}"/>
 <g:set var="scientificName" value="${tc?.taxonConcept?.nameString ?: ''}" />
 <g:set var="taxonRank" value="${tc?.taxonConcept?.rankString?.capitalize() ?: ''}" />
-<g:set var="tabs" value="${grailsApplication.config.show.tabs.split(',')}"/>
+<g:set var="kingdom" value="${tc?.classification?.kingdom ?: ''}" />
+<g:if test="${kingdom == 'Plantae'}">
+    <g:set var="tabs" value="${grailsApplication.config.show.tabs.split(',')}"/>
+    <g:set var="ausTraitsDownloadUrl" value="${raw(createLink(controller: 'externalSite', action: 'ausTraitsCSVDownload', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}"/>
+</g:if>
+<g:else>
+    <g:set var="tabs" value="${grailsApplication.config.show.tabs.replace('ausTraits':'').split(',')}"/>
+</g:else>
 <g:set var="jsonLink" value="${grailsApplication.config.bie.index.url}/species/${tc?.taxonConcept?.guid}.json"/>
 <g:set var="sciNameFormatted"><bie:formatSciName rankId="${tc?.taxonConcept?.rankID}"
                                                  nameFormatted="${tc?.taxonConcept?.nameFormatted}"
@@ -418,11 +425,14 @@
         mapOutline: ${grailsApplication.config.map.outline ?: 'false'},
         mapEnvOptions: "${grailsApplication.config.map.env?.options?:'color:' + grailsApplication.config.map.records.colour+ ';name:circle;size:4;opacity:0.8'}",
         troveUrl: "${raw(grailsApplication.config.literature?.trove?.api + '/result?zone=book&encoding=json&key=' + grailsApplication.config.literature?.trove?.apikey )}",
-        bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}"
+        bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}",
+        ausTraitsSummaryUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsSummary', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
+        ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
+        ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}"
     };
 
     $(function(){
-        showSpeciesPage();
+        showSpeciesPage(${grailsApplication.config.show.tabs.indexOf('ausTraits') != -1});
     });
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -442,5 +452,10 @@
     }
 });
 </asset:script>
+
+<g:if test="${grailsApplication.config.survey.speciesPage}">
+    <g:render template="survey"/>
+</g:if>
+
 </body>
 </html>

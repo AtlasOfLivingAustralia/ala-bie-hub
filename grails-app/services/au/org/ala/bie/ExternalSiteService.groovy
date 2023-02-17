@@ -17,9 +17,11 @@ package au.org.ala.bie
 
 import au.org.ala.citation.BHLAdaptor
 import grails.config.Config
+import grails.converters.JSON
 import grails.core.support.GrailsConfigurationAware
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import org.grails.web.json.JSONObject
 import org.apache.tika.langdetect.optimaize.OptimaizeLangDetector
 import org.apache.tika.language.detect.LanguageDetector
 import org.apache.tika.language.detect.LanguageResult
@@ -57,8 +59,10 @@ class ExternalSiteService implements GrailsConfigurationAware {
     /** Allowed attributes for HTML */
     String allowedAttributes
     /** Blacklist for external sites */
-    Blacklist blacklist;
+    Blacklist blacklist
+    String ausTraitsBase
 
+    def webClientService
 
     @Override
     void setConfiguration(Config config) {
@@ -73,8 +77,9 @@ class ExternalSiteService implements GrailsConfigurationAware {
         updateFile = config.getProperty("update.file.location")
         allowedElements = config.getProperty("eol.html.allowedElements")
         allowedAttributes = config.getProperty("eol.html.allowAttributes")
-        def blacklistURL = config.getProperty('external.blacklist', URL)
+        def blacklistURL = config.getProperty("external.blacklist", URL)
         blacklist = blacklistURL ? Blacklist.read(blacklistURL) : null
+        ausTraitsBase = config.getProperty("ausTraits.baseURL")
     }
 
     /**
@@ -148,6 +153,42 @@ class ExternalSiteService implements GrailsConfigurationAware {
             }
         }
         return [start: start, rows: rows, search: search, max: max, more: more, results: results]
+    }
+
+    def getAusTraitsSummary(def params) {
+        def url = ausTraitsBase + "/trait-summary?taxon=" + URLEncoder.encode(params.s, "UTF-8")
+        url = handleAusTraitsAPNI(url, params)
+        return fetchAusTraits(url)
+    }
+
+    def getAusTraitsCount(def params){
+        String url = ausTraitsBase + "/trait-count?taxon=" + URLEncoder.encode(params.s, "UTF-8")
+        url = handleAusTraitsAPNI(url, params)
+        return fetchAusTraits(url)
+
+    }
+
+    def generateAusTraitsDownloadUrl(def params){
+        String  url = ausTraitsBase + "/download-taxon-data?taxon=" + URLEncoder.encode(params.s, "UTF-8")
+        url = handleAusTraitsAPNI(url, params)
+        return url
+    }
+
+    def handleAusTraitsAPNI(String url, def params){
+        if (params.guid.indexOf("apni") > 0) {
+            url += "&APNI_ID=" + params.guid.split('/').last()
+        }
+        return url
+    }
+
+    def fetchAusTraits(String url) {
+        def json = webClientService.getJson(url)
+        // return a JSON with a simple error key if there is an error with fetching it.
+        if (json instanceof JSONObject && json.has("error")) {
+            log.warn "failed to get json, request error: " + json.error
+            return JSON.parse("{'error': 'Error fetching content from source'}")
+        }
+        return json
     }
 
     def searchEol(String name, String filter) {
