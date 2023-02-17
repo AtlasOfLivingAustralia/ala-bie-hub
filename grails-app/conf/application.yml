@@ -136,6 +136,7 @@ biocacheService:
 dataquality:
     enabled: false
     baseUrl: https://data-quality-service.ala.org.au/data-profiles
+qualityProfile: ALA
 spatial:
     baseURL: https://spatial.ala.org.au
 layersService:
@@ -149,6 +150,12 @@ regions:
     baseURL: https://regions.ala.org.au
 bhl:
     baseURL: https://www.biodiversitylibrary.org
+ausTraits:
+    baseURL: http://traitdata.austraits.cloud.edu.au
+    homeURL: https://austraits.org/
+    sourceURL: https://zenodo.org/record/7368074
+    definitionsURL: https://traitecoevo.github.io/austraits.build/articles/Trait_definitions.html
+alaCitingURL: https://support.ala.org.au/support/solutions/articles/6000261662-citing-the-ala#website
 speciesList:
     baseURL: https://lists.ala.org.au
     preferredSpeciesListDruid:
@@ -209,7 +216,21 @@ literature:
         api: https://api.trove.nla.gov.au
         apikey: "<key value>"
 show:
-    tabs: overview,gallery,names,classification,records,literature,sequences,data-partners
+    tabs: overview,gallery,names,classification,records,literature,sequences,data-partners,ausTraits
+
+survey:
+    indexPage: false
+    searchPage: false
+    speciesPage: false
+    url: https://ala.org.au
+    header: Do you have a moment to help us improve our site?
+    cookieAge: 30
+    html: "As part of the ALA’s continual improvement process, we’d appreciate your help to complete ALA’s species page survey. 
+        <br/><br/>
+        Results will be used to improve our species pages for our users.
+        <br/><br/>
+        ALA will not collect any personal information for the purposes of this survey, and survey results will not be published or made available to external parties.
+        For any questions, please contact support@ala.org.au"
 
 vernacularName:
     # A category of vernacular names pulled out from the standard list and given special display treatment

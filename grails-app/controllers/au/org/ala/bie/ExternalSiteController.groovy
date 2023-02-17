@@ -92,6 +92,39 @@ class ExternalSiteController {
         }
     }
 
+    def ausTraitsSummary() {
+        def results = externalSiteService.getAusTraitsSummary(params)
+        render results as JSON
+    }
+
+    def ausTraitsCount(){
+        def results = externalSiteService.getAusTraitsCount(params)
+        render results as JSON
+    }
+
+    /**
+     * Stream csv file from Austraits download endpoint directly to client
+     * @return
+     */
+    def ausTraitsCSVDownload(){
+        if(!params.s || params.s == "") {
+            render(status: 400, text: "Bad Request. Missing mandatory params")
+            return
+        }
+        def url = externalSiteService.generateAusTraitsDownloadUrl(params)
+        def newUrl  = new URL(url)
+        try{
+            newUrl.withInputStream {it ->
+            response.setHeader ("Content-disposition", "attachment;filename=${params.s}.csv")
+            response.contentType = 'text/csv'
+            response.outputStream << it
+            response.outputStream.flush()}
+        } catch (Exception e) {
+            log.error("${e.message}")
+            return render(status: 500, text: "Internal Server error")
+        }
+    }
+
     def scholar = {
         def searchStrings = params.list("s")
         def searchParams = "\"" + searchStrings.join("\" OR \"") + "\""

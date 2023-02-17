@@ -13,8 +13,7 @@
  * rights and limitations under the License.
  */
 
-function showSpeciesPage() {
-
+function showSpeciesPage(traitsTabSet) {
     //console.log("Starting show species page");
 
     //load content
@@ -31,6 +30,9 @@ function showSpeciesPage() {
     addAlerts();
     loadBhl();
     loadTrove(SHOW_CONF.troveUrl, SHOW_CONF.scientificName, SHOW_CONF.synonyms, 'trove-integration','trove-result-list','previousTrove','nextTrove');
+    if (traitsTabSet && SHOW_CONF.kingdom == 'Plantae') {
+        loadAusTraits();
+    }
 }
 
 function loadSpeciesLists(){
@@ -156,17 +158,14 @@ function loadMap() {
  * Update the total records count for the occurrence map in heading text
  */
 function updateOccurrenceCount() {
-    $.getJSON(SHOW_CONF.biocacheServiceUrl + '/occurrences/taxaCount?guids=' + SHOW_CONF.guid + "&fq=" + SHOW_CONF.mapQueryContext, function( data ) {
+    $.getJSON(SHOW_CONF.biocacheServiceUrl + '/occurrences/search?q=lsid:' + SHOW_CONF.guid + "&qualityProfile="+SHOW_CONF.qualityProfile+"&fq=" + SHOW_CONF.mapQueryContext, function( data ) {
         if (data) {
-            $.each( data, function( key, value ) {
-                if (value && typeof value == "number") {
-                    $('.occurrenceRecordCount').html(value.toLocaleString());
-                    return false;
-                } else if (value == 0) {
-                    // hide charts if no records
-                    $("#recordBreakdowns").html("<h3>" + jQuery.i18n.prop("no.records.found") + "</h3>");
-                }
-            });
+            if(data.totalRecords > 0){
+                $('.occurrenceRecordCount').html(data.totalRecords.toLocaleString());
+            } else{
+                // hide charts if no records
+                $("#recordBreakdowns").html("<h3>" + jQuery.i18n.prop("no.records.found") + "</h3>");
+            }
         }
     });
 }
@@ -216,6 +215,80 @@ function fitMapToBounds() {
 //        }
 //    });
 //}
+
+function loadAusTraits() {
+    $.ajax({url: SHOW_CONF.ausTraitsSummaryUrl}).done(function (data) {
+        // handle if traits  controller returns an error
+        if (data.error){
+            $("#traitsRecords").html("<p style='font-size: small'>" + jQuery.i18n.prop("no.traits.connection") +" You can find more infomation on AusTraits   <a target='_blank' href='"+SHOW_CONF.ausTraitsHomeUrl+"'>here</a>. </p>");
+            $("#download-button-area").hide()
+            $(".panel-footer").hide();
+        } else if (data.numeric_traits && data.categorical_traits) {
+            $.each(data.categorical_traits, function (idx, traitValue) {
+                var tableRow = "<tr><td>";
+                tableRow += traitValue.trait_name + "</td><td>"
+                tableRow += traitValue.trait_values + "</td><td class='centered-cell'>"
+                tableRow += "<a target='_blank' href=" + traitValue.definition + "> <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-box-arrow-up-right\" viewBox=\"0 0 16 16\">\n" +
+                    "  <path fill-rule=\"evenodd\" d=\"M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z\"/>\n" +
+                    "  <path fill-rule=\"evenodd\" d=\"M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z\"/>\n" +
+                    "</svg></a></td></tr>";
+
+                $('#categorical-traits tbody').append(tableRow);
+            });
+
+            $.each(data.numeric_traits, function (idx, traitValue) {
+                console.log(traitValue.min, traitValue.mean, traitValue.max)
+                var tableRow = "<tr><td>";
+                tableRow += traitValue.trait_name + "</td><td class='centered-cell'>"
+                tableRow += (traitValue.min || " - " ) + "</td><td class='centered-cell'>"
+                tableRow += (traitValue.mean || " - " )+ "</td><td class='centered-cell'>"
+                tableRow += (traitValue.max  || " - " ) + "</td><td class='centered-cell'>"
+                tableRow += traitValue.unit + "</td><td class='centered-cell'>"
+                tableRow += "<a target='_blank' href=" + traitValue.definition + "> <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-box-arrow-up-right\" viewBox=\"0 0 16 16\">\n" +
+                    "  <path fill-rule=\"evenodd\" d=\"M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z\"/>\n" +
+                    "  <path fill-rule=\"evenodd\" d=\"M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z\"/>\n" +
+                    "</svg></a></td></tr>"
+                $('#numeric-traits tbody').append(tableRow);
+            });
+
+        } else {
+            $("#traitsRecords").html("<h3>" + jQuery.i18n.prop("no.traits.found") + "</h3>");
+            $("#download-button-area").hide()
+            $(".panel-footer").hide();
+        }
+        // apply table cell styling after content is loaded.
+        $(".centered-cell").css({"text-align": "center"})
+
+    }).error(function (jqXHR, textStatus, errorThrown) {
+        console.warn("error " + textStatus);
+        console.warn("incoming Text " + jqXHR.responseText);
+    });
+
+    $.ajax({url:SHOW_CONF.ausTraitsCountUrl}).done(function (data) {
+        if (data[0] && data[0].explanation){
+            $('#traits-description').html("<span>"+data[0].explanation+"</span>")
+        }
+    }).error(function (jqXHR, textStatus, errorThrown) {
+        console.warn("error " + textStatus);
+        console.warn("incoming Text " + jqXHR.responseText);
+    });
+}
+
+/**
+ * Toggle the Austraits summary section and update the toggle action text accordingly
+ */
+function toggleTraitsSummary(){
+    const summary = $('#austraits-summary');
+    const summaryToggle = $('#austraits-summary-toggle');
+    const expanded = summary.attr('aria-expanded')
+    if(expanded === "true"){
+        summary.collapse('hide');
+        summaryToggle.text("See More")
+    } else{
+        summary.collapse('show');
+        summaryToggle.text("See Less")
+    }
+}
 
 function loadDataProviders(){
 
