@@ -428,7 +428,8 @@
         bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}",
         ausTraitsSummaryUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsSummary', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
         ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
-        ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}"
+        ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}",
+        ausTraitsSourceUrl:"${grailsApplication.config.ausTraits.sourceURL}"
     };
 
     $(function(){

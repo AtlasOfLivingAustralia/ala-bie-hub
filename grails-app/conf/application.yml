@@ -152,8 +152,8 @@ bhl:
 ausTraits:
     baseURL: http://traitdata.austraits.cloud.edu.au
     homeURL: https://austraits.org/
-    sourceURL: https://zenodo.org/record/7368074
-    definitionsURL: https://traitecoevo.github.io/austraits.build/articles/Trait_definitions.html
+    sourceURL: https://doi.org/10.5281/zenodo.3568417
+    definitionsURL: https://traitecoevo.github.io/austraits.build/articles/trait_definitions.html
 alaCitingURL: https://support.ala.org.au/support/solutions/articles/6000261662-citing-the-ala#website
 speciesList:
     baseURL: https://lists.ala.org.au
