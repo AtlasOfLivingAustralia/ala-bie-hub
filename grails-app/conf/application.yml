@@ -136,6 +136,7 @@ biocacheService:
 dataquality:
     enabled: false
     baseUrl: https://data-quality-service.ala.org.au/data-profiles
+qualityProfile: ALA
 spatial:
     baseURL: https://spatial.ala.org.au
 layersService:
