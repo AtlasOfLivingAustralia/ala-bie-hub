@@ -265,8 +265,10 @@ function loadAusTraits() {
     });
 
     $.ajax({url:SHOW_CONF.ausTraitsCountUrl}).done(function (data) {
-        if (data[0] && data[0].explanation){
-            $('#traits-description').html("<span>"+data[0].explanation+"</span>")
+        if (data[0] && data[0]["summary"] && data[0]["AusTraits"] && data[0]["taxon"] ){
+            let htmlContent =  "<span> There are " + data[0]["summary"]+ " available for <span class='scientific-name rank-"+SHOW_CONF.rankString+"'><span class='name'>"+ data[0]["taxon"] +"</span></span>  with data for "+ data[0]["AusTraits"] +
+                " further traits in the <a  target='_blank' href='"+SHOW_CONF.ausTraitsHomeUrl+"'>AusTraits</a> database. These are accessible via the download CSV button or alternatively the entire database can be accessed at  <a target='_blank' href='"+SHOW_CONF.ausTraitsSourceUrl+"'>"+SHOW_CONF.ausTraitsSourceUrl+"</a>. </span>"
+            $('#traits-description').html(htmlContent);
         }
     }).error(function (jqXHR, textStatus, errorThrown) {
         console.warn("error " + textStatus);
