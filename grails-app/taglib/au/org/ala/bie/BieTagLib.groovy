@@ -342,6 +342,21 @@ class BieTagLib implements GrailsConfigurationAware {
     }
 
     /**
+     * Custom function to fetch a AusTraits message from message.properties and formatting to add links to AusTraits keyword
+     */
+    def ausTraitsLinkedDescription = {attrs, body   ->
+        def messageType  = attrs.message
+        def messageKey = "aus.traits.${messageType}"
+        def msg  = g.message(code: messageKey) as Object
+        def linkText = "AusTraits"
+        def replaceMent  = "<a href=\"${grailsApplication.config.ausTraits.homeURL}\" target=\"_blank\">${linkText}</a>"
+
+
+        out <<  msg.toString().replaceAll(linkText, replaceMent)
+
+    }
+
+    /**
      * Custom function to escape a string for JS use
      *
      * @param value
