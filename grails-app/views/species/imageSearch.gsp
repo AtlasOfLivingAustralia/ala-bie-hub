@@ -87,7 +87,7 @@
                     if(el.image) {
                         var scientificName = (el.nameComplete) ? "<i>" + el.nameComplete + "</i>" : "";
                         var commonName = (el.commonNameSingle) ? el.commonNameSingle + "<br/> " : "";
-                        var imageUrl = "${grailsApplication.config.getProperty('image.thumbnailUrl')}" + el.image;
+                        var imageUrl = "${grailsApplication.config.getProperty('image.thumbnailUrl')}" + el.image + "/thumbnail";
                         var titleText = $("<div/>" + commonName.replace("<br/>", " - ") + scientificName).text();
                         var $ImgCon = $('.imgConTmpl').clone();
                         $ImgCon.removeClass('imgConTmpl').removeClass('hide');

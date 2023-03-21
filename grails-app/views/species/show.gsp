@@ -15,9 +15,11 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <g:set var="alaUrl" value="${grailsApplication.config.ala.baseURL}"/>
 <g:set var="biocacheUrl" value="${grailsApplication.config.biocache.baseURL}"/>
-<g:set var="speciesListUrl" value="${grailsApplication.config.speciesList.baseURL}"/>
+<g:set var="speciesListUrl" value="${grailsApplication.config.speciesListService.baseURL ?: grailsApplication.config.speciesList.baseURL}"/>
+<g:set var="speciesListServiceUrl" value="${grailsApplication.config.speciesList.baseURL}"/>
 <g:set var="spatialPortalUrl" value="${grailsApplication.config.spatial.baseURL}"/>
 <g:set var="collectoryUrl" value="${grailsApplication.config.collectory.baseURL}"/>
+<g:set var="collectoryServiceUrl" value="${grailsApplication.config.collectoryService.baseURL ?: grailsApplication.config.collectory.baseURL}"/>
 <g:set var="citizenSciUrl" value="${grailsApplication.config.sightings.url}"/>
 <g:set var="alertsUrl" value="${grailsApplication.config.alerts.url}"/>
 <g:set var="guid" value="${tc?.previousGuid ?: tc?.taxonConcept?.guid ?: ''}"/>
@@ -374,6 +376,7 @@
         qualityProfile:     "${grailsApplication.config.qualityProfile}",
         layersServiceUrl:   "${grailsApplication.config.layersService.baseURL}",
         collectoryUrl:      "${grailsApplication.config.collectory.baseURL}",
+        collectoryServiceUrl: "${grailsApplication.config.collectoryService.baseURL ?: grailsApplication.config.collectory.baseURL}",
         profileServiceUrl:  "${grailsApplication.config.profileService.baseURL}",
         imageServiceBaseUrl:"${grailsApplication.config.imageServiceBaseUrl}",
         guid:               "${guid}",
@@ -387,6 +390,7 @@
         citizenSciUrl:      "${citizenSciUrl}",
         serverName:         "${grailsApplication.config.grails.serverURL}",
         speciesListUrl:     "${grailsApplication.config.speciesList.baseURL}",
+        speciesListServiceUrl: "${grailsApplication.config.speciesListService.baseURL ?: grailsApplication.config.speciesList.baseURL}",
         bieUrl:             "${grailsApplication.config.bie.baseURL}",
         alertsUrl:          "${grailsApplication.config.alerts.baseUrl}",
         remoteUser:         "${request.remoteUser ?: ''}",

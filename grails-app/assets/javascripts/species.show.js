@@ -37,8 +37,8 @@ function showSpeciesPage(traitsTabSet) {
 
 function loadSpeciesLists(){
 
-    //console.log('### loadSpeciesLists #### ' + SHOW_CONF.speciesListUrl + '/ws/species/' + SHOW_CONF.guid);
-    $.getJSON(SHOW_CONF.speciesListUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function( data ) {
+    //console.log('### loadSpeciesLists #### ' + SHOW_CONF.speciesListServiceUrl + '/ws/species/' + SHOW_CONF.guid);
+    $.getJSON(SHOW_CONF.speciesListServiceUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function( data ) {
         for(var i = 0; i < data.length; i++) {
             var specieslist = data[i];
             var maxListFields = 10;
@@ -334,7 +334,7 @@ function loadDataProviders(){
                     var tableRow = "<tr><td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
 
                     //console.log(uid);
-                    $.getJSON(SHOW_CONF.collectoryUrl + "/ws/dataResource/" + uid, function(collectoryData) {
+                    $.getJSON(SHOW_CONF.collectoryServiceUrl + "/ws/dataResource/" + uid, function(collectoryData) {
 
 
                         if(collectoryData.provider){
@@ -588,7 +588,7 @@ function loadOverviewImages(){
                     'uuid': null,
                     'image': SHOW_CONF.preferredImageId,
                     'scientificName': SHOW_CONF.scientificName,
-                    'largeImageUrl': SHOW_CONF.imageServiceBaseUrl + "/image/proxyImageThumbnailLarge?imageId=" + SHOW_CONF.preferredImageId
+                    'largeImageUrl':  SHOW_CONF.imageServiceBaseUrl + "image/"+SHOW_CONF.preferredImageId+"/large"
                 }
                 addOverviewImage(record)
             }
