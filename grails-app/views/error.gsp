@@ -13,6 +13,6 @@
 				<li><g:renderException exception="${exception}" /></li>
 			</g:if>
 		</ul>
-	<p>If this problem persists, please send an email to <a href="mailto:support@ala.org.au?subject=Error page for: ${grailsApplication.config.serverName}${request.forwardURI}">support@ala.org.au</a>.</p>
+	<p>If this problem persists, please send an email to <a href="mailto:${grailsApplication.config.supportEmail ?: 'support@ala.org.au'}?subject=Reporting error on page: ${request.serverName}${request.forwardURI}">${grailsApplication.config.supportEmail ?: 'support@ala.org.au'}</a> and include the URL to this page.</p>
 	</body>
 </html>
