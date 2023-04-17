@@ -171,7 +171,7 @@ function updateOccurrenceCount() {
 }
 
 function fitMapToBounds() {
-    var jsonUrl = SHOW_CONF.biocacheServiceUrl + "/mapping/bounds.json?q=lsid:" + SHOW_CONF.guid;
+    var jsonUrl = SHOW_CONF.biocacheServiceUrl + "/mapping/bounds?q=lsid:" + SHOW_CONF.guid;
     $.getJSON(jsonUrl, function(data) {
         if (data.length == 4 && data[0] != 0 && data[1] != 0) {
             //console.log("data", data);
