@@ -41,7 +41,7 @@ function loadSpeciesLists(){
     $.getJSON(SHOW_CONF.speciesListUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function( data ) {
         for(var i = 0; i < data.length; i++) {
             var specieslist = data[i];
-            var maxListFields = 10;
+            var maxListFields = 20;
 
             if (specieslist.list.isBIE) {
                 var $description = $('#descriptionTemplate').clone();
@@ -188,7 +188,7 @@ function fitMapToBounds() {
                     SHOW_CONF.map.setZoom(3);
                 }
             }
-            
+
             SHOW_CONF.map.invalidateSize(true);
         }
     });
