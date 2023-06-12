@@ -2,6 +2,22 @@
 
     <div id="austraits-logo">
         <img src="${resource(dir: "images", file: "austraits_logo.png")}" height="100" alt="Austraits Logo"/>
+
+        <div class="panel panel-default" style="float: right; width: 50%">
+            <div class="panel-footer" style="border-radius:3px;border-top:none;">
+                <p class="source">Source: <a target="_blank" href="${grailsApplication.config.ausTraits.sourceURL}" class="sourceText">Zenodo</a></p>
+                <p class="rights">Rights holder:  <a target="_blank" href="${grailsApplication.config.ausTraits.homeURL}" class="rightsText">AusTraits</a></p>
+                <p class="provider">Provided by: <a target="_blank" href="${grailsApplication.config.ausTraits.homeURL}" class="providedBy">AusTraits</a></p>
+                <h4>How to cite AusTraits data</h4>
+                <p>
+                    <span> Falster, Gallagher et al (2021) AusTraits, a curated plant trait database for the Australian flora. Scientific Data 8: 254, <a href="https://doi.org/10.1038/s41597-021-01006-6" target="_blank" >https://doi.org/10.1038/s41597-021-01006-6</a>
+                    </span>  - followed by the ALA url and access date<br>
+                    For more information about citing information on the ALA, see - <a target="_blank" href="${grailsApplication.config.alaCitingURL}"> Citing the ALA</a>
+                </p>
+            </div>
+
+        </div>
+
         <p><bie:ausTraitsLinkedDescription message="whatis"/></p>
     </div>
 
@@ -53,23 +69,6 @@
             <tbody></tbody>
         </table>
     </div>
-
-    <hr>
-    <div class="panel panel-default">
-        <div class="panel-footer" style="border-radius:3px;border-top:none;">
-            <p class="source">Source: <a target="_blank" href="${grailsApplication.config.ausTraits.sourceURL}" class="sourceText">Zenodo</a></p>
-            <p class="rights">Rights holder:  <a target="_blank" href="${grailsApplication.config.ausTraits.homeURL}" class="rightsText">AusTraits</a></p>
-            <p class="provider">Provided by: <a target="_blank" href="${grailsApplication.config.ausTraits.homeURL}" class="providedBy">AusTraits</a></p>
-            <h4>How to cite AusTraits data</h4>
-            <p>
-                <span> Falster, Gallagher et al (2021) AusTraits, a curated plant trait database for the Australian flora. Scientific Data 8: 254, <a href="https://doi.org/10.1038/s41597-021-01006-6" target="_blank" >https://doi.org/10.1038/s41597-021-01006-6</a>
-                </span>  - followed by the ALA url and access date<br>
-                For more information about citing information on the ALA, see - <a target="_blank" href="${grailsApplication.config.alaCitingURL}"> Citing the ALA</a>
-            </p>
-        </div>
-
-    </div>
-
 
 
 </section>
