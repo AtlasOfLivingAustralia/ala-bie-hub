@@ -714,7 +714,6 @@ function loadGalleryType(category, start) {
             var br = "<br>";
             var $categoryTmpl = $('#cat_' + category);
             $categoryTmpl.removeClass('hide');
-            $('#cat_nonavailable').addClass('hide');
 
             $.each(data.occurrences, function(i, el) {
                 // clone template div & populate with metadata
@@ -748,6 +747,8 @@ function loadGalleryType(category, start) {
                     + (start + pageSize)  + ');">Load more images <img src="' + spinnerLink + '" class="hide"/></button></div>';
                 $categoryTmpl.find('.taxon-gallery').append(btn);
             }
+        } else {
+            $('#cat_nonavailable').addClass('show');
         }
     }).fail(function(jqxhr, textStatus, error) {
         alert('Error loading gallery: ' + textStatus + ', ' + error);
