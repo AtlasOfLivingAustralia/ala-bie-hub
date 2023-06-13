@@ -868,18 +868,70 @@ function cancelSearch(msg) {
     return true;
 }
 
+let distributions = []
+var distributionsIdx = 0
 function loadExpertDistroMap() {
-    var url = SHOW_CONF.layersServiceUrl + "/distribution/map/" + SHOW_CONF.guid;
+    var url = SHOW_CONF.layersServiceUrl + "/distribution/lsids/" + SHOW_CONF.guid;
     $.getJSON(url, function(data){
-        if (data.available) {
-            $("#expertDistroDiv img").attr("src", data.url);
-            if (data.dataResourceName && data.dataResourceUrl) {
-                var attr = $('<a>').attr('href', data.dataResourceUrl).text(data.dataResourceName)
-                $("#expertDistroDiv #dataResource").html(attr);
-            }
-            $("#expertDistroDiv").show();
+        if (data) {
+            $.each(data, function (idx, distribution) {
+                var record = {
+                    url: distribution.imageUrl,
+                    name: distribution.area_name,
+                    dr: distribution.data_resource_uid
+                }
+
+                if (record.dr) {
+                    $.getJSON(SHOW_CONF.collectoryUrl + "/ws/dataResource/" + record.dr, function(collectoryData) {
+                        record.providerName = collectoryData.name
+                        distributions.push(record)
+
+                        showDistribution()
+                    })
+                }
+            })
+            $('#expertDistroCount').text(' (' + data.length + ')')
         }
     })
+}
+
+function nextDistribution() {
+    if (distributionsIdx < distributions.length) {
+        distributionsIdx = distributionsIdx + 1
+    }
+
+    showDistribution()
+}
+
+function prevDistribution() {
+    if (distributionsIdx > 0) {
+        distributionsIdx = distributionsIdx - 1
+    }
+
+    showDistribution()
+}
+
+function showDistribution() {
+    $("#expertDistroDiv img").attr("src", distributions[distributionsIdx].url);
+    $("#dataResourceAreaName").text(distributions[distributionsIdx].name)
+    if (distributions[distributionsIdx].dr) {
+        var attr = $('<a>').attr('href', SHOW_CONF.collectoryUrl + '/public/show/' + distributions[distributionsIdx].dr).text(distributions[distributionsIdx].providerName)
+        $("#expertDistroDiv #dataResource").html(attr);
+    }
+
+    $("#expertDistroDiv").show();
+
+    if (distributionsIdx > 0) {
+        $("#expertDistroPrev").prop( "disabled", false );
+    } else {
+        $("#expertDistroPrev").prop( "disabled", true );
+    }
+
+    if (distributionsIdx < distributions.length - 1) {
+        $("#expertDistroNext").prop( "disabled", false );
+    } else {
+        $("#expertDistroNext").prop( "disabled", true );
+    }
 }
 
 function expandImageGallery(btn) {

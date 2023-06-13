@@ -73,11 +73,17 @@
 
         <div class="col-md-6">
             <div id="expertDistroDiv" style="display:none;margin-bottom: 20px;">
-                <h3><g:message code="overview.map.occurrence.compile.mapa.attribution"/></h3>
+                <h3><g:message code="overview.map.occurrence.compile.mapa.attribution"/><span id="expertDistroCount"></span>
+                    <button id="expertDistroPrev" onclick="prevDistribution()" disabled> &lt; </button>
+                    <button id="expertDistroNext" onclick="nextDistribution()" disabled> &gt; </button>
+                </h3>
                 <img id="distroMapImage" src="${resource(dir: 'images', file: 'noImage.jpg')}" class="distroImg"
                      style="width:316px;" alt="occurrence map" onerror="this.style.display = 'none'"/>
 
-                <p class="mapAttribution"><g:message code="overview.map.occurrence.mapa.attribution.01"/>
+
+                <p class="mapAttribution">
+                    <span id="dataResourceAreaName" style="font-weight: bold;font-style: italic;"></span>
+                    <g:message code="overview.map.occurrence.mapa.attribution.01"/>
                     <span id="dataResource">[<g:message code="overview.map.occurrence.mapa.attribution.02"/>]</span></p>
             </div>
 
