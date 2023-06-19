@@ -913,7 +913,7 @@ function prevDistribution() {
 
 function showDistribution() {
     $("#expertDistroDiv img").attr("src", distributions[distributionsIdx].url);
-    $("#dataResourceAreaName").text(distributions[distributionsIdx].name)
+    $("#dataResourceAreaName").text((distributionsIdx + 1) + ": " + distributions[distributionsIdx].name)
     if (distributions[distributionsIdx].dr) {
         var attr = $('<a>').attr('href', SHOW_CONF.collectoryUrl + '/public/show/' + distributions[distributionsIdx].dr).text(distributions[distributionsIdx].providerName)
         $("#expertDistroDiv #dataResource").html(attr);
