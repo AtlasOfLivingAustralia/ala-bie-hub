@@ -73,12 +73,28 @@
 
         <div class="col-md-6">
             <div id="expertDistroDiv" style="display:none;margin-bottom: 20px;">
-                <h3><g:message code="overview.map.occurrence.compile.mapa.attribution"/></h3>
-                <img id="distroMapImage" src="${resource(dir: 'images', file: 'noImage.jpg')}" class="distroImg"
-                     style="width:316px;" alt="occurrence map" onerror="this.style.display = 'none'"/>
+                <h3><g:message code="overview.map.occurrence.compile.mapa.attribution"/><span id="expertDistroCount"></span></h3>
 
-                <p class="mapAttribution"><g:message code="overview.map.occurrence.mapa.attribution.01"/>
-                    <span id="dataResource">[<g:message code="overview.map.occurrence.mapa.attribution.02"/>]</span></p>
+                <div>
+                    <div style="background-color: #3a3a3a;text-align-last: center">
+
+                        <img id="distroMapImage" src="${resource(dir: 'images', file: 'noImage.jpg')}" class="distroImg"
+                             style="width:316px;" alt="occurrence map" onerror="this.style.display = 'none'"/>
+
+                        <button id="expertDistroPrev" onclick="prevDistribution()" disabled class="carousel-button" style="float:left;">
+                            <span> &lt; </span>
+                        </button>
+
+                        <button id="expertDistroNext" onclick="nextDistribution()" disabled class="carousel-button" style="float:right;">
+                            <span> &gt; </span>
+                        </button>
+                    </div>
+                    <p class="mapAttribution">
+                        <span id="dataResourceAreaName" style="font-weight: bold;font-style: italic;"></span>
+                        <g:message code="overview.map.occurrence.mapa.attribution.01"/>
+                        <span id="dataResource">[<g:message code="overview.map.occurrence.mapa.attribution.02"/>]</span></p>
+                </div>
+
             </div>
 
             <div class="taxon-map">
