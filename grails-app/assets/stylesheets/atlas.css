@@ -217,3 +217,22 @@ html, body {height:100%;}
 .margin-bottom-30 {
 	margin-bottom: 30px;
 }
+
+/* expertDistro */
+.carousel-button {
+	height:316px;
+	font-size:30px;
+	color:gray;
+	background: #3a3a3a;
+	border:0;
+}
+
+.carousel-button:hover {
+	color:white;
+	/*background: #7a7a7a;*/
+}
+
+.carousel-button:disabled {
+	opacity: 0.0;
+}
+

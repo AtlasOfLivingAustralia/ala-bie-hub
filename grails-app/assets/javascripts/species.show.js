@@ -41,7 +41,7 @@ function loadSpeciesLists(){
     $.getJSON(SHOW_CONF.speciesListServiceUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function( data ) {
         for(var i = 0; i < data.length; i++) {
             var specieslist = data[i];
-            var maxListFields = 10;
+            var maxListFields = 20;
 
             if (specieslist.list.isBIE) {
                 var $description = $('#descriptionTemplate').clone();
@@ -188,7 +188,7 @@ function fitMapToBounds() {
                     SHOW_CONF.map.setZoom(3);
                 }
             }
-            
+
             SHOW_CONF.map.invalidateSize(true);
         }
     });
@@ -714,7 +714,6 @@ function loadGalleryType(category, start) {
             var br = "<br>";
             var $categoryTmpl = $('#cat_' + category);
             $categoryTmpl.removeClass('hide');
-            $('#cat_nonavailable').addClass('hide');
 
             $.each(data.occurrences, function(i, el) {
                 // clone template div & populate with metadata
@@ -748,6 +747,8 @@ function loadGalleryType(category, start) {
                     + (start + pageSize)  + ');">Load more images <img src="' + spinnerLink + '" class="hide"/></button></div>';
                 $categoryTmpl.find('.taxon-gallery').append(btn);
             }
+        } else {
+            $('#cat_nonavailable').addClass('show');
         }
     }).fail(function(jqxhr, textStatus, error) {
         alert('Error loading gallery: ' + textStatus + ', ' + error);
@@ -867,18 +868,70 @@ function cancelSearch(msg) {
     return true;
 }
 
+let distributions = []
+var distributionsIdx = 0
 function loadExpertDistroMap() {
-    var url = SHOW_CONF.layersServiceUrl + "/distribution/map/" + SHOW_CONF.guid;
+    var url = SHOW_CONF.layersServiceUrl + "/distribution/lsids/" + SHOW_CONF.guid;
     $.getJSON(url, function(data){
-        if (data.available) {
-            $("#expertDistroDiv img").attr("src", data.url);
-            if (data.dataResourceName && data.dataResourceUrl) {
-                var attr = $('<a>').attr('href', data.dataResourceUrl).text(data.dataResourceName)
-                $("#expertDistroDiv #dataResource").html(attr);
-            }
-            $("#expertDistroDiv").show();
+        if (data) {
+            $.each(data, function (idx, distribution) {
+                var record = {
+                    url: distribution.imageUrl,
+                    name: distribution.area_name,
+                    dr: distribution.data_resource_uid
+                }
+
+                if (record.dr) {
+                    $.getJSON(SHOW_CONF.collectoryUrl + "/ws/dataResource/" + record.dr, function(collectoryData) {
+                        record.providerName = collectoryData.name
+                        distributions.push(record)
+
+                        showDistribution()
+                    })
+                }
+            })
+            $('#expertDistroCount').text(' (' + data.length + ')')
         }
     })
+}
+
+function nextDistribution() {
+    if (distributionsIdx < distributions.length) {
+        distributionsIdx = distributionsIdx + 1
+    }
+
+    showDistribution()
+}
+
+function prevDistribution() {
+    if (distributionsIdx > 0) {
+        distributionsIdx = distributionsIdx - 1
+    }
+
+    showDistribution()
+}
+
+function showDistribution() {
+    $("#expertDistroDiv img").attr("src", distributions[distributionsIdx].url);
+    $("#dataResourceAreaName").text((distributionsIdx + 1) + ": " + distributions[distributionsIdx].name)
+    if (distributions[distributionsIdx].dr) {
+        var attr = $('<a>').attr('href', SHOW_CONF.collectoryUrl + '/public/show/' + distributions[distributionsIdx].dr).text(distributions[distributionsIdx].providerName)
+        $("#expertDistroDiv #dataResource").html(attr);
+    }
+
+    $("#expertDistroDiv").show();
+
+    if (distributionsIdx > 0) {
+        $("#expertDistroPrev").prop( "disabled", false );
+    } else {
+        $("#expertDistroPrev").prop( "disabled", true );
+    }
+
+    if (distributionsIdx < distributions.length - 1) {
+        $("#expertDistroNext").prop( "disabled", false );
+    } else {
+        $("#expertDistroNext").prop( "disabled", true );
+    }
 }
 
 function expandImageGallery(btn) {
