@@ -116,9 +116,9 @@
                 <div class="map-buttons">
                     <a class="btn btn-primary btn-lg"
                        href="${mapUrl}"
-                       title="${g.message(code: 'overview.map.button.records.map.title', default: 'View interactive map')}"
+                       title="${g.message(code: 'overview.map.button.records.map.title', default: 'View interactive map in the Spatial Portal')}"
                        role="button">
-                        <g:message code="overview.map.button.records.map" default="View Interactive Map"/>
+                        <g:message code="overview.map.button.records.map" default="View interactive map in the Spatial Portal"/>
                     </a>
                     <g:if test="${grailsApplication.config.map.simpleMapButton.toBoolean()}">
                         <a class="btn btn-primary btn-lg"
