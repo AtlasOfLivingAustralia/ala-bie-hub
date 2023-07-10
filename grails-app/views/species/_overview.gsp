@@ -129,8 +129,8 @@
                     </g:if>
                     <a class="btn btn-primary btn-lg"
                        href="${biocacheUrl}/occurrences/search?q=lsid:${tc?.taxonConcept?.guid}#tab_recordsView"
-                       title="${g.message(code: 'overview.map.button.records.list.title', default: 'View records')}"
-                       role="button"><g:message code="overview.map.button.records.list" default="View records"/></a>
+                       title="${g.message(code: 'overview.map.button.records.list.title', default: 'View and download occurrence records')}"
+                       role="button"><g:message code="overview.map.button.records.list" default="View and download occurrence records"/></a>
                 </div>
             </div>
 
