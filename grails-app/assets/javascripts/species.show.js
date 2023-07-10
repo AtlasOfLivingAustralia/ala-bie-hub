@@ -135,6 +135,7 @@ function loadMap() {
     });
 
     defaultBaseLayer.addTo(SHOW_CONF.map);
+    L.control.scale({imperial: false, position: 'bottomright'}).addTo(SHOW_CONF.map);
 
     var baseLayers = {
         "Base layer": defaultBaseLayer
