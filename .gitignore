@@ -3,7 +3,7 @@ Thumbs.db
 .gradle
 build/
 out/
-log/
+logs/
 .idea
 *.iml
 *.ipr
@@ -11,3 +11,4 @@ log/
 .project
 .settings
 .classpath
+

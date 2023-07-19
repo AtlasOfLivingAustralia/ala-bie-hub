@@ -165,6 +165,10 @@ class SpeciesController implements GrailsConfigurationAware {
             }
             taxonDetails.standardCommonNames = nameSplit[false]
             taxonDetails.pullCommonNames = nameSplit[true]
+            if (taxonDetails.synonyms) {
+                // Sort synonyms by date. Attempt to get year from nameComplete if namePublishedInYear is missing
+                taxonDetails.synonyms = taxonDetails.synonyms.sort { (it.namePublishedInYear ?: it.nameComplete.replaceAll('[^0-9]*', '')) + ' ' + it.nameComplete }.reverse()
+            }
             render(view: 'show', model: [
                     tc: taxonDetails,
                     statusRegionMap: utilityService.getStatusRegionCodes(),

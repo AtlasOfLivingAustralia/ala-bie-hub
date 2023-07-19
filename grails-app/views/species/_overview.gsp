@@ -73,12 +73,28 @@
 
         <div class="col-md-6">
             <div id="expertDistroDiv" style="display:none;margin-bottom: 20px;">
-                <h3><g:message code="overview.map.occurrence.compile.mapa.attribution"/></h3>
-                <img id="distroMapImage" src="${resource(dir: 'images', file: 'noImage.jpg')}" class="distroImg"
-                     style="width:316px;" alt="occurrence map" onerror="this.style.display = 'none'"/>
+                <h3><g:message code="overview.map.occurrence.compile.mapa.attribution"/><span id="expertDistroCount"></span></h3>
 
-                <p class="mapAttribution"><g:message code="overview.map.occurrence.mapa.attribution.01"/>
-                    <span id="dataResource">[<g:message code="overview.map.occurrence.mapa.attribution.02"/>]</span></p>
+                <div>
+                    <div style="background-color: #3a3a3a;text-align-last: center">
+
+                        <img id="distroMapImage" src="${resource(dir: 'images', file: 'noImage.jpg')}" class="distroImg"
+                             style="width:316px;" alt="occurrence map" onerror="this.style.display = 'none'"/>
+
+                        <button id="expertDistroPrev" onclick="prevDistribution()" disabled class="carousel-button" style="float:left;">
+                            <span> &lt; </span>
+                        </button>
+
+                        <button id="expertDistroNext" onclick="nextDistribution()" disabled class="carousel-button" style="float:right;">
+                            <span> &gt; </span>
+                        </button>
+                    </div>
+                    <p class="mapAttribution">
+                        <span id="dataResourceAreaName" style="font-weight: bold;font-style: italic;"></span>
+                        <g:message code="overview.map.occurrence.mapa.attribution.01"/>
+                        <span id="dataResource">[<g:message code="overview.map.occurrence.mapa.attribution.02"/>]</span></p>
+                </div>
+
             </div>
 
             <div class="taxon-map">
@@ -100,9 +116,9 @@
                 <div class="map-buttons">
                     <a class="btn btn-primary btn-lg"
                        href="${mapUrl}"
-                       title="${g.message(code: 'overview.map.button.records.map.title', default: 'View interactive map')}"
+                       title="${g.message(code: 'overview.map.button.records.map.title', default: 'View interactive map in the Spatial Portal')}"
                        role="button">
-                        <g:message code="overview.map.button.records.map" default="View Interactive Map"/>
+                        <g:message code="overview.map.button.records.map" default="View interactive map in the Spatial Portal"/>
                     </a>
                     <g:if test="${grailsApplication.config.map.simpleMapButton.toBoolean()}">
                         <a class="btn btn-primary btn-lg"
@@ -113,8 +129,8 @@
                     </g:if>
                     <a class="btn btn-primary btn-lg"
                        href="${biocacheUrl}/occurrences/search?q=lsid:${tc?.taxonConcept?.guid}#tab_recordsView"
-                       title="${g.message(code: 'overview.map.button.records.list.title', default: 'View records')}"
-                       role="button"><g:message code="overview.map.button.records.list" default="View records"/></a>
+                       title="${g.message(code: 'overview.map.button.records.list.title', default: 'View and download occurrence records')}"
+                       role="button"><g:message code="overview.map.button.records.list" default="View and download occurrence records"/></a>
                 </div>
             </div>
 

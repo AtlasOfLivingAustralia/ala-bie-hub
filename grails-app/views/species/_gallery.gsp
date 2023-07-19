@@ -13,7 +13,7 @@
 
     </g:each>
 
-    <div id="cat_nonavailable">
+    <div id="cat_nonavailable" class="hide">
         <h2><g:message code="gallery.title"/></h2>
 
 

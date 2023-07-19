@@ -29,7 +29,7 @@ $(document).ready(function () {
         source: function (request, response) {
             bieParams.q = request.term;
             $.ajax( {
-                url: bieBaseUrl + '/search/auto.json',
+                url: bieBaseUrl + '/search/auto',
                 dataType: "json",
                 data: bieParams,
                 success: function( data ) {

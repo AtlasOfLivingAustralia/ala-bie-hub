@@ -13,7 +13,7 @@
 </g:if>
 
 <g:if test="${tc.imageIdentifier}">
-    <g:set var="image" value="${grailsApplication.config.image.thumbnailUrl}${tc.imageIdentifier}"/>
+    <g:set var="image" value="${grailsApplication.config.image.thumbnailUrl}${tc.imageIdentifier}/thumbnail"/>
     <meta name="twitter:image" content="${image}"/>
     <meta name="twitter:image:alt" content="Photograph of ${scientificName}"/>
 

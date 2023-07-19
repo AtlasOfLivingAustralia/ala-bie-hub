@@ -40,7 +40,7 @@ class BiocacheService {
         def data = webClientService.getJson(queryUrl)
 
         if (data.size() && data.has("occurrences") && data.get("occurrences").size()) {
-            def recordUrl = grailsApplication.config.biocacheService.baseURL + "/occurrence/" + data.get("occurrences").get(0).uuid
+            def recordUrl = grailsApplication.config.biocacheService.baseURL + "/occurrences/" + data.get("occurrences").get(0).uuid
             jsonObj = webClientService.getJson(recordUrl)
         }
 

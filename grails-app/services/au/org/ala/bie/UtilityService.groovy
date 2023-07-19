@@ -22,7 +22,7 @@ import org.grails.web.json.JSONObject
 class UtilityService {
 
     def grailsApplication
-    def webClientService
+    def webService
 
     /**
      * Get a map of region names to collectory codes
@@ -147,7 +147,7 @@ class UtilityService {
                                         (uid.startsWith("co")) ? "collection" :
                                                 (uid.startsWith("in")) ? "institution" : null
                         if(type != null && grailsApplication.config.collectory.baseURL){
-                            String url = grailsApplication.config.collectory.baseURL+"/ws/"+type+"/"+uid
+                            String url = (grailsApplication.config.collectoryService.baseURL?: grailsApplication.config.collectory.baseURL) +"/ws/"+type+"/"+uid
                             def json = webService.get(url)
                             Map wsmap =JSON.parse(json)
                             map.putAt(uid, wsmap.get("name"))
