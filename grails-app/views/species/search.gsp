@@ -249,7 +249,7 @@
                                 <g:if test="${result.image}">
                                     <div class="result-thumbnail">
                                         <a href="${acceptedPageLink}">
-                                            <img src="${grailsApplication.config.image.thumbnailUrl}${result.image}" alt="">
+                                            <img src="${grailsApplication.config.image.thumbnailUrl}${result.image}/thumbnail" alt="">
                                         </a>
                                     </div>
                                 </g:if>
@@ -274,7 +274,7 @@
                                 <g:if test="${result.image}">
                                     <div class="result-thumbnail">
                                         <a href="${speciesPageLink}">
-                                            <img src="${grailsApplication.config.image.thumbnailUrl}${result.image}" alt="">
+                                            <img src="${grailsApplication.config.image.thumbnailUrl}${result.image}/thumbnail" alt="">
                                         </a>
                                     </div>
                                 </g:if>
