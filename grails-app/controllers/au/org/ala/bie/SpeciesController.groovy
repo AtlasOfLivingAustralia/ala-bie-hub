@@ -51,19 +51,21 @@ class SpeciesController implements GrailsConfigurationAware {
         def searchResults = []
         try {
             def googleMapsKey = grailsApplication.config.googleMapsApiKey
-            def url = "https://maps.googleapis.com/maps/api/geocode/json?key=${googleMapsKey}&address=" +
-                    URLEncoder.encode(params.q, 'UTF-8')
-            def response = new URL(url).text
-            def js = new JsonSlurper()
-            def json = js.parseText(response)
+            if (googleMapsKey != '<key value>') {
+                def url = "https://maps.googleapis.com/maps/api/geocode/json?key=${googleMapsKey}&address=" +
+                        URLEncoder.encode(params.q, 'UTF-8')
+                def response = new URL(url).text
+                def js = new JsonSlurper()
+                def json = js.parseText(response)
 
-            if(json.results){
-                json.results.each {
-                    searchResults << [
-                            name: it.formatted_address,
-                            latitude: it.geometry.location.lat,
-                            longitude: it.geometry.location.lng
-                    ]
+                if (json.results) {
+                    json.results.each {
+                        searchResults << [
+                                name     : it.formatted_address,
+                                latitude : it.geometry.location.lat,
+                                longitude: it.geometry.location.lng
+                        ]
+                    }
                 }
             }
         } catch (Exception e) {
