@@ -877,7 +877,7 @@ function loadExpertDistroMap() {
         if (data) {
             $.each(data, function (idx, distribution) {
                 var record = {
-                    url: distribution.imageUrl,
+                    url: distribution.imageUrl || distribution.image_url,
                     name: distribution.area_name,
                     dr: distribution.data_resource_uid
                 }
