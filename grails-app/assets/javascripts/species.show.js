@@ -326,27 +326,28 @@ function loadDataProviders(){
 
             $('.datasetCount').html(datasetCount);
             $.each(data.facetResults[0].fieldResult, function (idx, facetValue) {
-                //console.log(data.facetResults[0].fieldResult);
                 if(facetValue.count > 0){
 
                     var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
                     var dataResourceUrl =  SHOW_CONF.collectoryUrl + "/public/show/" + uid;
                     var tableRow = "<tr><td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
 
-                    //console.log(uid);
-                    $.getJSON(SHOW_CONF.collectoryServiceUrl + "/ws/dataResource/" + uid, function(collectoryData) {
+                    $.ajax({
+                        url: SHOW_CONF.collectoryServiceUrl + "/ws/dataResource/" + uid,
+                        dataType: 'json',
+                        async: false,
+                        success: function (collectoryData) {
+                            if (collectoryData.provider) {
+                                tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
+                            }
+                            tableRow += "</td>";
+                            tableRow += "<td>" + collectoryData.licenseType + "</td>";
 
-
-                        if(collectoryData.provider){
-                            tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
+                            var queryUrl = uiUrl + "&fq=" + facetValue.fq;
+                            tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetValue.count + "</span></a></td>"
+                            tableRow += "</tr>";
+                            $('#data-providers-list tbody').append(tableRow);
                         }
-                        tableRow += "</td>";
-                        tableRow += "<td>" + collectoryData.licenseType + "</td>";
-
-                        var queryUrl = uiUrl + "&fq=" + facetValue.fq;
-                        tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetValue.count + "</span></a></td>"
-                        tableRow += "</tr>";
-                        $('#data-providers-list tbody').append(tableRow);
                     });
                 }
             });
