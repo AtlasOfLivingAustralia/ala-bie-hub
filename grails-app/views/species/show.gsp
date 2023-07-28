@@ -94,9 +94,28 @@
         </g:if>
         <div class="header-inner">
             <h5 class="pull-right json">
-                <a href="${jsonLink}" target="data"
-                   title="${message(code:"show.view.json.title")}" class="btn btn-sm btn-default active"
-                   data-toggle="tooltip" data-placement="bottom"><g:message code="show.json" /></a>
+                <a href="#CopyLink" data-toggle="modal" role="button" class="tooltips btn copyLink" title="${g.message(code:"list.copylinks.dlg.copybutton.title")}"><i class="fa fa-file-code-o" aria-hidden="true"></i>&nbsp;&nbsp;<g:message code="show.api" default="API"/></a>
+                <div id="CopyLink" class="modal fade" role="dialog" tabindex="-1">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h3><g:message code="list.copylinks.dlg.title" default="Copy the JSON web service URL"/></h3>
+                            </div>
+                            <div class="modal-body">
+                                <div class="col-sm-12 input-group">
+                                    <g:set var="jsonurl" value="${jsonLink}"/>
+                                    <input type="text" class="form-control" value=${jsonurl} id="al4rcode" readonly/>
+                                    <span class="input-group-btn">
+                                        <button class="form-control btn" id="copy-al4r">
+                                            <g:message code="list.copylinks.dlg.copybutton.text" default="{JSON}"/>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </h5>
             <h1>${raw(sciNameFormatted)}</h1>
             <h5 class="inline-head taxon-rank">${tc.taxonConcept.rankString}</h5>
