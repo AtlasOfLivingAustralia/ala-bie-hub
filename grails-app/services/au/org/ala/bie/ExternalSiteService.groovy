@@ -61,6 +61,8 @@ class ExternalSiteService implements GrailsConfigurationAware {
     /** Blacklist for external sites */
     Blacklist blacklist
     String ausTraitsBase
+    String wikipediaUrl
+    String wikipediaLang
 
     def webClientService
 
@@ -80,6 +82,8 @@ class ExternalSiteService implements GrailsConfigurationAware {
         def blacklistURL = config.getProperty("external.blacklist", URL)
         blacklist = blacklistURL ? Blacklist.read(blacklistURL) : null
         ausTraitsBase = config.getProperty("ausTraits.baseURL")
+        wikipediaUrl = config.getProperty("wikipedia.url")
+        wikipediaLang = config.getProperty("wikipedia.lang")
     }
 
     /**
@@ -189,6 +193,18 @@ class ExternalSiteService implements GrailsConfigurationAware {
             return JSON.parse("{'error': 'Error fetching content from source'}")
         }
         return json
+    }
+
+    def searchWikipedia(String name) {
+        if (blacklist && blacklist.isBlacklisted(name, null, null)) {
+            return ''
+        }
+
+        String url = wikipediaUrl +  URLEncoder.encode(name.replace(' ', '_'), 'UTF-8')
+
+        var header = ["Accept-Language": wikipediaLang]
+
+        webClientService.get(url, false, header)
     }
 
     def searchEol(String name, String filter) {

@@ -21,17 +21,30 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 
+import java.nio.charset.StandardCharsets
+
 /**
  * Controller that proxies external webservice calls to get around cross domain issues
  * and to make consumption of services easier from javascript.
  */
 class ExternalSiteController {
     def externalSiteService
+    def webService
 
     RateLimiter eolRateLimiter = RateLimiter.create(1.0) // rate max requests per second (Double)
     RateLimiter genbankRateLimiter = RateLimiter.create(3.0) // rate max requests per second (Double)
 
     def index() {}
+
+    def wikipedia = {
+        def results
+        if (params.name) {
+            results = externalSiteService.searchWikipedia(params.name)
+        } else if (params.redirect) {
+            results = externalSiteService.searchWikipedia(params.redirect)
+        }
+        render results
+    }
 
     def eol = {
         eolRateLimiter.acquire()
@@ -187,5 +200,23 @@ class ExternalSiteController {
                 bufferedReader.close() // can throw exception but passing on to Grails error handling
             }
         }
+    }
+
+    def addImage() {
+        def result = webService.get(grailsApplication.config.bie.index.url +
+                '/api/addImage?imageId=' + URLEncoder.encode(params.imageId, StandardCharsets.UTF_8) +
+                "&name=" + URLEncoder.encode(params.name, StandardCharsets.UTF_8) +
+                "&guid=" + URLEncoder.encode(params.guid, StandardCharsets.UTF_8) +
+                "&order=" + URLEncoder.encode(params.order, StandardCharsets.UTF_8))
+        render status: result.statusCode
+    }
+
+    def addUrl() {
+        def url = grailsApplication.config.bie.index.url +
+                '/api/addUrl?url=' + URLEncoder.encode(params.url, StandardCharsets.UTF_8) +
+                "&name=" + URLEncoder.encode(params.name, StandardCharsets.UTF_8) +
+                "&guid=" + URLEncoder.encode(params.guid, StandardCharsets.UTF_8)
+        def result = webService.get(url)
+        render status: result.statusCode
     }
 }

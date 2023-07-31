@@ -171,6 +171,13 @@ class SpeciesController implements GrailsConfigurationAware {
                 // Sort synonyms by date. Attempt to get year from nameComplete if namePublishedInYear is missing
                 taxonDetails.synonyms = taxonDetails.synonyms.sort { (it.namePublishedInYear ?: it.nameComplete.replaceAll('[^0-9]*', '')) + ' ' + it.nameComplete }.reverse()
             }
+            def taxonHierarchy = bieService.getClassificationForGuid(taxonDetails.taxonConcept.guid)
+            taxonDetails.classification.put("kingdom",taxonHierarchy.find({it.rank == "kingdom"})?.scientificName)
+            taxonDetails.classification.put("phylum",taxonHierarchy.find({it.rank == "phylum"})?.scientificName)
+            taxonDetails.classification.put("class",taxonHierarchy.find({it.rank == "class"})?.scientificName)
+            taxonDetails.classification.put("order",taxonHierarchy.find({it.rank == "order"})?.scientificName)
+            taxonDetails.classification.put("family",taxonHierarchy.find({it.rank == "family"})?.scientificName)
+
             render(view: 'show', model: [
                     tc: taxonDetails,
                     statusRegionMap: utilityService.getStatusRegionCodes(),
@@ -182,7 +189,7 @@ class SpeciesController implements GrailsConfigurationAware {
                     userName: "",
                     isReadOnly: grailsApplication.config.ranking.readonly,
                     sortCommonNameSources: utilityService.getNamesAsSortedMap(taxonDetails.commonNames),
-                    taxonHierarchy: bieService.getClassificationForGuid(taxonDetails.taxonConcept.guid),
+                    taxonHierarchy: taxonHierarchy,
                     childConcepts: bieService.getChildConceptsForGuid(taxonDetails.taxonConcept.guid),
                     speciesList: bieService.getSpeciesList(taxonDetails.taxonConcept?.guid?:guid)
             ])

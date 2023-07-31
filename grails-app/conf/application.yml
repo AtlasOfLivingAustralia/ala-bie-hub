@@ -217,7 +217,10 @@ literature:
         apikey: "<key value>"
 show:
     tabs: overview,gallery,names,classification,records,literature,data-partners,ausTraits
-
+wikipedia:
+    # https://en.wikipedia.org/api/rest_v1/#/Page%20content/get_page_html__title_
+    url: https://en.wikipedia.org/api/rest_v1/page/html/
+    lang: en
 survey:
     indexPage: false
     searchPage: false

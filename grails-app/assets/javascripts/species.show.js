@@ -34,11 +34,11 @@ function showSpeciesPage(traitsTabSet) {
     }
 }
 
-function loadSpeciesLists(){
+function loadSpeciesLists() {
 
     //console.log('### loadSpeciesLists #### ' + SHOW_CONF.speciesListServiceUrl + '/ws/species/' + SHOW_CONF.guid);
-    $.getJSON(SHOW_CONF.speciesListServiceUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function( data ) {
-        for(var i = 0; i < data.length; i++) {
+    $.getJSON(SHOW_CONF.speciesListServiceUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function (data) {
+        for (var i = 0; i < data.length; i++) {
             var specieslist = data[i];
             var maxListFields = 20;
 
@@ -56,7 +56,7 @@ function loadSpeciesLists(){
                             return false;
                         }
                         var value = kvpValue.value;
-                        if(kvpValue.vocabValue){
+                        if (kvpValue.vocabValue) {
                             value = kvpValue.vocabValue;
                         }
                         content += "<tr><td>" + (kvpValue.key + "</td><td>" + value + "</td></tr>");
@@ -67,8 +67,8 @@ function loadSpeciesLists(){
                     $description.find(".content").html("A species list provided by " + specieslist.list.listName);
                 }
 
-                $description.find(".source").css({'display':'none'});
-                $description.find(".rights").css({'display':'none'});
+                $description.find(".source").css({'display': 'none'});
+                $description.find(".rights").css({'display': 'none'});
 
                 $description.find(".providedBy").attr('href', SHOW_CONF.speciesListUrl + '/speciesListItem/list/' + specieslist.dataResourceUid);
                 $description.find(".providedBy").html(specieslist.list.listName);
@@ -79,9 +79,9 @@ function loadSpeciesLists(){
     });
 }
 
-function addAlerts(){
+function addAlerts() {
     // alerts button
-    $("#alertsButton").click(function(e) {
+    $("#alertsButton").click(function (e) {
         e.preventDefault();
         var query = "Species: " + SHOW_CONF.scientificName;
         var searchString = "?q=lsid:" + SHOW_CONF.guid;
@@ -98,23 +98,23 @@ function addAlerts(){
 
 function loadMap() {
 
-    if(SHOW_CONF.map != null){
+    if (SHOW_CONF.map != null) {
         return;
     }
 
     //add an occurrence layer for this taxon
     var taxonLayer = L.tileLayer.wms(SHOW_CONF.biocacheServiceUrl + "/mapping/wms/reflect?q=lsid:" +
-        SHOW_CONF.guid + (SHOW_CONF.qualityProfile? "&qualityProfile="+SHOW_CONF.qualityProfile : "")
-        +"&qc=" + SHOW_CONF.mapQueryContext + SHOW_CONF.additionalMapFilter
+        SHOW_CONF.guid + (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "")
+        + "&qc=" + SHOW_CONF.mapQueryContext + SHOW_CONF.additionalMapFilter
         , {
-        layers: 'ALA:occurrences',
-        format: 'image/png',
-        transparent: true,
-        attribution: SHOW_CONF.mapAttribution,
-        bgcolor: "0x000000",
-        outline: SHOW_CONF.mapOutline,
-        ENV: SHOW_CONF.mapEnvOptions
-    });
+            layers: 'ALA:occurrences',
+            format: 'image/png',
+            transparent: true,
+            attribution: SHOW_CONF.mapAttribution,
+            bgcolor: "0x000000",
+            outline: SHOW_CONF.mapOutline,
+            ENV: SHOW_CONF.mapEnvOptions
+        });
 
     var speciesLayers = new L.LayerGroup();
     taxonLayer.addTo(speciesLayers);
@@ -158,11 +158,11 @@ function loadMap() {
  * Update the total records count for the occurrence map in heading text
  */
 function updateOccurrenceCount() {
-    $.getJSON(SHOW_CONF.biocacheServiceUrl + '/occurrences/search?q=lsid:' + SHOW_CONF.guid + "&qualityProfile="+SHOW_CONF.qualityProfile+"&fq=" + SHOW_CONF.mapQueryContext, function( data ) {
+    $.getJSON(SHOW_CONF.biocacheServiceUrl + '/occurrences/search?q=lsid:' + SHOW_CONF.guid + "&qualityProfile=" + SHOW_CONF.qualityProfile + "&fq=" + SHOW_CONF.mapQueryContext, function (data) {
         if (data) {
-            if(data.totalRecords > 0){
+            if (data.totalRecords > 0) {
                 $('.occurrenceRecordCount').html(data.totalRecords.toLocaleString());
-            } else{
+            } else {
                 // hide charts if no records
                 $("#recordBreakdowns").html("<h3>" + jQuery.i18n.prop("no.records.found") + "</h3>");
             }
@@ -172,11 +172,11 @@ function updateOccurrenceCount() {
 
 function fitMapToBounds() {
     var jsonUrl = SHOW_CONF.biocacheServiceUrl + "/mapping/bounds?q=lsid:" + SHOW_CONF.guid;
-    $.getJSON(jsonUrl, function(data) {
+    $.getJSON(jsonUrl, function (data) {
         if (data.length == 4 && data[0] != 0 && data[1] != 0) {
             //console.log("data", data);
-            var sw = L.latLng(data[1],data[0]);
-            var ne = L.latLng(data[3],data[2]);
+            var sw = L.latLng(data[1], data[0]);
+            var ne = L.latLng(data[3], data[2]);
             //console.log("sw", sw.toString());
             var dataBounds = L.latLngBounds(sw, ne);
             //var centre = dataBounds.getCenter();
@@ -219,8 +219,8 @@ function fitMapToBounds() {
 function loadAusTraits() {
     $.ajax({url: SHOW_CONF.ausTraitsSummaryUrl}).done(function (data) {
         // handle if traits  controller returns an error
-        if (data.error){
-            $("#traitsRecords").html("<p style='font-size: small'>" + jQuery.i18n.prop("no.traits.connection") +" You can find more infomation on AusTraits   <a target='_blank' href='"+SHOW_CONF.ausTraitsHomeUrl+"'>here</a>. </p>");
+        if (data.error) {
+            $("#traitsRecords").html("<p style='font-size: small'>" + jQuery.i18n.prop("no.traits.connection") + " You can find more infomation on AusTraits   <a target='_blank' href='" + SHOW_CONF.ausTraitsHomeUrl + "'>here</a>. </p>");
             $("#download-button-area").hide()
             $(".panel-footer").hide();
         } else if (data.numeric_traits && data.categorical_traits) {
@@ -240,9 +240,9 @@ function loadAusTraits() {
                 console.log(traitValue.min, traitValue.mean, traitValue.max)
                 var tableRow = "<tr><td>";
                 tableRow += traitValue.trait_name + "</td><td class='centered-cell'>"
-                tableRow += (traitValue.min || " - " ) + "</td><td class='centered-cell'>"
-                tableRow += (traitValue.mean || " - " )+ "</td><td class='centered-cell'>"
-                tableRow += (traitValue.max  || " - " ) + "</td><td class='centered-cell'>"
+                tableRow += (traitValue.min || " - ") + "</td><td class='centered-cell'>"
+                tableRow += (traitValue.mean || " - ") + "</td><td class='centered-cell'>"
+                tableRow += (traitValue.max || " - ") + "</td><td class='centered-cell'>"
                 tableRow += traitValue.unit + "</td><td class='centered-cell'>"
                 tableRow += "<a target='_blank' href=" + traitValue.definition + "> <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-box-arrow-up-right\" viewBox=\"0 0 16 16\">\n" +
                     "  <path fill-rule=\"evenodd\" d=\"M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z\"/>\n" +
@@ -264,10 +264,10 @@ function loadAusTraits() {
         console.warn("incoming Text " + jqXHR.responseText);
     });
 
-    $.ajax({url:SHOW_CONF.ausTraitsCountUrl}).done(function (data) {
-        if (data[0] && data[0]["summary"] && data[0]["AusTraits"] && data[0]["taxon"] ){
-            let htmlContent =  "<span> There are " + data[0]["summary"]+ " available for <span class='scientific-name rank-"+SHOW_CONF.rankString+"'><span class='name'>"+ data[0]["taxon"] +"</span></span>  with data for "+ data[0]["AusTraits"] +
-                " further traits in the <a  target='_blank' href='"+SHOW_CONF.ausTraitsHomeUrl+"'>AusTraits</a> database. These are accessible via the download CSV button or alternatively the entire database can be accessed at  <a target='_blank' href='"+SHOW_CONF.ausTraitsSourceUrl+"'>"+SHOW_CONF.ausTraitsSourceUrl+"</a>. </span>"
+    $.ajax({url: SHOW_CONF.ausTraitsCountUrl}).done(function (data) {
+        if (data[0] && data[0]["summary"] && data[0]["AusTraits"] && data[0]["taxon"]) {
+            let htmlContent = "<span> There are " + data[0]["summary"] + " available for <span class='scientific-name rank-" + SHOW_CONF.rankString + "'><span class='name'>" + data[0]["taxon"] + "</span></span>  with data for " + data[0]["AusTraits"] +
+                " further traits in the <a  target='_blank' href='" + SHOW_CONF.ausTraitsHomeUrl + "'>AusTraits</a> database. These are accessible via the download CSV button or alternatively the entire database can be accessed at  <a target='_blank' href='" + SHOW_CONF.ausTraitsSourceUrl + "'>" + SHOW_CONF.ausTraitsSourceUrl + "</a>. </span>"
             $('#traits-description').html(htmlContent);
         }
     }).error(function (jqXHR, textStatus, errorThrown) {
@@ -279,57 +279,57 @@ function loadAusTraits() {
 /**
  * Toggle the Austraits summary section and update the toggle action text accordingly
  */
-function toggleTraitsSummary(){
+function toggleTraitsSummary() {
     const summary = $('#austraits-summary');
     const summaryToggle = $('#austraits-summary-toggle');
     const expanded = summary.attr('aria-expanded')
-    if(expanded === "true"){
+    if (expanded === "true") {
         summary.collapse('hide');
         summaryToggle.text("See More")
-    } else{
+    } else {
         summary.collapse('show');
         summaryToggle.text("See Less")
     }
 }
 
-function loadDataProviders(){
+function loadDataProviders() {
 
-    var url = SHOW_CONF.biocacheServiceUrl  +
+    var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
         '&pageSize=0&flimit=-1';
 
-    if(SHOW_CONF.mapQueryContext){
-       url = url + '&fq=' + SHOW_CONF.mapQueryContext;
+    if (SHOW_CONF.mapQueryContext) {
+        url = url + '&fq=' + SHOW_CONF.mapQueryContext;
     }
 
     url = url + '&facet=on&facets=data_resource_uid';
 
-    var uiUrl = SHOW_CONF.biocacheUrl  +
+    var uiUrl = SHOW_CONF.biocacheUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid;
 
-    $.getJSON(url, function(data){
+    $.getJSON(url, function (data) {
 
-        if(data.totalRecords > 0) {
+        if (data.totalRecords > 0) {
 
             var datasetCount = data.facetResults[0].fieldResult.length;
 
             //exclude the "Unknown facet value"
-            if(data.facetResults[0].fieldResult[datasetCount - 1].label == "Unknown"){
+            if (data.facetResults[0].fieldResult[datasetCount - 1].label == "Unknown") {
                 datasetCount = datasetCount - 1;
             }
 
-            if(datasetCount == 1){
+            if (datasetCount == 1) {
                 $('.datasetLabel').html("dataset has");
             }
 
             $('.datasetCount').html(datasetCount);
             $.each(data.facetResults[0].fieldResult, function (idx, facetValue) {
-                if(facetValue.count > 0){
+                if (facetValue.count > 0) {
 
                     var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
-                    var dataResourceUrl =  SHOW_CONF.collectoryUrl + "/public/show/" + uid;
+                    var dataResourceUrl = SHOW_CONF.collectoryUrl + "/public/show/" + uid;
                     var tableRow = "<tr><td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
 
                     $.ajax({
@@ -357,7 +357,7 @@ function loadDataProviders(){
 
 function loadIndigenousData() {
 
-    if(!SHOW_CONF.profileServiceUrl || SHOW_CONF.profileServiceUrl == ""){
+    if (!SHOW_CONF.profileServiceUrl || SHOW_CONF.profileServiceUrl == "") {
         return;
     }
 
@@ -366,7 +366,7 @@ function loadIndigenousData() {
         if (data.total > 0) {
             $("#indigenous-info-tab").parent().removeClass("hide");
 
-            $.each(data.profiles, function(index, profile) {
+            $.each(data.profiles, function (index, profile) {
                 var panel = $('#indigenous-profile-summary-template').clone();
                 panel.removeClass("hide");
                 panel.attr("id", profile.id);
@@ -395,13 +395,13 @@ function loadIndigenousData() {
                 panel.find(".summary-text").append(summary);
                 panel.find(".profile-link").append("<a href='" + profile.url + "' title='Click to view the whole profile' target='_blank'>View the full profile</a>");
 
-                if(profile.thumbnailUrl) {
+                if (profile.thumbnailUrl) {
                     panel.find(".main-image").removeClass("hide");
 
                     panel.find(".image-embedded").append("<img src='" + profile.thumbnailUrl + "' alt='" + profile.collection.title + " main image'>");
                 }
 
-                if(profile.mainVideo) {
+                if (profile.mainVideo) {
                     panel.find(".main-video").removeClass("hide");
                     panel.find(".video-name").append(profile.mainVideo.name);
                     panel.find(".video-attribution").append(profile.mainVideo.attribution);
@@ -409,7 +409,7 @@ function loadIndigenousData() {
                     panel.find(".video-embedded").append(profile.mainVideo.embeddedVideo);
                 }
 
-                if(profile.mainAudio) {
+                if (profile.mainAudio) {
                     panel.find(".main-audio").removeClass("hide");
                     panel.find(".audio-name").append(profile.mainAudio.name);
                     panel.find(".audio-attribution").append(profile.mainAudio.attribution);
@@ -423,68 +423,108 @@ function loadIndigenousData() {
     });
 }
 
-function loadExternalSources(){
-    //load EOL content
-    //console.log('####### Loading EOL content - ' + SHOW_CONF.eolUrl);
-    $.ajax({url: SHOW_CONF.eolUrl}).done(function ( data ) {
-        //console.log(data);
-        //clone a description template...
-        if(data.taxonConcept && data.taxonConcept.dataObjects){
-            //console.log('Loading EOL content - ' + data.taxonConcept.dataObjects.length);
-            var eolIdentifier = data.taxonConcept.identifier;
-            $.each(data.taxonConcept.dataObjects, function(idx, dataObject){
-                //console.log('Loading EOL content -> ' + dataObject.description);
-                // Data objects are now language filtered on the server
-                var $description = $('#descriptionTemplate').clone();
-                $description.css({'display':'block'});
-                $description.attr('id', dataObject.id);
-                $description.find(".title").html(dataObject.title ?  dataObject.title : 'Description');
+function showWikipediaData(data) {
+    var node = $(data)
+    node.find('[role="note"]').remove()
 
-                var descriptionDom = $.parseHTML( dataObject.description );
-                var body = $(descriptionDom).find('#bodyContent > p:lt(2)').html(); // for really long EOL blocks
+    // show wikipedia data
+    var dataLength = $(data).length
+    var tested = false
+    var valid = true
+    node.each(function (idx, item) {
+        // exclude the last item (typically ExternalLinks) include SECTIONS
+        if (valid && idx + 1 < dataLength && item.tagName == "SECTION") {
+            var $description = $('#descriptionTemplate').clone();
 
-                if (body) {
-                    $description.find(".content").html(body);
-                } else {
-                    $description.find(".content").html(dataObject.description);
+            // redirect if required
+            var redirect = $(item).find('link[rel="mw:PageProp/redirect"]')
+            if (redirect.length > 0) {
+                var redirectItem = redirect[0].href.replace(/^.*\//, "")
+                var url = "/externalSite/wikipedia?name=" + encodeURI(redirectItem)
+                $.ajax({url: url}).done(function (data) {
+                    showWikipediaData(data)
+                });
+                return
+            }
+
+            // basic test for validity
+            if (!tested) {
+                var uppercaseData = node.text().toUpperCase()
+                tested = true
+                valid = false
+                if (SHOW_CONF.family) {
+                    valid = uppercaseData.indexOf(SHOW_CONF.family.toUpperCase()) > 0
                 }
-
-
-                if(dataObject.source && dataObject.source.trim().length != 0){
-                    var sourceText = dataObject.source;
-                    var sourceHtml = "";
-
-                    if (sourceText.match("^http")) {
-                        sourceHtml = "<a href='" + sourceText + "' target='eol'>"  + sourceText + "</a>"
-                    } else {
-                        sourceHtml = sourceText;
-                    }
-
-                    $description.find(".sourceText").html(sourceHtml);
-                } else {
-                    $description.find(".source").css({'display':'none'});
+                if (!valid && SHOW_CONF.order) {
+                    valid = uppercaseData.indexOf(SHOW_CONF.order.toUpperCase()) > 0
                 }
-                if(dataObject.rightsHolder && dataObject.rightsHolder.trim().length != 0){
-                    $description.find(".rightsText").html(dataObject.rightsHolder);
-                } else {
-                    $description.find(".rights").css({'display':'none'});
+                if (!valid && SHOW_CONF.class) {
+                    valid = uppercaseData.indexOf(SHOW_CONF.class.toUpperCase()) > 0
                 }
+                if (!valid && SHOW_CONF.phylum) {
+                    valid = uppercaseData.indexOf(SHOW_CONF.phylum.toUpperCase()) > 0
+                }
+                if (!valid) {
+                    return
+                }
+            }
 
-                $description.find(".providedBy").attr('href', 'https://eol.org/pages/' + eolIdentifier);
-                $description.find(".providedBy").attr('target', '_blank');
-                $description.find(".providedBy").html("Encyclopedia of Life");
-                $description.appendTo('#descriptiveContent');
-            });
+            // identify the title
+            var title
+            if (item.childNodes[0].tagName.match(/H[0-9]/)) {
+                title = item.childNodes[0].innerHTML
+                item.removeChild(item.childNodes[0])
+            } else {
+                title = jQuery.i18n.prop("description.title.default")
+            }
+            $description.find(".title").html(title)
+
+            // remove infoboxes
+            $(item).find('.infobox').remove()
+
+            // remove tables
+            // $(item).find('table').remove()
+
+            // fix relative links
+            $description.find(".content").html(item.innerHTML.replaceAll('href="./', "href=\"" + "https://wikipedia.org/wiki/"))
+
+            // show this description
+            $description.css({'display': 'block'});
+
+            // set the source of this description
+            var sourceHtml = "<a href='https://wikipedia.org/wiki/" + encodeURI(SHOW_CONF.scientificName) + "' target='wikipedia'>Wikipedia</a>"
+            $description.find(".sourceText").html(sourceHtml);
+
+            // hide unused properties of this description
+            $description.find(".rights").css({'display': 'none'});
+            $description.find(".provider").css({'display': 'none'});
+
+            // add to the page
+            $description.appendTo('#descriptiveContent');
         }
-    });
+    })
+}
+
+function loadExternalSources() {
+    // load Wikipedia content
+    if (SHOW_CONF.wikiUrl != 'hide') {
+        var name = SHOW_CONF.scientificName
+        if (SHOW_CONF.wikiUrl.match("^http.*")) {
+            name = SHOW_CONF.wikiUrl.replace(/^.*\//, "")
+        }
+        var url = "/externalSite/wikipedia?name=" + encodeURI(name)
+        $.ajax({url: url}).done(function (data) {
+            showWikipediaData(data)
+        });
+    }
 
     //load Genbank content
-    $.ajax({url: SHOW_CONF.genbankUrl}).done(function ( data ) {
-        if(data.total){
+    $.ajax({url: SHOW_CONF.genbankUrl}).done(function (data) {
+        if (data.total) {
             $('.genbankResultCount').html('<a href="' + data.resultsUrl + '">View all results - ' + data.total + '</a>');
-            if(data.results){
-                $.each(data.results, function(idx, result){
-                    var $genbank =  $('#genbankTemplate').clone();
+            if (data.results) {
+                $.each(data.results, function (idx, result) {
+                    var $genbank = $('#genbankTemplate').clone();
                     $genbank.removeClass('hide');
                     $genbank.find('.externalLink').attr('href', result.link);
                     $genbank.find('.externalLink').html(result.title);
@@ -497,12 +537,12 @@ function loadExternalSources(){
     });
 
     //load sound content
-    $.ajax({url: SHOW_CONF.soundUrl}).done(function ( data ) {
-        if(data.sounds){
+    $.ajax({url: SHOW_CONF.soundUrl}).done(function (data) {
+        if (data.sounds) {
             var soundsDiv = "<div class='panel panel-default '><div class='panel-heading'>";
             soundsDiv += '<h3 class="panel-title">Sounds</h3></div><div class="panel-body">';
             soundsDiv += '<audio src="' + data.sounds[0].alternativeFormats['audio/mpeg'] + '" preload="auto" />';
-            audiojs.events.ready(function() {
+            audiojs.events.ready(function () {
                 var as = audiojs.createAll();
             });
             var source = "";
@@ -533,11 +573,11 @@ function loadExternalSources(){
             }
 
             soundsDiv += '</div><div class="panel-footer"><p>' + source + '<br>';
-            soundsDiv += '<a href="' + SHOW_CONF.biocacheUrl + '/occurrence/'+ data.raw.rowKey +'">View more details of this audio</a></p>';
+            soundsDiv += '<a href="' + SHOW_CONF.biocacheUrl + '/occurrence/' + data.raw.rowKey + '">View more details of this audio</a></p>';
             soundsDiv += '</div></div>';
             $('#sounds').append(soundsDiv);
         }
-    }).fail(function(jqXHR, textStatus, errorThrown) {
+    }).fail(function (jqXHR, textStatus, errorThrown) {
         console.warn("AUDIO Error", errorThrown, textStatus);
     });
 }
@@ -551,7 +591,7 @@ function loadGalleries() {
     loadGalleryType('type', 0)
     loadGalleryType('specimen', 0)
     loadGalleryType('other', 0)
-    loadGalleryType('uncertain',0)
+    loadGalleryType('uncertain', 0)
 }
 
 var entityMap = {
@@ -572,15 +612,15 @@ function escapeHtml(string) {
 /**
  * Load overview images on the species page. This is separate from the main galleries.
  */
-function loadOverviewImages(){
+function loadOverviewImages() {
     var hasPreferredImage = false; // Could get a race condition where no main image gets loaded due callbacks
 
     if (SHOW_CONF.preferredImageId) {
         hasPreferredImage = true;
-        var prefUrl = SHOW_CONF.biocacheServiceUrl  +
+        var prefUrl = SHOW_CONF.biocacheServiceUrl +
             '/occurrences/search?q=images:' + SHOW_CONF.preferredImageId +
             '&fq=-assertion_user_id:*&im=true&facet=off&pageSize=1&start=0';
-        $.getJSON(prefUrl, function(data){
+        $.getJSON(prefUrl, function (data) {
             // console.log("prefUrl", prefUrl, data);
             if (data && data.totalRecords > 0) {
                 addOverviewImage(data.occurrences[0]);
@@ -589,30 +629,30 @@ function loadOverviewImages(){
                     'uuid': null,
                     'image': SHOW_CONF.preferredImageId,
                     'scientificName': SHOW_CONF.scientificName,
-                    'largeImageUrl':  SHOW_CONF.imageServiceBaseUrl + "image/"+SHOW_CONF.preferredImageId+"/large"
+                    'largeImageUrl': SHOW_CONF.imageServiceBaseUrl + "image/" + SHOW_CONF.preferredImageId + "/large"
                 }
                 addOverviewImage(record)
             }
 
-        }).fail(function(jqxhr, textStatus, error) {
+        }).fail(function (jqxhr, textStatus, error) {
             alert('Error loading overview image: ' + textStatus + ', ' + error);
             hasPreferredImage = false;
         });
     }
 
-    var url = SHOW_CONF.biocacheServiceUrl  +
+    var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
         '&fq=multimedia:"Image"&fq=geospatial_kosher:true&fq=-user_assertions:50001&fq=-user_assertions:50005&im=true&facet=off&pageSize=5&start=0';
     //console.log('Loading images from: ' + url);
 
-    $.getJSON(url, function(data){
+    $.getJSON(url, function (data) {
         if (data && data.totalRecords > 0) {
             addOverviewImages(data.occurrences, hasPreferredImage);
         }
-    }).fail(function(jqxhr, textStatus, error) {
+    }).fail(function (jqxhr, textStatus, error) {
         alert('Error loading overview images: ' + textStatus + ', ' + error);
-    }).always(function() {
+    }).always(function () {
         $('#gallerySpinner').hide();
     });
 }
@@ -626,7 +666,7 @@ function addOverviewImages(imagesArray, hasPreferredImage) {
 
     for (j = 1; j < 5; j++) {
         // load smaller thumb images
-        if(imagesArray.length > j) {
+        if (imagesArray.length > j) {
             addOverviewThumb(imagesArray[j], j)
         }
     }
@@ -640,7 +680,7 @@ function addOverviewImage(overviewImageRecord) {
     $categoryTmpl.removeClass('hide');
 
     var $mainOverviewImage = $('.mainOverviewImage');
-    $mainOverviewImage.attr('src',overviewImageRecord.largeImageUrl);
+    $mainOverviewImage.attr('src', overviewImageRecord.largeImageUrl);
     $mainOverviewImage.parent().attr('href', overviewImageRecord.largeImageUrl);
     $mainOverviewImage.parent().attr('data-title', getImageTitleFromOccurrence(overviewImageRecord));
     $mainOverviewImage.parent().attr('data-footer', getImageFooterFromOccurrence(overviewImageRecord));
@@ -660,11 +700,11 @@ function addOverviewThumb(record, i) {
     }
 }
 
-function generateOverviewThumb(occurrence, id){
+function generateOverviewThumb(occurrence, id) {
     var $taxonSummaryThumb = $('#taxon-summary-thumb-template').clone();
     var $taxonSummaryThumbLink = $taxonSummaryThumb.find('a');
     $taxonSummaryThumb.removeClass('hide');
-    $taxonSummaryThumb.attr('id', 'taxon-summary-thumb-'+id);
+    $taxonSummaryThumb.attr('id', 'taxon-summary-thumb-' + id);
     $taxonSummaryThumb.attr('style', 'background-image:url(' + occurrence.smallImageUrl + ')');
     $taxonSummaryThumbLink.attr('data-title', getImageTitleFromOccurrence(occurrence));
     $taxonSummaryThumbLink.attr('data-footer', getImageFooterFromOccurrence(occurrence));
@@ -672,6 +712,29 @@ function generateOverviewThumb(occurrence, id){
     $taxonSummaryThumbLink.attr('data-image-id', occurrence.image);
     $taxonSummaryThumbLink.attr('data-record-url', SHOW_CONF.biocacheUrl + '/occurrences/' + occurrence.uuid);
     return $taxonSummaryThumb;
+}
+
+function editWikipediaURL() {
+    var defaultWiki = SHOW_CONF.wikiUrl
+
+    var url = prompt(jQuery.i18n.prop("edit.wiki.url"), defaultWiki);
+
+    if (url != defaultWiki && url != null && url != undefined) {
+        var url = '/externalSite/addUrl?guid=' + encodeURIComponent(SHOW_CONF.guid) + '&url=' + encodeURIComponent(url) + '&name=' + encodeURIComponent(SHOW_CONF.scientificName)
+        $.getJSON(url, function (data) {
+        })
+        SHOW_CONF.wikiUrl = url
+    }
+}
+
+function heroImage(imageId, order) {
+    if (confirm(jQuery.i18n.prop("confirm.hero.image")) == true) {
+        var url = '/externalSite/addImage?guid=' + encodeURIComponent(SHOW_CONF.guid) + '&imageId=' +
+            encodeURIComponent(imageId) + '&name=' + encodeURIComponent(SHOW_CONF.scientificName) +
+            '&order=' + encodeURIComponent(order)
+        $.getJSON(url, function (data) {
+        })
+    }
 }
 
 /**
@@ -699,7 +762,7 @@ function loadGalleryType(category, start) {
     }
 
     //TODO a toggle between LSID based searches and names searches
-    var url = SHOW_CONF.biocacheServiceUrl  +
+    var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
         (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "") + '&fq=multimedia:"Image"&pageSize=' + pageSize +
@@ -707,7 +770,7 @@ function loadGalleryType(category, start) {
 
     //console.log("URL: " + url);
 
-    $.getJSON(url, function(data){
+    $.getJSON(url, function (data) {
 
         //console.log('Total images: ' + data.totalRecords + ", category: " + category);
 
@@ -716,11 +779,11 @@ function loadGalleryType(category, start) {
             var $categoryTmpl = $('#cat_' + category);
             $categoryTmpl.removeClass('hide');
 
-            $.each(data.occurrences, function(i, el) {
+            $.each(data.occurrences, function (i, el) {
                 // clone template div & populate with metadata
                 var $taxonThumb = $('#taxon-thumb-template').clone();
                 $taxonThumb.removeClass('hide');
-                $taxonThumb.attr('id','thumb_' + category + i);
+                $taxonThumb.attr('id', 'thumb_' + category + i);
                 $taxonThumb.attr('href', el.largeImageUrl);
                 $taxonThumb.find('img').attr('src', el.smallImageUrl);
                 // turned off 'onerror' below as IE11 hides all images
@@ -731,6 +794,8 @@ function loadGalleryType(category, start) {
                 $taxonThumb.find('.caption-brief').html(briefHtml);
                 $taxonThumb.attr('data-title', briefHtml);
                 $taxonThumb.find('.caption-detail').html(briefHtml);
+
+                $taxonThumb.find('.hero-button').attr('onclick', 'heroImage("' + el.image + '");')
 
                 // write to DOM
                 $taxonThumb.attr('data-footer', getImageFooterFromOccurrence(el));
@@ -745,54 +810,54 @@ function loadGalleryType(category, start) {
                 // add new 'load more images' button if required
                 var spinnerLink = $('img#gallerySpinner').attr('src');
                 var btn = '<div class="loadMore ' + category + '"><br><button class="btn btn-default" onCLick="loadGalleryType(\'' + category + '\','
-                    + (start + pageSize)  + ');">Load more images <img src="' + spinnerLink + '" class="hide"/></button></div>';
+                    + (start + pageSize) + ');">Load more images <img src="' + spinnerLink + '" class="hide"/></button></div>';
                 $categoryTmpl.find('.taxon-gallery').append(btn);
             }
         } else {
             $('#cat_nonavailable').addClass('show');
         }
-    }).fail(function(jqxhr, textStatus, error) {
+    }).fail(function (jqxhr, textStatus, error) {
         alert('Error loading gallery: ' + textStatus + ', ' + error);
-    }).always(function() {
+    }).always(function () {
         $('#gallerySpinner').hide();
     });
 }
 
-function getImageTitleFromOccurrence(el){
+function getImageTitleFromOccurrence(el) {
     var br = "<br/>";
     var briefHtml = "";
     //include sci name when genus or higher taxon
-    if(SHOW_CONF.taxonRankID  < 7000) {
-        briefHtml += (el.raw_scientificName === undefined? el.scientificName : el.raw_scientificName); //raw scientific name can be null, e.g. if taxon GUIDS were submitted
+    if (SHOW_CONF.taxonRankID < 7000) {
+        briefHtml += (el.raw_scientificName === undefined ? el.scientificName : el.raw_scientificName); //raw scientific name can be null, e.g. if taxon GUIDS were submitted
     }
 
     if (el.typeStatus) {
-        if(briefHtml.length > 0)  briefHtml += br;
+        if (briefHtml.length > 0) briefHtml += br;
         briefHtml += el.typeStatus;
     }
 
     if (el.institutionName) {
-        if(briefHtml.length > 0)  briefHtml += br;
+        if (briefHtml.length > 0) briefHtml += br;
         briefHtml += ((el.typeStatus) ? ' | ' : br) + el.institutionName;
     }
 
-    if(el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].creator != null){
-        if(briefHtml.length > 0)  briefHtml += br;
+    if (el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].creator != null) {
+        if (briefHtml.length > 0) briefHtml += br;
         briefHtml += "Photographer: " + el.imageMetadata[0].creator;
-    } else if(el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].rightsHolder != null) {
-        if(briefHtml.length > 0)  briefHtml += br;
+    } else if (el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].rightsHolder != null) {
+        if (briefHtml.length > 0) briefHtml += br;
         briefHtml += "Rights holder: " + el.imageMetadata[0].rightsHolder;
-    } else if(el.collector){
-        if(briefHtml.length > 0)  briefHtml += br;
+    } else if (el.collector) {
+        if (briefHtml.length > 0) briefHtml += br;
         briefHtml += "Supplied by: " + el.collector;
     }
 
     return briefHtml;
 }
 
-function getImageFooterFromOccurrence(el){
+function getImageFooterFromOccurrence(el) {
     var br = "<br/>";
-    var detailHtml = (el.raw_scientificName === undefined? el.scientificName : el.raw_scientificName); //raw scientific name can be null, e.g. if taxon GUIDS were submitted
+    var detailHtml = (el.raw_scientificName === undefined ? el.scientificName : el.raw_scientificName); //raw scientific name can be null, e.g. if taxon GUIDS were submitted
     if (el.typeStatus) detailHtml += br + 'Type: ' + el.typeStatus;
     if (el.collector) detailHtml += br + 'By: ' + el.collector;
     if (el.eventDate) detailHtml += br + 'Date: ' + moment(el.eventDate).format('YYYY-MM-DD');
@@ -801,7 +866,7 @@ function getImageFooterFromOccurrence(el){
     } else if (el.dataResourceName && el.dataResourceName !== undefined) {
         detailHtml += br + "Supplied by: " + el.dataResourceName;
     }
-    if(el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].rightsHolder != null){
+    if (el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].rightsHolder != null) {
         detailHtml += br + "Rights holder: " + el.imageMetadata[0].rightsHolder;
     }
 
@@ -833,7 +898,7 @@ function loadBhl(start, rows, scroll) {
         rows = 10;
     }
     var source = SHOW_CONF.bhlUrl;
-    var taxonName = SHOW_CONF.scientificName ;
+    var taxonName = SHOW_CONF.scientificName;
     var synonyms = SHOW_CONF.synonyms;
     var i;
     var query = ""; // = taxonName.split(/\s+/).join(" AND ") + synonyms;
@@ -871,9 +936,10 @@ function cancelSearch(msg) {
 
 let distributions = []
 var distributionsIdx = 0
+
 function loadExpertDistroMap() {
     var url = SHOW_CONF.layersServiceUrl + "/distribution/lsids/" + SHOW_CONF.guid;
-    $.getJSON(url, function(data){
+    $.getJSON(url, function (data) {
         if (data) {
             $.each(data, function (idx, distribution) {
                 var record = {
@@ -883,7 +949,7 @@ function loadExpertDistroMap() {
                 }
 
                 if (record.dr) {
-                    $.getJSON(SHOW_CONF.collectoryUrl + "/ws/dataResource/" + record.dr, function(collectoryData) {
+                    $.getJSON(SHOW_CONF.collectoryUrl + "/ws/dataResource/" + record.dr, function (collectoryData) {
                         record.providerName = collectoryData.name
                         distributions.push(record)
 
@@ -923,20 +989,20 @@ function showDistribution() {
     $("#expertDistroDiv").show();
 
     if (distributionsIdx > 0) {
-        $("#expertDistroPrev").prop( "disabled", false );
+        $("#expertDistroPrev").prop("disabled", false);
     } else {
-        $("#expertDistroPrev").prop( "disabled", true );
+        $("#expertDistroPrev").prop("disabled", true);
     }
 
     if (distributionsIdx < distributions.length - 1) {
-        $("#expertDistroNext").prop( "disabled", false );
+        $("#expertDistroNext").prop("disabled", false);
     } else {
-        $("#expertDistroNext").prop( "disabled", true );
+        $("#expertDistroNext").prop("disabled", true);
     }
 }
 
 function expandImageGallery(btn) {
-    if(!$(btn).hasClass('.expand-image-gallery')){
+    if (!$(btn).hasClass('.expand-image-gallery')) {
         $(btn).parent().find('.collapse-image-gallery').removeClass('btn-primary');
         $(btn).addClass('btn-primary');
 
@@ -945,7 +1011,7 @@ function expandImageGallery(btn) {
 }
 
 function collapseImageGallery(btn) {
-    if(!$(btn).hasClass('.collapse-image-gallery')){
+    if (!$(btn).hasClass('.collapse-image-gallery')) {
         $(btn).parent().find('.expand-image-gallery').removeClass('btn-primary');
         $(btn).addClass('btn-primary');
 

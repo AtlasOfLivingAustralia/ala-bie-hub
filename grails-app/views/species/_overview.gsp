@@ -1,3 +1,5 @@
+<g:set bean="authService" var="authService"></g:set>
+
 <section class="tab-pane fade in active" id="overview">
     <div class="row taxon-row">
         <div class="col-md-6">
@@ -55,6 +57,9 @@
                 </div>
             </g:if>
 
+            <g:if test="${authService.userInRole('ROLE_ADMIN')}">
+                <button onclick="editWikipediaURL()">Edit Wikipedia URL</button>
+            </g:if>
             <div id="descriptiveContent"></div>
 
             <div id="sounds" style="padding-bottom:20px;"></div>
