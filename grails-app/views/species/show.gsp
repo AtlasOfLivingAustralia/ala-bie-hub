@@ -161,6 +161,9 @@
 <div id="taxon-summary-thumb-template"
      class="taxon-summary-thumb hide"
      style="">
+    <g:if test="${authService.userInRole('ROLE_ADMIN')}">
+        <button class="thumb-caption hero-button" style="bottom: 175px;z-index:1000">edit</button>
+    </g:if>
     <a data-toggle="lightbox"
        data-gallery="taxon-summary-gallery"
        data-parent=".taxon-summary-gallery"
@@ -171,19 +174,25 @@
 </div>
 
 <!-- thumbnail template -->
-<a id="taxon-thumb-template"
-   class="taxon-thumb hide"
-   data-toggle="lightbox"
-   data-gallery="main-image-gallery"
-   data-title=""
-   data-footer=""
-   href="">
-    <img src="" alt="">
+<div id="taxon-thumb-template" class="taxon-thumb hide">
+    <g:if test="${authService.userInRole('ROLE_ADMIN')}">
+        <button class="thumb-caption hero-button">edit</button>
+    </g:if>
 
-    <div class="thumb-caption caption-brief"></div>
+    <a
+       data-toggle="lightbox"
+       data-gallery="main-image-gallery"
+       data-title=""
+       data-footer=""
+       href="">
+        <img src="" alt="">
 
-    <div class="thumb-caption caption-detail"></div>
-</a>
+
+        <div class="thumb-caption caption-brief"></div>
+
+        <div class="thumb-caption caption-detail"></div>
+    </a>
+</div>
 
 <!-- description template -->
 <div id="descriptionTemplate" class="panel panel-default panel-description" style="display:none;">
@@ -409,6 +418,7 @@
         phylum:             "${tc?.classification?.phylum ?: ''}",
         kingdom:            "${tc?.classification?.kingdom ?: ''}",
         preferredImageId:   "${tc?.imageIdentifier?: ''}",
+        hiddenImages    :   "${tc?.hiddenImages?: ''}",
         wikiUrl:            "${tc?.wikiUrl}",
         citizenSciUrl:      "${citizenSciUrl}",
         serverName:         "${grailsApplication.config.grails.serverURL}",
@@ -420,7 +430,6 @@
         genbankUrl:         "${raw(createLink(controller: 'externalSite', action: 'genbank', params: [s: tc?.taxonConcept?.nameString ?: '']))}",
         scholarUrl:         "${raw(createLink(controller: 'externalSite', action: 'scholar', params: [s: tc?.taxonConcept?.nameString ?: '']))}",
         soundUrl:           "${raw(createLink(controller: 'species', action: 'soundSearch', params: [id: guid]))}",
-        eolLanguage:        "${grailsApplication.config.eol.lang}",
         defaultDecimalLatitude: ${grailsApplication.config.defaultDecimalLatitude},
         defaultDecimalLongitude: ${grailsApplication.config.defaultDecimalLongitude},
         defaultZoomLevel: ${grailsApplication.config.defaultZoomLevel},
@@ -450,12 +459,12 @@
         addPreferenceButton: ${imageClient.checkAllowableEditRole()},
         mapOutline: ${grailsApplication.config.map.outline ?: 'false'},
         mapEnvOptions: "${grailsApplication.config.map.env?.options?:'color:' + grailsApplication.config.map.records.colour+ ';name:circle;size:4;opacity:0.8'}",
-        troveUrl: "${raw(grailsApplication.config.literature?.trove?.api + '/result?zone=book&encoding=json&key=' + grailsApplication.config.literature?.trove?.apikey )}",
         bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}",
         ausTraitsSummaryUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsSummary', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
         ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
         ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}",
-        ausTraitsSourceUrl:"${grailsApplication.config.ausTraits.sourceURL}"
+        ausTraitsSourceUrl:"${grailsApplication.config.ausTraits.sourceURL}",
+        showHiddenImages: false
     };
 
     $(function(){

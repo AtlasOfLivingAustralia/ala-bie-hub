@@ -613,61 +613,68 @@ function escapeHtml(string) {
  * Load overview images on the species page. This is separate from the main galleries.
  */
 function loadOverviewImages() {
-    var hasPreferredImage = false; // Could get a race condition where no main image gets loaded due callbacks
+    var countPreferredImages = 0; // Could get a race condition where no main image gets loaded due callbacks
 
     if (SHOW_CONF.preferredImageId) {
-        hasPreferredImage = true;
-        var prefUrl = SHOW_CONF.biocacheServiceUrl +
-            '/occurrences/search?q=images:' + SHOW_CONF.preferredImageId +
-            '&fq=-assertion_user_id:*&im=true&facet=off&pageSize=1&start=0';
-        $.getJSON(prefUrl, function (data) {
-            // console.log("prefUrl", prefUrl, data);
-            if (data && data.totalRecords > 0) {
-                addOverviewImage(data.occurrences[0]);
-            } else {
-                var record = {
-                    'uuid': null,
-                    'image': SHOW_CONF.preferredImageId,
-                    'scientificName': SHOW_CONF.scientificName,
-                    'largeImageUrl': SHOW_CONF.imageServiceBaseUrl + "image/" + SHOW_CONF.preferredImageId + "/large"
-                }
-                addOverviewImage(record)
-            }
+        var imageIds = SHOW_CONF.preferredImageId.split(',')
+        $.each(imageIds, function(idx, imageId) {
+            var prefUrl = SHOW_CONF.biocacheServiceUrl +
+                '/occurrences/search?q=images:' + imageId +
+                '&fq=-assertion_user_id:*&im=true&facet=off&pageSize=1&start=0';
+            $.ajax({
+                url: prefUrl,
+                dataType: 'json',
+                async: false,
+                success: function (data) {
+                    var record = {
+                        'uuid': null,
+                        'image': imageId,
+                        'scientificName': SHOW_CONF.scientificName,
+                        'largeImageUrl': SHOW_CONF.imageServiceBaseUrl + "/image/" + imageId + "/large"
+                    }
+                    if (data && data.totalRecords > 0) {
+                        record.uuid = data.occurrences[0].uuid;
+                    }
 
-        }).fail(function (jqxhr, textStatus, error) {
-            alert('Error loading overview image: ' + textStatus + ', ' + error);
-            hasPreferredImage = false;
-        });
+                    if (countPreferredImages == 0) {
+                        addOverviewImage(record)
+                    } else {
+                        addOverviewThumb(record, countPreferredImages)
+                    }
+                    countPreferredImages = countPreferredImages + 1
+                }
+            })
+        })
     }
 
     var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
         '&fq=multimedia:"Image"&fq=geospatial_kosher:true&fq=-user_assertions:50001&fq=-user_assertions:50005&im=true&facet=off&pageSize=5&start=0';
-    //console.log('Loading images from: ' + url);
 
     $.getJSON(url, function (data) {
         if (data && data.totalRecords > 0) {
-            addOverviewImages(data.occurrences, hasPreferredImage);
+            addOverviewImages(data.occurrences, countPreferredImages);
         }
-    }).fail(function (jqxhr, textStatus, error) {
-        alert('Error loading overview images: ' + textStatus + ', ' + error);
     }).always(function () {
         $('#gallerySpinner').hide();
     });
 }
 
-function addOverviewImages(imagesArray, hasPreferredImage) {
-
-    if (!hasPreferredImage) {
-        // no preferred image so use first in results set
-        addOverviewImage(imagesArray[0]);
-    }
-
-    for (j = 1; j < 5; j++) {
-        // load smaller thumb images
-        if (imagesArray.length > j) {
-            addOverviewThumb(imagesArray[j], j)
+function addOverviewImages(imagesArray, countPreferredImages) {
+    var addedImages = countPreferredImages
+    for (j = 0; j < imagesArray.length && addedImages < 5; j++) {
+        // load images
+        if (imagesArray.length > j && (SHOW_CONF.preferredImageId || SHOW_CONF.preferredImageId.indexOf(imagesArray[j].image) < 0) &&
+            SHOW_CONF.hiddenImages.indexOf(imagesArray[j].image) < 0) {
+            if (addedImages == 0) {
+                // first image is the overview image
+                addOverviewImage(imagesArray[j])
+            } else {
+                // additional images are thumbnails
+                addOverviewThumb(imagesArray[j], addedImages)
+            }
+            addedImages = addedImages + 1
         }
     }
 }
@@ -686,6 +693,8 @@ function addOverviewImage(overviewImageRecord) {
     $mainOverviewImage.parent().attr('data-footer', getImageFooterFromOccurrence(overviewImageRecord));
     $mainOverviewImage.parent().attr('data-image-id', overviewImageRecord.image);
     $mainOverviewImage.parent().attr('data-record-url', SHOW_CONF.biocacheUrl + '/occurrences/' + overviewImageRecord.uuid);
+
+    $mainOverviewImage.parent().parent().find('.hero-button').attr('onclick', 'event.stopImmediatePropagation(); heroImage("' + overviewImageRecord.image + '");')
 
     $('.mainOverviewImageInfo').html(getImageTitleFromOccurrence(overviewImageRecord));
 }
@@ -711,6 +720,7 @@ function generateOverviewThumb(occurrence, id) {
     $taxonSummaryThumbLink.attr('href', occurrence.largeImageUrl);
     $taxonSummaryThumbLink.attr('data-image-id', occurrence.image);
     $taxonSummaryThumbLink.attr('data-record-url', SHOW_CONF.biocacheUrl + '/occurrences/' + occurrence.uuid);
+    $taxonSummaryThumb.find('.hero-button').attr('onclick', 'event.stopImmediatePropagation(); heroImage("' + occurrence.image + '");')
     return $taxonSummaryThumb;
 }
 
@@ -727,13 +737,75 @@ function editWikipediaURL() {
     }
 }
 
-function heroImage(imageId, order) {
-    if (confirm(jQuery.i18n.prop("confirm.hero.image")) == true) {
-        var url = '/externalSite/addImage?guid=' + encodeURIComponent(SHOW_CONF.guid) + '&imageId=' +
-            encodeURIComponent(imageId) + '&name=' + encodeURIComponent(SHOW_CONF.scientificName) +
-            '&order=' + encodeURIComponent(order)
+function heroImage(imageId) {
+    // determine existing order
+    var originalOrder = 0   // not an existing preferred image
+    var imageIds = SHOW_CONF.preferredImageId.split(',')
+    if (SHOW_CONF.preferredImageId == '') {
+        imageIds = []
+    }
+    for (var i=0;i<imageIds.length;i++) {
+        if (imageIds[i] == imageId) {
+            originalOrder = i + 1
+        }
+    }
+
+    // is it an excluded imageId?
+    if (SHOW_CONF.hiddenImages.indexOf(imageId) >= 0) {
+        originalOrder = -1
+    }
+
+    var order = parseInt(prompt(jQuery.i18n.prop("confirm.hero.image"), originalOrder))
+
+    // Insert imageId at the position 1 to 5. Remove the image if `order` == 0. Add to exclusion list if -1.
+    if (order != originalOrder && order != null && order != undefined) {
+        // insert or remove from preferred images
+        var newImageIds = []
+        if (imageIds.length == 0 && order > 0) {
+            newImageIds.push(imageId)
+        } else {
+            for (var i = 0; i < imageIds.length; i++) {
+                if (order <= 0 && imageIds[i] != imageId) {
+                    // add image if it is not being removed
+                    newImageIds.push(imageIds[i])
+                } else if (order > 0 && order - 1 == i) {
+                    // insert image at requested position
+                    newImageIds.push(imageId)
+                    if (newImageIds.length < 5) {
+                        newImageIds.push(imageIds[i])
+                    }
+                } else if (order > 0 && imageId != imageIds[i]) {
+                    // insert image if it is not being moved
+                    newImageIds.push(imageIds[i])
+                }
+            }
+        }
+
+        // insert or remove from excluded images
+        var hiddenImages = SHOW_CONF.hiddenImages.split(',')
+        if (SHOW_CONF.hiddenImages == '') {
+            hiddenImages = []
+        }
+        var newHiddenImages = []
+        if (order == -1) {
+            // add to hidden images
+            newHiddenImages = [imageId]
+        }
+        for (var i = 0; i < hiddenImages.length; i++) {
+            // copy all hidden images but exclude imageId if it no longer hidden
+            if (order < 0 || hiddenImages[i] != imageId) {
+                newHiddenImages.push(hiddenImages[i])
+            }
+        }
+
+        var url = '/externalSite/setImages?guid=' + encodeURIComponent(SHOW_CONF.guid) + '&prefer=' +
+            encodeURIComponent(newImageIds.join(',')) + '&name=' + encodeURIComponent(SHOW_CONF.scientificName) +
+            '&hide=' + encodeURIComponent(newHiddenImages.join(','))
         $.getJSON(url, function (data) {
         })
+
+        SHOW_CONF.preferredImageId = newImageIds.join(',')
+        SHOW_CONF.hiddenImages = newHiddenImages.join(',')
     }
 }
 
@@ -744,8 +816,6 @@ function heroImage(imageId, order) {
  * @param start
  */
 function loadGalleryType(category, start) {
-
-    //console.log("Loading images category: " + category);
 
     var imageCategoryParams = {
         type: '&fq=type_status:*',
@@ -768,11 +838,7 @@ function loadGalleryType(category, start) {
         (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "") + '&fq=multimedia:"Image"&pageSize=' + pageSize +
         '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true';
 
-    //console.log("URL: " + url);
-
     $.getJSON(url, function (data) {
-
-        //console.log('Total images: ' + data.totalRecords + ", category: " + category);
 
         if (data && data.totalRecords > 0) {
             var br = "<br>";
@@ -783,8 +849,14 @@ function loadGalleryType(category, start) {
                 // clone template div & populate with metadata
                 var $taxonThumb = $('#taxon-thumb-template').clone();
                 $taxonThumb.removeClass('hide');
+                if (SHOW_CONF.hiddenImages.indexOf(el.image) >= 0) {
+                    $taxonThumb.addClass('hiddenImage');
+                    if (!SHOW_CONF.showHiddenImages) {
+                        $taxonThumb.hide();
+                    }
+                }
                 $taxonThumb.attr('id', 'thumb_' + category + i);
-                $taxonThumb.attr('href', el.largeImageUrl);
+                // $taxonThumb.attr('href', el.largeImageUrl);
                 $taxonThumb.find('img').attr('src', el.smallImageUrl);
                 // turned off 'onerror' below as IE11 hides all images
                 //$taxonThumb.find('img').attr('onerror',"$(this).parent().hide();"); // hide broken images
@@ -795,7 +867,7 @@ function loadGalleryType(category, start) {
                 $taxonThumb.attr('data-title', briefHtml);
                 $taxonThumb.find('.caption-detail').html(briefHtml);
 
-                $taxonThumb.find('.hero-button').attr('onclick', 'heroImage("' + el.image + '");')
+                $taxonThumb.find('.hero-button').attr('onclick', 'event.stopImmediatePropagation(); heroImage("' + el.image + '");')
 
                 // write to DOM
                 $taxonThumb.attr('data-footer', getImageFooterFromOccurrence(el));

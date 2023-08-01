@@ -100,6 +100,7 @@ a.expand-options {border-top: 1px solid #e3e3e3; display: block; padding-top: 2p
 .taxon-thumb img {height: 100%;}
 .thumb-caption {position: absolute; bottom: 0; left: 0; width: 100%; background:rgba(0,0,0,0.5); font-size:12px; line-height:14px; color:#fff; padding:4px 5px;}
 .caption-detail {display: none;}
+.hero-button {bottom: 140px;}
 .taxon-thumb:hover .caption-brief {display: none;}
 .taxon-thumb:hover .caption-detail {display: block;}
 

@@ -121,7 +121,7 @@ bie:
     baseURL: http://devt.ala.org.au:8080
     searchPath: /search
     index:
-        url: https://bie-ws.ala.org.au/ws
+        url: http://localhost:5173
 
 facets: idxtype,rank,speciesGroup,locatedInHubCountry,imageAvailable,conservationStatusAUS_s,conservationStatusACT_s,conservationStatusNSW_s,conservationStatusQLD_s,conservationStatusVIC_s,conservationStatusTAS_s,conservationStatusSA_s,conservationStatusWA_s,conservationStatusNT_s
 speciesParent: https://lists.ala.org.au/iconic-species
@@ -165,8 +165,6 @@ alerts:
     baseUrl: https://alerts.ala.org.au/ws/
 sightings:
     url: https://www.ala.org.au/home/record-a-sighting/
-eol:
-    lang: en
 defaultDecimalLatitude: -25.61
 defaultDecimalLongitude: 134.35
 defaultZoomLevel: 4
@@ -221,6 +219,7 @@ wikipedia:
     # https://en.wikipedia.org/api/rest_v1/#/Page%20content/get_page_html__title_
     url: https://en.wikipedia.org/api/rest_v1/page/html/
     lang: en
+imageServiceBaseUrl: https://images.ala.org.au/
 survey:
     indexPage: false
     searchPage: false
@@ -245,14 +244,6 @@ vernacularName:
         showHeader: false
         showLanguage: false
 external:
-    eol:
-        search:
-            # {0}= name to search for, {1} = filter string
-            # service: https://eol.org/api/search/1.0.json?q={0}&page=1&exact=true&filter_by_string={1}&cache_ttl=
-            service: https://eol.org/api/search/1.0.json?q={0}&page=1&exact=true&cache_ttl=
-        page:
-            # {0} = page id
-            service: https://eol.org/api/pages/1.0/{0,number,#0}.json?language={1}&images_per_page=0&videos_per_page=0&sounds_per_page=0&maps_per_page=0&texts_per_page=30&subjects=overview&licenses=all&details=true&references=true&vetted=0&cache_ttl=
     blacklist: file:./src/test/resources/test-blacklist.json
 ---
 #headerAndFooter:

@@ -46,14 +46,6 @@ class ExternalSiteController {
         render results
     }
 
-    def eol = {
-        eolRateLimiter.acquire()
-        def name = params.s
-        def filter = params.f
-        def results = externalSiteService.searchEol(name, filter)
-        render results as JSON
-    }
-
     def genbank = {
         genbankRateLimiter.acquire()
         def searchStrings = params.list("s")
@@ -202,18 +194,18 @@ class ExternalSiteController {
         }
     }
 
-    def addImage() {
+    def setImages() {
         def result = webService.get(grailsApplication.config.bie.index.url +
-                '/api/addImage?imageId=' + URLEncoder.encode(params.imageId, StandardCharsets.UTF_8) +
+                '/api/setImages?prefer=' + URLEncoder.encode(params.prefer, StandardCharsets.UTF_8) +
                 "&name=" + URLEncoder.encode(params.name, StandardCharsets.UTF_8) +
                 "&guid=" + URLEncoder.encode(params.guid, StandardCharsets.UTF_8) +
-                "&order=" + URLEncoder.encode(params.order, StandardCharsets.UTF_8))
+                "&hide=" + URLEncoder.encode(params.hide, StandardCharsets.UTF_8))
         render status: result.statusCode
     }
 
-    def addUrl() {
+    def setUrl() {
         def url = grailsApplication.config.bie.index.url +
-                '/api/addUrl?url=' + URLEncoder.encode(params.url, StandardCharsets.UTF_8) +
+                '/api/setUrl?url=' + URLEncoder.encode(params.url, StandardCharsets.UTF_8) +
                 "&name=" + URLEncoder.encode(params.name, StandardCharsets.UTF_8) +
                 "&guid=" + URLEncoder.encode(params.guid, StandardCharsets.UTF_8)
         def result = webService.get(url)
