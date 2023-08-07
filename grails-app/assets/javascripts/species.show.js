@@ -432,8 +432,8 @@ function showWikipediaData(data) {
     var tested = false
     var valid = true
     node.each(function (idx, item) {
-        // exclude the last item (typically ExternalLinks) include SECTIONS
-        if (valid && idx + 1 < dataLength && item.tagName == "SECTION") {
+        // include SECTIONS
+        if (item.tagName == "SECTION") {
             var $description = $('#descriptionTemplate').clone();
 
             // redirect if required
@@ -479,11 +479,16 @@ function showWikipediaData(data) {
             }
             $description.find(".title").html(title)
 
-            // remove infoboxes
+            // remove items
             $(item).find('.infobox').remove()
-
-            // remove tables
-            // $(item).find('table').remove()
+            $(item).find('.hatnote').remove()
+            $(item).find('.infobox.biota').remove()
+            $(item).find('.mw-editsection').remove()
+            $(item).find('.navbar').remove()
+            $(item).find('.reference').remove()
+            $(item).find('.error').remove()
+            $(item).find('.box-Unreferenced_section').remove()
+            $(item).find('.portalbox').remove()
 
             // fix relative links
             $description.find(".content").html(item.innerHTML.replaceAll('href="./', "href=\"" + "https://wikipedia.org/wiki/"))
@@ -492,11 +497,12 @@ function showWikipediaData(data) {
             $description.css({'display': 'block'});
 
             // set the source of this description
-            var sourceHtml = "<a href='https://wikipedia.org/wiki/" + encodeURI(SHOW_CONF.scientificName) + "' target='wikipedia'>Wikipedia</a>"
+            var sourceHtml = "<a href='https://wikipedia.org/wiki/" + encodeURI(SHOW_CONF.scientificName) + "' target='wikipedia'>Wikipedia</a>&nbsp;" + jQuery.i18n.prop("wikipedia.licence.comment")
             $description.find(".sourceText").html(sourceHtml);
 
             // hide unused properties of this description
-            $description.find(".rights").css({'display': 'none'});
+            var rights = "<a href='https://creativecommons.org/licenses/by-sa/4.0/'>" + jQuery.i18n.prop("wikipedia.licence.label") + "</a>"
+            $description.find(".rights").html(rights);
             $description.find(".provider").css({'display': 'none'});
 
             // add to the page

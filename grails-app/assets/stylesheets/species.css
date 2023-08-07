@@ -182,3 +182,89 @@ h5.json > a {
     max-width: 128px;
     max-height: 120px;
 }
+
+.content .navbox {
+    box-sizing: border-box;
+    border: 1px solid #a2a2a2;
+    width: 100%;
+    clear: both;
+    font-size: 88%;
+    text-align: center;
+    padding: 1px;
+    margin: 1em auto 0;
+}
+
+.content tr+tr>.navbox-list {
+    border-top: 2px solid #fdfdfd;
+}
+
+.content .navbox+.navbox-styles+.navbox {
+    margin-top: -1px;
+}
+
+.content .navbox-inner,.content  .navbox-subgroup {
+    width: 100%;
+}
+
+.content .navbox-title {
+    background-color: #ccc;
+}
+
+.content .navbox-title,.content  .navbox-abovebelow {
+    padding: 0.25em 1em;
+    line-height: 1.5em;
+    text-align: center;
+}
+
+.content .navbox-title .navbar {
+    float: left;
+    text-align: left;
+    margin-right: 0.5em;
+}
+
+.content .navbox .navbar {
+    display: block;
+    font-size: 100%;
+}
+
+.content .navbar ul {
+    display: inline-block;
+    white-space: nowrap;
+    line-height: inherit;
+}
+
+.content .hlist li {
+    margin: 0;
+    display: inline;
+}
+
+.content .nowraplinks a {
+    white-space: nowrap;
+}
+
+
+.content tr+tr>.navbox-abovebelow,.content  tr+tr>.navbox-group,.content  tr+tr>.navbox-image,.content  tr+tr>.navbox-list {
+    border-top: 2px solid #fdfdfd;
+}
+
+.content .navbox-abovebelow,.content  .navbox-group,.content  .navbox-subgroup .navbox-title {
+    background-color: #ddd;
+}
+
+.content .navbox-group,.content  .navbox-title,.content  .navbox-abovebelow {
+    padding: 0.25em 1em;
+    line-height: 1.5em;
+    text-align: center;
+}
+
+.content .navbox .hlist td dl,.content  .navbox .hlist td ol,.content  .navbox .hlist td ul,.content  .navbox td.hlist dl,.content  .navbox td.hlist ol,.content  .navbox td.hlist ul {
+    padding: 0.125em 0;
+}
+
+.content .navbox-subgroup .navbox-group,.content  .navbox-subgroup .navbox-abovebelow {
+    background-color: #e6e6e6;
+}
+
+.content .navbox-inner ul li::before {
+    content: '• ';
+}
