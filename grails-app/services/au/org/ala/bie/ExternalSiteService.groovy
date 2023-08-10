@@ -19,6 +19,7 @@ import au.org.ala.citation.BHLAdaptor
 import grails.config.Config
 import grails.converters.JSON
 import grails.core.support.GrailsConfigurationAware
+import grails.plugin.cache.Cacheable
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.grails.web.json.JSONObject
@@ -77,6 +78,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
      *
      * @return A map containing
      */
+    @Cacheable("bhlCache")
     def searchBhl(List<String> search, int start = 0, int rows = 10, boolean fulltext = false) {
         //https://www.biodiversitylibrary.org/docs/api3.html
         // searchtype - 'C' for a catalog-only search; 'F' for a catalog+full-text search
@@ -166,6 +168,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
         return url
     }
 
+    @Cacheable("austraitsCache")
     def fetchAusTraits(String url) {
         def json = webClientService.getJson(url)
         // return a JSON with a simple error key if there is an error with fetching it.
@@ -176,6 +179,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
         return json
     }
 
+    @Cacheable("wikiCache")
     def searchWikipedia(String name) {
         if (blacklist && blacklist.isBlacklisted(name, null, null)) {
             return ''

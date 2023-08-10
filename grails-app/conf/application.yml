@@ -8,6 +8,10 @@ grails:
             # Whether to translate GORM events into Reactor events
             # Disabled by default for performance reasons
             events: false
+    cache:
+        ehcache:
+            ehcacheXmlLocation: 'classpath:ala-bie-hub-ehcache.xml'
+            lockTimeout: 1000
 info:
     app:
         name: '@info.app.name@'
@@ -267,4 +271,11 @@ security:
         discoveryUri: https://auth-test.ala.org.au/cas/oidc/.well-known
         fallbackToLegacyBehaviour: true
 
-
+springcache:
+    caches:
+        wikiCache:
+            timeToLive: 600
+        austraitsCache:
+            timeToLive: 600
+        bhlCache:
+            timeToLive: 600

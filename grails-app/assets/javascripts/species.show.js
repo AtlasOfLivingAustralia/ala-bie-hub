@@ -515,6 +515,7 @@ function loadExternalSources() {
     // load Wikipedia content
     if (SHOW_CONF.wikiUrl != 'hide') {
         var name = SHOW_CONF.scientificName
+        name = name[1] + name.substring(1, name.length).toLowerCase()
         if (SHOW_CONF.wikiUrl.match("^http.*")) {
             name = SHOW_CONF.wikiUrl.replace(/^.*\//, "")
         }
