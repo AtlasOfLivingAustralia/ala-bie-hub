@@ -515,7 +515,7 @@ function loadExternalSources() {
     // load Wikipedia content
     if (SHOW_CONF.wikiUrl != 'hide') {
         var name = SHOW_CONF.scientificName
-        name = name[1] + name.substring(1, name.length).toLowerCase()
+        name = name[0] + name.substring(1, name.length).toLowerCase()
         if (SHOW_CONF.wikiUrl.match("^http.*")) {
             name = SHOW_CONF.wikiUrl.replace(/^.*\//, "")
         }
@@ -702,8 +702,23 @@ function addOverviewImage(overviewImageRecord) {
     $mainOverviewImage.parent().attr('data-record-url', SHOW_CONF.biocacheUrl + '/occurrences/' + overviewImageRecord.uuid);
 
     $mainOverviewImage.parent().parent().find('.hero-button').attr('onclick', 'event.stopImmediatePropagation(); heroImage("' + overviewImageRecord.image + '");')
+    setImageEditButtonText($mainOverviewImage.parent().parent().find('.hero-button'), overviewImageRecord.image)
 
     $('.mainOverviewImageInfo').html(getImageTitleFromOccurrence(overviewImageRecord));
+}
+
+function setImageEditButtonText(button, imageId) {
+    // set attribute for finding the button if edited
+    button.attr('imageId', imageId)
+
+    var imageOrder = getImageOrder(imageId)
+    if (imageOrder < 0) {
+        button.html('edit (hidden)')
+    } else if (imageOrder > 0) {
+        button.html('edit (' + imageOrder + ')')
+    } else {
+        button.html('edit')
+    }
 }
 
 function addOverviewThumb(record, i) {
@@ -728,6 +743,7 @@ function generateOverviewThumb(occurrence, id) {
     $taxonSummaryThumbLink.attr('data-image-id', occurrence.image);
     $taxonSummaryThumbLink.attr('data-record-url', SHOW_CONF.biocacheUrl + '/occurrences/' + occurrence.uuid);
     $taxonSummaryThumb.find('.hero-button').attr('onclick', 'event.stopImmediatePropagation(); heroImage("' + occurrence.image + '");')
+    setImageEditButtonText($taxonSummaryThumb.find('.hero-button'), occurrence.image)
     return $taxonSummaryThumb;
 }
 
@@ -744,8 +760,7 @@ function editWikipediaURL() {
     }
 }
 
-function heroImage(imageId) {
-    // determine existing order
+function getImageOrder(imageId) {
     var originalOrder = 0   // not an existing preferred image
     var imageIds = SHOW_CONF.preferredImageId.split(',')
     if (SHOW_CONF.preferredImageId == '') {
@@ -762,10 +777,21 @@ function heroImage(imageId) {
         originalOrder = -1
     }
 
+    return originalOrder
+}
+
+function heroImage(imageId) {
+    // determine existing order
+    var originalOrder = getImageOrder(imageId)
+    var imageIds = SHOW_CONF.preferredImageId.split(',')
+    if (SHOW_CONF.preferredImageId == '') {
+        imageIds = []
+    }
+
     var order = parseInt(prompt(jQuery.i18n.prop("confirm.hero.image"), originalOrder))
 
     // Insert imageId at the position 1 to 5. Remove the image if `order` == 0. Add to exclusion list if -1.
-    if (order != originalOrder && order != null && order != undefined) {
+    if (order != originalOrder && !isNaN(order)) {
         // insert or remove from preferred images
         var newImageIds = []
         if (imageIds.length == 0 && order > 0) {
@@ -813,6 +839,9 @@ function heroImage(imageId) {
 
         SHOW_CONF.preferredImageId = newImageIds.join(',')
         SHOW_CONF.hiddenImages = newHiddenImages.join(',')
+
+        // update edit button text
+        setImageEditButtonText($('button[imageId=' + imageId + ']'), imageId)
     }
 }
 
@@ -875,6 +904,7 @@ function loadGalleryType(category, start) {
                 $taxonThumb.find('.caption-detail').html(briefHtml);
 
                 $taxonThumb.find('.hero-button').attr('onclick', 'event.stopImmediatePropagation(); heroImage("' + el.image + '");')
+                setImageEditButtonText($taxonThumb.find('.hero-button'), el.image)
 
                 // write to DOM
                 $taxonThumb.attr('data-footer', getImageFooterFromOccurrence(el));

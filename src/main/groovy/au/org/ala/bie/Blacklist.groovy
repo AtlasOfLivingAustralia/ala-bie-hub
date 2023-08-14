@@ -56,9 +56,13 @@ class Blacklist {
      * @return The resulting blacklist
      */
     static  Blacklist read(URL url) {
-        def mapper = new ObjectMapper()
-        def blacklist =  mapper.readValue(url, Blacklist)
-        return blacklist
+        try {
+            def mapper = new ObjectMapper()
+            def blacklist = mapper.readValue(url, Blacklist)
+            return blacklist
+        } catch (Exception e) {
+            return null
+        }
     }
 
     static class Rule {
