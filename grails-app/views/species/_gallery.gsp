@@ -1,5 +1,5 @@
 <section class="tab-pane fade" id="gallery">
-    <button type="button" class="btn btn-sm btn-default" style="float:right" onclick="expandImageGallery(this); SHOW_CONF.showHiddenImages = true; $('.hiddenImage').show()"><g:message code="gallery.button.show.hidden"/></button>
+    <button type="button" class="btn btn-default" style="float:right" onclick="expandImageGallery(this); SHOW_CONF.showHiddenImages = true; $('.hiddenImage').show()"><g:message code="gallery.button.show.hidden"/></button>
     <g:each in="${["type","specimen","other","uncertain"]}" var="cat">
         <div id="cat_${cat}" class="hide image-section">
             <h2><g:message code="images.heading.${cat}" default="${cat}"/>&nbsp;

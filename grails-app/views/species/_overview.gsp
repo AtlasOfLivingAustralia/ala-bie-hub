@@ -61,7 +61,7 @@
             </g:if>
 
             <g:if test="${authService.userInRole('ROLE_ADMIN')}">
-                <button onclick="editWikipediaURL()">Edit Wikipedia URL</button>
+                <button class="button" onclick="editWikipediaURL()">Edit Wikipedia URL</button>
             </g:if>
             <div id="descriptiveContent"></div>
 

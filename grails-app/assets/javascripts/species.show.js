@@ -750,13 +750,13 @@ function generateOverviewThumb(occurrence, id) {
 function editWikipediaURL() {
     var defaultWiki = SHOW_CONF.wikiUrl
 
-    var url = prompt(jQuery.i18n.prop("edit.wiki.url"), defaultWiki);
+    var newUrl = prompt(jQuery.i18n.prop("edit.wiki.url"), defaultWiki);
 
-    if (url != defaultWiki && url != null && url != undefined) {
-        var url = '/externalSite/setUrl?guid=' + encodeURIComponent(SHOW_CONF.guid) + '&url=' + encodeURIComponent(url) + '&name=' + encodeURIComponent(SHOW_CONF.scientificName)
+    if (newUrl != defaultWiki && newUrl != null && newUrl != undefined) {
+        var url = '/externalSite/setUrl?guid=' + encodeURIComponent(SHOW_CONF.guid) + '&url=' + encodeURIComponent(newUrl) + '&name=' + encodeURIComponent(SHOW_CONF.scientificName)
         $.getJSON(url, function (data) {
         })
-        SHOW_CONF.wikiUrl = url
+        SHOW_CONF.wikiUrl = newUrl
     }
 }
 
