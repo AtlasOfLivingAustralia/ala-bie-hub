@@ -627,7 +627,8 @@ function loadOverviewImages() {
         $.each(imageIds, function(idx, imageId) {
             var prefUrl = SHOW_CONF.biocacheServiceUrl +
                 '/occurrences/search?q=images:' + imageId +
-                '&fq=-assertion_user_id:*&im=true&facet=off&pageSize=1&start=0';
+                '&im=true&facet=off&pageSize=1&start=0' +
+                (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "");
             $.ajax({
                 url: prefUrl,
                 dataType: 'json',
@@ -657,7 +658,8 @@ function loadOverviewImages() {
     var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
-        '&fq=multimedia:"Image"&fq=geospatial_kosher:true&fq=-user_assertions:50001&fq=-user_assertions:50005&im=true&facet=off&pageSize=5&start=0';
+        '&fq=multimedia:"Image"&im=true&facet=off&pageSize=5&start=0' +
+        (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "");
 
     $.getJSON(url, function (data) {
         if (data && data.totalRecords > 0) {
