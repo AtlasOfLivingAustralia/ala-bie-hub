@@ -13,6 +13,8 @@
  * rights and limitations under the License.
  */
 
+var IMAGE_FILTER = '&fq=geospatial_kosher:true&fq=-user_assertions:50001&fq=-user_assertions:50005'
+
 function showSpeciesPage(traitsTabSet) {
     //console.log("Starting show species page");
 
@@ -626,9 +628,8 @@ function loadOverviewImages() {
         var imageIds = SHOW_CONF.preferredImageId.split(',')
         $.each(imageIds, function(idx, imageId) {
             var prefUrl = SHOW_CONF.biocacheServiceUrl +
-                '/occurrences/search?q=images:' + imageId +
-                '&im=true&facet=off&pageSize=1&start=0' +
-                (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "");
+                '/occurrences/search?q=images:' + imageId + IMAGE_FILTER +
+                '&im=true&facet=off&pageSize=1&start=0';
             $.ajax({
                 url: prefUrl,
                 dataType: 'json',
@@ -658,8 +659,7 @@ function loadOverviewImages() {
     var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
-        '&fq=multimedia:"Image"&im=true&facet=off&pageSize=5&start=0' +
-        (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "");
+        '&fq=multimedia:"Image"&im=true&facet=off&pageSize=5&start=0' + IMAGE_FILTER;
 
     $.getJSON(url, function (data) {
         if (data && data.totalRecords > 0) {
@@ -873,8 +873,8 @@ function loadGalleryType(category, start) {
     var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
-        (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "") + '&fq=multimedia:"Image"&pageSize=' + pageSize +
-        '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true';
+        '&fq=multimedia:"Image"&pageSize=' + pageSize +
+        '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true' + IMAGE_FILTER;
 
     $.getJSON(url, function (data) {
 
@@ -883,36 +883,40 @@ function loadGalleryType(category, start) {
             var $categoryTmpl = $('#cat_' + category);
             $categoryTmpl.removeClass('hide');
 
+            var count = 0
             $.each(data.occurrences, function (i, el) {
-                // clone template div & populate with metadata
-                var $taxonThumb = $('#taxon-thumb-template').clone();
-                $taxonThumb.removeClass('hide');
-                if (SHOW_CONF.hiddenImages.indexOf(el.image) >= 0) {
-                    $taxonThumb.addClass('hiddenImage');
-                    if (!SHOW_CONF.showHiddenImages) {
-                        $taxonThumb.hide();
+                $.each(el.images, function (j, imageId) {
+                    count = count + 1
+                    // clone template div & populate with metadata
+                    var $taxonThumb = $('#taxon-thumb-template').clone();
+                    $taxonThumb.removeClass('hide');
+                    if (SHOW_CONF.hiddenImages.indexOf(imageId) >= 0) {
+                        $taxonThumb.addClass('hiddenImage');
+                        if (!SHOW_CONF.showHiddenImages) {
+                            $taxonThumb.hide();
+                        }
                     }
-                }
-                $taxonThumb.attr('id', 'thumb_' + category + i);
-                // $taxonThumb.attr('href', el.largeImageUrl);
-                $taxonThumb.find('img').attr('src', el.smallImageUrl);
-                // turned off 'onerror' below as IE11 hides all images
-                //$taxonThumb.find('img').attr('onerror',"$(this).parent().hide();"); // hide broken images
+                    $taxonThumb.attr('id', 'thumb_' + category + count);
+                    // $taxonThumb.attr('href', el.largeImageUrl);
+                    $taxonThumb.find('img').attr('src', el.smallImageUrl.replace(el.image, imageId));
+                    // turned off 'onerror' below as IE11 hides all images
+                    //$taxonThumb.find('img').attr('onerror',"$(this).parent().hide();"); // hide broken images
 
-                // brief metadata
-                var briefHtml = getImageTitleFromOccurrence(el);
-                $taxonThumb.find('.caption-brief').html(briefHtml);
-                $taxonThumb.attr('data-title', briefHtml);
-                $taxonThumb.find('.caption-detail').html(briefHtml);
+                    // brief metadata
+                    var briefHtml = getImageTitleFromOccurrence(el);
+                    $taxonThumb.find('.caption-brief').html(briefHtml);
+                    $taxonThumb.attr('data-title', briefHtml);
+                    $taxonThumb.find('.caption-detail').html(briefHtml);
 
-                $taxonThumb.find('.hero-button').attr('onclick', 'event.stopImmediatePropagation(); heroImage("' + el.image + '");')
-                setImageEditButtonText($taxonThumb.find('.hero-button'), el.image)
+                    $taxonThumb.find('.hero-button').attr('onclick', 'event.stopImmediatePropagation(); heroImage("' + imageId + '");')
+                    setImageEditButtonText($taxonThumb.find('.hero-button'), imageId)
 
-                // write to DOM
-                $taxonThumb.attr('data-footer', getImageFooterFromOccurrence(el));
-                $taxonThumb.attr('data-image-id', el.image);
-                $taxonThumb.attr('data-record-url', SHOW_CONF.biocacheUrl + '/occurrences/' + el.uuid);
-                $categoryTmpl.find('.taxon-gallery').append($taxonThumb);
+                    // write to DOM
+                    $taxonThumb.attr('data-footer', getImageFooterFromOccurrence(el));
+                    $taxonThumb.attr('data-image-id', imageId);
+                    $taxonThumb.attr('data-record-url', SHOW_CONF.biocacheUrl + '/occurrences/' + el.uuid);
+                    $categoryTmpl.find('.taxon-gallery').append($taxonThumb);
+                });
             });
 
             $('.loadMore.' + category).remove(); // remove 'load more images' button that was just clicked
