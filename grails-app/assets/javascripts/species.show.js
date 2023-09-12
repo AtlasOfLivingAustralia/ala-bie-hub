@@ -492,6 +492,13 @@ function showWikipediaData(data, testPage) {
             $(item).find('.box-Unreferenced_section').remove()
             $(item).find('.portalbox').remove()
 
+            // keep only 'taxon identifiers' table, if it is present
+            var newItems = $(item).find('[aria-labelledby="Taxon_identifiers"]')
+            if (newItems && newItems.length > 0) {
+                item = document.createElement("div")
+                item.append(newItems[0])
+            }
+
             // fix relative links
             $description.find(".content").html(item.innerHTML.replaceAll('href="./', "href=\"" + "https://wikipedia.org/wiki/"))
 
