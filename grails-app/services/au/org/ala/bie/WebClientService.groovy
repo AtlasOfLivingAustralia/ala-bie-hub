@@ -28,12 +28,15 @@ class WebClientService implements InitializingBean {
     }
 
     def get(String url){
-        get(url,false)
+        get(url,false, [:])
     }
-    def get(String url, boolean throwError) {
+    def get(String url, boolean throwError, Map<String, String> headers) {
         log.debug "GET on " + url
         def conn = new URL(url).openConnection()
         try {
+            headers.each {
+                conn.setRequestProperty(it.key, it.value)
+            }
             conn.setConnectTimeout(10000)
             conn.setReadTimeout(50000)
             return conn.content.text

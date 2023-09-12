@@ -51,19 +51,21 @@ class SpeciesController implements GrailsConfigurationAware {
         def searchResults = []
         try {
             def googleMapsKey = grailsApplication.config.googleMapsApiKey
-            def url = "https://maps.googleapis.com/maps/api/geocode/json?key=${googleMapsKey}&address=" +
-                    URLEncoder.encode(params.q, 'UTF-8')
-            def response = new URL(url).text
-            def js = new JsonSlurper()
-            def json = js.parseText(response)
+            if (googleMapsKey != '<key value>') {
+                def url = "https://maps.googleapis.com/maps/api/geocode/json?key=${googleMapsKey}&address=" +
+                        URLEncoder.encode(params.q, 'UTF-8')
+                def response = new URL(url).text
+                def js = new JsonSlurper()
+                def json = js.parseText(response)
 
-            if(json.results){
-                json.results.each {
-                    searchResults << [
-                            name: it.formatted_address,
-                            latitude: it.geometry.location.lat,
-                            longitude: it.geometry.location.lng
-                    ]
+                if (json.results) {
+                    json.results.each {
+                        searchResults << [
+                                name     : it.formatted_address,
+                                latitude : it.geometry.location.lat,
+                                longitude: it.geometry.location.lng
+                        ]
+                    }
                 }
             }
         } catch (Exception e) {
@@ -169,6 +171,13 @@ class SpeciesController implements GrailsConfigurationAware {
                 // Sort synonyms by date. Attempt to get year from nameComplete if namePublishedInYear is missing
                 taxonDetails.synonyms = taxonDetails.synonyms.sort { (it.namePublishedInYear ?: it.nameComplete.replaceAll('[^0-9]*', '')) + ' ' + it.nameComplete }.reverse()
             }
+            def taxonHierarchy = bieService.getClassificationForGuid(taxonDetails.taxonConcept.guid)
+            taxonDetails.classification.put("kingdom",taxonHierarchy.find({it.rank == "kingdom"})?.scientificName)
+            taxonDetails.classification.put("phylum",taxonHierarchy.find({it.rank == "phylum"})?.scientificName)
+            taxonDetails.classification.put("class",taxonHierarchy.find({it.rank == "class"})?.scientificName)
+            taxonDetails.classification.put("order",taxonHierarchy.find({it.rank == "order"})?.scientificName)
+            taxonDetails.classification.put("family",taxonHierarchy.find({it.rank == "family"})?.scientificName)
+
             render(view: 'show', model: [
                     tc: taxonDetails,
                     statusRegionMap: utilityService.getStatusRegionCodes(),
@@ -180,7 +189,7 @@ class SpeciesController implements GrailsConfigurationAware {
                     userName: "",
                     isReadOnly: grailsApplication.config.ranking.readonly,
                     sortCommonNameSources: utilityService.getNamesAsSortedMap(taxonDetails.commonNames),
-                    taxonHierarchy: bieService.getClassificationForGuid(taxonDetails.taxonConcept.guid),
+                    taxonHierarchy: taxonHierarchy,
                     childConcepts: bieService.getChildConceptsForGuid(taxonDetails.taxonConcept.guid),
                     speciesList: bieService.getSpeciesList(taxonDetails.taxonConcept?.guid?:guid)
             ])

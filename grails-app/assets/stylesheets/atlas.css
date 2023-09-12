@@ -86,7 +86,7 @@ a.expand-options {border-top: 1px solid #e3e3e3; display: block; padding-top: 2p
 #leafletMap {height: 550px; border-radius: 4px 4px 0 0; overflow: hidden; background-color: #ebebeb;}
 .map-buttons {border-top: 1px solid #fff; border-radius: 0 0 4px 4px; overflow: hidden;}
 .map-buttons a.btn-lg {width: 50%; border:0; border-left: 1px solid #fff; float: left; border-radius: 0; font-size: 15px; line-height: 18px;}
-.map-buttons a.btn-lg:first-child {border-left: 0;}
+.map-buttons a.btn-lg:first-child {border-left: 0; text-wrap: wrap;}
 
 /* Taxon actions */
 .panel-actions .panel-body {padding-bottom: 4px; padding-top: 19px; -webkit-columns: 150px 2; -moz-columns: 150px 2; columns: 150px 2;}
@@ -100,6 +100,7 @@ a.expand-options {border-top: 1px solid #e3e3e3; display: block; padding-top: 2p
 .taxon-thumb img {height: 100%;}
 .thumb-caption {position: absolute; bottom: 0; left: 0; width: 100%; background:rgba(0,0,0,0.5); font-size:12px; line-height:14px; color:#fff; padding:4px 5px;}
 .caption-detail {display: none;}
+.hero-button {bottom: 140px;}
 .taxon-thumb:hover .caption-brief {display: none;}
 .taxon-thumb:hover .caption-detail {display: block;}
 
@@ -236,3 +237,23 @@ html, body {height:100%;}
 	opacity: 0.0;
 }
 
+a.copyLink {
+	border-color: black;
+	color: black
+}
+
+#copy-al4r {
+	border-color: black;
+}
+
+.wikitable {
+	background-color: #f8f9fa;
+	color: #202122;
+	margin: 1em 0;
+	border: 1px solid #a2a9b1;
+}
+
+.wikitable > tr > th, .wikitable > tr > td, .wikitable > * > tr > th, .wikitable > * > tr > td {
+	border: 1px solid #a2a9b1;
+	padding: 0.2em 0.4em;
+}

@@ -94,9 +94,28 @@
         </g:if>
         <div class="header-inner">
             <h5 class="pull-right json">
-                <a href="${jsonLink}" target="data"
-                   title="${message(code:"show.view.json.title")}" class="btn btn-sm btn-default active"
-                   data-toggle="tooltip" data-placement="bottom"><g:message code="show.json" /></a>
+                <a href="#CopyLink" data-toggle="modal" role="button" class="tooltips btn copyLink" title="${g.message(code:"list.copylinks.dlg.copybutton.title")}"><i class="fa fa-file-code-o" aria-hidden="true"></i>&nbsp;&nbsp;<g:message code="show.api" default="API"/></a>
+                <div id="CopyLink" class="modal fade" role="dialog" tabindex="-1">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h3><g:message code="list.copylinks.dlg.title" default="Copy the JSON web service URL"/></h3>
+                            </div>
+                            <div class="modal-body">
+                                <div class="col-sm-12 input-group">
+                                    <g:set var="jsonurl" value="${jsonLink}"/>
+                                    <input type="text" class="form-control" value=${jsonurl} id="al4rcode" readonly/>
+                                    <span class="input-group-btn">
+                                        <button class="form-control btn" id="copy-al4r">
+                                            <g:message code="list.copylinks.dlg.copybutton.text" default="{JSON}"/>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </h5>
             <h1>${raw(sciNameFormatted)}</h1>
             <h5 class="inline-head taxon-rank">${tc.taxonConcept.rankString}</h5>
@@ -142,6 +161,9 @@
 <div id="taxon-summary-thumb-template"
      class="taxon-summary-thumb hide"
      style="">
+    <g:if test="${authService.userInRole('ROLE_ADMIN')}">
+        <button class="thumb-caption hero-button" style="bottom: 175px;z-index:1000">edit</button>
+    </g:if>
     <a data-toggle="lightbox"
        data-gallery="taxon-summary-gallery"
        data-parent=".taxon-summary-gallery"
@@ -152,19 +174,25 @@
 </div>
 
 <!-- thumbnail template -->
-<a id="taxon-thumb-template"
-   class="taxon-thumb hide"
-   data-toggle="lightbox"
-   data-gallery="main-image-gallery"
-   data-title=""
-   data-footer=""
-   href="">
-    <img src="" alt="">
+<div id="taxon-thumb-template" class="taxon-thumb hide">
+    <g:if test="${authService.userInRole('ROLE_ADMIN')}">
+        <button class="thumb-caption hero-button">edit</button>
+    </g:if>
 
-    <div class="thumb-caption caption-brief"></div>
+    <a
+       data-toggle="lightbox"
+       data-gallery="main-image-gallery"
+       data-title=""
+       data-footer=""
+       href="">
+        <img src="" alt="">
 
-    <div class="thumb-caption caption-detail"></div>
-</a>
+
+        <div class="thumb-caption caption-brief"></div>
+
+        <div class="thumb-caption caption-detail"></div>
+    </a>
+</div>
 
 <!-- description template -->
 <div id="descriptionTemplate" class="panel panel-default panel-description" style="display:none;">
@@ -385,8 +413,13 @@
         taxonRankID:        "${tc?.taxonConcept?.rankID ?: ''}",
         synonyms:           [ <g:each in="${synonyms}" var="syn" status="idx">"${syn.encodeAsJavaScript()}"<g:if test="${idx < synonyms.size() - 1}">, </g:if></g:each> ],
         family:             "${tc?.classification?.family ?: ''}",
+        order:             "${tc?.classification?.order ?: ''}",
+        class:             "${tc?.classification?.class ?: ''}",
+        phylum:             "${tc?.classification?.phylum ?: ''}",
         kingdom:            "${tc?.classification?.kingdom ?: ''}",
         preferredImageId:   "${tc?.imageIdentifier?: ''}",
+        hiddenImages    :   "${tc?.hiddenImages?: ''}",
+        wikiUrl:            "${tc?.wikiUrl}",
         citizenSciUrl:      "${citizenSciUrl}",
         serverName:         "${grailsApplication.config.grails.serverURL}",
         speciesListUrl:     "${grailsApplication.config.speciesList.baseURL}",
@@ -394,11 +427,9 @@
         bieUrl:             "${grailsApplication.config.bie.baseURL}",
         alertsUrl:          "${grailsApplication.config.alerts.baseUrl}",
         remoteUser:         "${request.remoteUser ?: ''}",
-        eolUrl:             "${raw(createLink(controller: 'externalSite', action: 'eol', params: [s: tc?.taxonConcept?.nameString ?: '', f:tc?.classification?.class?:tc?.classification?.phylum?:'']))}",
         genbankUrl:         "${raw(createLink(controller: 'externalSite', action: 'genbank', params: [s: tc?.taxonConcept?.nameString ?: '']))}",
         scholarUrl:         "${raw(createLink(controller: 'externalSite', action: 'scholar', params: [s: tc?.taxonConcept?.nameString ?: '']))}",
         soundUrl:           "${raw(createLink(controller: 'species', action: 'soundSearch', params: [id: guid]))}",
-        eolLanguage:        "${grailsApplication.config.eol.lang}",
         defaultDecimalLatitude: ${grailsApplication.config.defaultDecimalLatitude},
         defaultDecimalLongitude: ${grailsApplication.config.defaultDecimalLongitude},
         defaultZoomLevel: ${grailsApplication.config.defaultZoomLevel},
@@ -428,12 +459,12 @@
         addPreferenceButton: ${imageClient.checkAllowableEditRole()},
         mapOutline: ${grailsApplication.config.map.outline ?: 'false'},
         mapEnvOptions: "${grailsApplication.config.map.env?.options?:'color:' + grailsApplication.config.map.records.colour+ ';name:circle;size:4;opacity:0.8'}",
-        troveUrl: "${raw(grailsApplication.config.literature?.trove?.api + '/result?zone=book&encoding=json&key=' + grailsApplication.config.literature?.trove?.apikey )}",
         bhlUrl: "${raw(createLink(controller: 'externalSite', action: 'bhl'))}",
         ausTraitsSummaryUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsSummary', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
         ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
         ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}",
-        ausTraitsSourceUrl:"${grailsApplication.config.ausTraits.sourceURL}"
+        ausTraitsSourceUrl:"${grailsApplication.config.ausTraits.sourceURL}",
+        showHiddenImages: false
     };
 
     $(function(){

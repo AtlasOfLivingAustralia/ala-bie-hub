@@ -1,9 +1,14 @@
+<g:set bean="authService" var="authService"></g:set>
+
 <section class="tab-pane fade in active" id="overview">
     <div class="row taxon-row">
         <div class="col-md-6">
 
             <div class="taxon-summary-gallery">
                 <div class="main-img hide">
+                    <g:if test="${authService.userInRole('ROLE_ADMIN')}">
+                        <button class="thumb-caption hero-button" style="bottom: 20px;">edit</button>
+                    </g:if>
                     <a class="lightbox-img"
                        data-toggle="lightbox"
                        data-gallery="taxon-summary-gallery"
@@ -55,6 +60,9 @@
                 </div>
             </g:if>
 
+            <g:if test="${authService.userInRole('ROLE_ADMIN')}">
+                <button class="button" onclick="editWikipediaURL()">Edit Wikipedia URL</button>
+            </g:if>
             <div id="descriptiveContent"></div>
 
             <div id="sounds" style="padding-bottom:20px;"></div>

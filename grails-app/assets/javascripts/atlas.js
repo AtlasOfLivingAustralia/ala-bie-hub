@@ -5,14 +5,14 @@ $(document).ready(function() {
 	var imageId, attribution, recordUrl;
 	$(".wrap").css("margin-bottom", -footerHeight);
 	$(".push").height(footerHeight);
-	
+
 	// Tabs init
 	var hash = window.location.hash;
 	hash && $(".taxon-tabs a[href='" + hash + "']").tab("show");
 	$(".taxon-tabs a").click(function (e) {
 		window.location.hash = this.hash;
 	});
-	
+
 	// Links to tabs
 	$(".tab-link").click(function (e) {
 		e.preventDefault();
@@ -22,7 +22,7 @@ $(document).ready(function() {
 	})
 
 	// Lightbox
-	$(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) { 
+	$(document).delegate('*[data-toggle="lightbox"]', 'click', function(event) {
 		event.preventDefault();
 		switch (SHOW_CONF.imageDialog){
 			case 'MODAL':
@@ -84,4 +84,37 @@ $(document).ready(function() {
 		})
 		$(this).prev(".collapse").collapse("toggle");
 	});
+
+	$('#copy-al4r').on('click', function() {
+		var input = document.querySelector('#al4rcode');
+		if (navigator.clipboard && window.isSecureContext) {
+			// navigator clipboard api method'
+			navigator.clipboard.writeText(input.value)
+				.then(() => {
+					$('#copy-al4r').qtip({
+						content: jQuery.i18n.prop('list.copylinks.tooltip.copied'),
+						show: true,
+						hide: { when: { event: 'mouseout'} }
+					})})
+				.catch((error) => { alert(jQuery.i18n.prop('list.copylinks.alert.failed') + error) })
+		} else {
+			alert("Copying to clipboard requires a secure HTTPS connection. Value copied to clipboard is: " + input.value);
+		}
+
+	});
+
+	$('#copy-al4r').on('mouseleave', function() {
+		$('#copy-al4r').qtip({
+			content: jQuery.i18n.prop('list.copylinks.tooltip.copytoclipboard'),
+			show: {when: {event: 'mouseover'}},
+			style: {
+				classes: 'ui-tooltip-rounded ui-tooltip-shadow'
+			},
+			position: {
+				target: 'mouse',
+				my: 'bottom center',
+				adjust: {x: -6, y: -10}
+			}
+		})
+	})
 });

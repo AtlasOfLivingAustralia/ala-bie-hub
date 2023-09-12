@@ -19,6 +19,7 @@ import au.org.ala.citation.BHLAdaptor
 import grails.config.Config
 import grails.converters.JSON
 import grails.core.support.GrailsConfigurationAware
+import grails.plugin.cache.Cacheable
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.grails.web.json.JSONObject
@@ -29,7 +30,6 @@ import org.jsoup.Jsoup
 import org.owasp.html.HtmlPolicyBuilder
 import org.owasp.html.PolicyFactory
 
-import java.text.MessageFormat
 import java.util.regex.Pattern
 
 /**
@@ -44,23 +44,13 @@ class ExternalSiteService implements GrailsConfigurationAware {
     int bhlPageSize
     /** Extend BHL information with DOIs and citations */
     boolean bhlExtend
-    /** The EoL search service patterm */
-    String eolSearchService
-    /** The EoL page service pattern */
-    String eolPageService
-    /** Sanitize the EoL pages */
-    boolean eolSanitise
-    /** Accept these languages for the EoL pages */
-    String eolLanguage
     /** The file containing elements to update */
     String updateFile
-    /** Allowed elements for HTML */
-    String allowedElements
-    /** Allowed attributes for HTML */
-    String allowedAttributes
     /** Blacklist for external sites */
     Blacklist blacklist
     String ausTraitsBase
+    String wikipediaUrl
+    String wikipediaLang
 
     def webClientService
 
@@ -70,16 +60,12 @@ class ExternalSiteService implements GrailsConfigurationAware {
         bhlApiKey = config.getProperty("literature.bhl.apikey")
         bhlPageSize = config.getProperty("literature.bhl.pageSize", Integer)
         bhlExtend = config.getProperty("literature.bhl.extend", Boolean)
-        eolSearchService = config.getProperty("external.eol.search.service")
-        eolPageService = config.getProperty("external.eol.page.service")
-        eolSanitise =  config.getProperty("eol.sanitise", Boolean, false)
-        eolLanguage = config.getProperty("eol.lang")
         updateFile = config.getProperty("update.file.location")
-        allowedElements = config.getProperty("eol.html.allowedElements")
-        allowedAttributes = config.getProperty("eol.html.allowAttributes")
         def blacklistURL = config.getProperty("external.blacklist", URL)
         blacklist = blacklistURL ? Blacklist.read(blacklistURL) : null
         ausTraitsBase = config.getProperty("ausTraits.baseURL")
+        wikipediaUrl = config.getProperty("wikipedia.url")
+        wikipediaLang = config.getProperty("wikipedia.lang")
     }
 
     /**
@@ -92,6 +78,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
      *
      * @return A map containing
      */
+    @Cacheable("bhlCache")
     def searchBhl(List<String> search, int start = 0, int rows = 10, boolean fulltext = false) {
         //https://www.biodiversitylibrary.org/docs/api3.html
         // searchtype - 'C' for a catalog-only search; 'F' for a catalog+full-text search
@@ -181,6 +168,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
         return url
     }
 
+    @Cacheable("austraitsCache")
     def fetchAusTraits(String url) {
         def json = webClientService.getJson(url)
         // return a JSON with a simple error key if there is an error with fetching it.
@@ -191,147 +179,17 @@ class ExternalSiteService implements GrailsConfigurationAware {
         return json
     }
 
-    def searchEol(String name, String filter) {
-        def nameEncoded = URLEncoder.encode(name, 'UTF-8')
-        def filterString  = URLEncoder.encode(filter ?: '', 'UTF-8')
-        def search =  MessageFormat.format(eolSearchService, nameEncoded, filterString)
-        log.debug "Initial EOL url = ${search}"
-        def js = new JsonSlurper()
-        def jsonText = new URL(search).text
-        def json = js.parseText(jsonText ?: '{}')
-        def result = [:]
-
-        //get first pageId
-        if (json.results) {
-            def match = json.results.find { it.title.equalsIgnoreCase(name) }
-            if (match) {
-                def pageId = match.id
-                def page = MessageFormat.format(eolPageService, pageId, eolLanguage ?: "")
-                log.debug("EOL page url = ${page}")
-                def pageText = new URL(page).text ?: '{}'
-                pageText = updateEolOutput(pageText)
-                pageText = eolSanitise ? sanitiseEolOutput(pageText) : pageText
-                // Select on language
-                result = js.parseText(pageText)
-                if (result?.taxonConcept) {
-                    def dataObjects = result?.taxonConcept?.dataObjects ?: []
-                    if (eolLanguage) {
-                        dataObjects = dataObjects.findAll { dto -> dto.language && dto.language == eolLanguage && isContentInLanguage(dto.description , eolLanguage) }
-                    }
-                    if (blacklist) {
-                        dataObjects = dataObjects.findAll { dto -> !blacklist.isBlacklisted(name, dto.source, dto.title) }
-                    }
-                    result.taxonConcept.dataObjects = dataObjects
-                }
-            }
-        }
-        return result
-    }
-    /**
-     *
-     * @param content
-     * @param language
-     * @return boolean
-     */
-    Boolean isContentInLanguage(String content, String language){
-        LanguageDetector detector = new OptimaizeLangDetector().loadModels()
-        // remove any html tags to prevent mis-detection
-        def cleanedContent  = Jsoup.parse(content).text()
-        // detectionList contains the list of lang codes detected on each segment of the text content
-        def detectionList = []
-        def isoLangCode = ""
-         /**
-          * The detector doesn't always the detect the language in the content as expected.
-          * In case of mixed content e.g. mostly Korean with some English, if the detector detects the English with higher confidence than Korean, English will be returned as the result.
-          * Since there isn't a native method of detecting the percentage of content per language in a given text string, we need to segment the text content to sensible chunks.
-         */
-        if(cleanedContent.length() >= 10){
-            for(int i = 0; i < cleanedContent.length() - 10; i += 10) {
-                def subStr = cleanedContent.substring(i, i+10)
-                def ll = detector.detect(subStr).getLanguage()
-                detectionList.add(ll)
-            }
-            isoLangCode = detectionList.countBy { it }.max { it.value }.key
-        } else{
-            isoLangCode = detector.detect(cleanedContent).getLanguage()
-        }
-        return isoLangCode == language
-    }
-
-    /**
-     * Update EOL content before rendering, rules specified in an external file.
-     */
-    String updateEolOutput(String text){
-        if (updateFile != null && new File(updateFile).exists()){
-            new File(updateFile).eachLine { line ->
-                if (!line.startsWith("#")) {
-                    String[] valuePairs = line.split('--')
-                    String replacement = valuePairs.length==1 ? "''" :valuePairs[1]
-                    text = text.replace(valuePairs[0], replacement)
-                }
-            }
-        }
-        text
-    }
-
-    /**
-     * Sanitise EOL response with defined policy.
-     * @param text EOL response
-     * @return processed EOL response
-     */
-    String sanitiseEolOutput(String text) {
-        def json = new JsonSlurper().parseText(text)
-
-        if(json.taxonConcept?.dataObjects){
-            PolicyFactory policy = getPolicyFactory()
-            json.taxonConcept.dataObjects.each { dataObject ->
-                String desc = dataObject.description
-                String processedDesc = sanitiseBodyText(policy, desc)
-                dataObject.description = processedDesc
-            }
-        }
-        JsonOutput.toJson(json)
-    }
-
-    /**
-     * Utility to sanitise HTML text and only allow links to be kept, removing any
-     * other HTML markup.
-     * @param policy PolicyFactory
-     * @param input HTML String
-     * @return output sanitized HTML String
-     */
-    String sanitiseBodyText(PolicyFactory policy, String input) {
-        // Sanitize the HTML based on given policy
-        String sanitisedHtml = policy.sanitize(input)
-        sanitisedHtml
-    }
-
-    private PolicyFactory getPolicyFactory(){
-        HtmlPolicyBuilder builder = new HtmlPolicyBuilder()
-                .allowStandardUrlProtocols()
-                .requireRelNofollowOnLinks()
-
-        if (allowedElements){
-            String[] elements = allowedElements.split(",")
-            elements.each {
-                builder.allowElements(it)
-            }
+    @Cacheable("wikiCache")
+    def searchWikipedia(String name) {
+        if (blacklist && blacklist.isBlacklisted(name, null, null)) {
+            return ''
         }
 
-        if (allowedAttributes){
-            String[] attributes = allowedAttributes.split(",")
-            attributes.each { attribute ->
-                String[] values = attribute.split (";")
-                if (values.length == 2){
-                    builder.allowAttributes(values[0]).onElements(values[1])
-                } else {
-                    builder.allowAttributes(values[0]).matching(Pattern.compile(values[2], Pattern.CASE_INSENSITIVE)).onElements(values[1])
-                }
+        String url = wikipediaUrl +  URLEncoder.encode(name.replace(' ', '_'), 'UTF-8')
 
-            }
-        }
+        var header = ["Accept-Language": wikipediaLang]
 
-        builder.toFactory()
+        webClientService.get(url, false, header)
     }
 
 }
