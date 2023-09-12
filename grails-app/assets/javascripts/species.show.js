@@ -425,13 +425,13 @@ function loadIndigenousData() {
     });
 }
 
-function showWikipediaData(data) {
+function showWikipediaData(data, testPage) {
     var node = $(data)
     node.find('[role="note"]').remove()
 
     // show wikipedia data
     var dataLength = $(data).length
-    var tested = false
+    var tested = !testPage
     var valid = true
     node.each(function (idx, item) {
         // include SECTIONS
@@ -444,7 +444,7 @@ function showWikipediaData(data) {
                 var redirectItem = redirect[0].href.replace(/^.*\//, "")
                 var url = "/externalSite/wikipedia?name=" + encodeURI(redirectItem)
                 $.ajax({url: url}).done(function (data) {
-                    showWikipediaData(data)
+                    showWikipediaData(data, testPage)
                 });
                 return
             }
@@ -520,11 +520,17 @@ function loadExternalSources() {
         name = name[0] + name.substring(1, name.length).toLowerCase()
         if (SHOW_CONF.wikiUrl.match("^http.*")) {
             name = SHOW_CONF.wikiUrl.replace(/^.*\//, "")
+
+            var url = "/externalSite/wikipedia?name=" + encodeURI(name)
+            $.ajax({url: url}).done(function (data) {
+                showWikipediaData(data, false)
+            });
+        } else {
+            var url = "/externalSite/wikipedia?name=" + encodeURI(name)
+            $.ajax({url: url}).done(function (data) {
+                showWikipediaData(data, true)
+            });
         }
-        var url = "/externalSite/wikipedia?name=" + encodeURI(name)
-        $.ajax({url: url}).done(function (data) {
-            showWikipediaData(data)
-        });
     }
 
     //load Genbank content
