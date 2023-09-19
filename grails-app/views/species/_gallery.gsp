@@ -14,7 +14,7 @@
 
     </g:each>
 
-    <div id="cat_nonavailable" class="hide">
+    <div id="cat_nonavailable" class="hide type specimen uncertain other">
         <h2><g:message code="gallery.title"/></h2>
 
 

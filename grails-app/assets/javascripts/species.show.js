@@ -942,7 +942,11 @@ function loadGalleryType(category, start) {
                 $categoryTmpl.find('.taxon-gallery').append(btn);
             }
         } else {
-            $('#cat_nonavailable').addClass('show');
+            $('#cat_nonavailable').removeClass(category);
+            // if all categories removed because they have no images, remove the 'hide'
+            if ($('#cat_nonavailable').attr("class") == 'hide') {
+                $('#cat_nonavailable').removeClass('hide');
+            }
         }
     }).fail(function (jqxhr, textStatus, error) {
         alert('Error loading gallery: ' + textStatus + ', ' + error);
