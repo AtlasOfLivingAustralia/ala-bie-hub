@@ -29,9 +29,15 @@ $(document).ready(function() {
 				$(this).ekkoLightbox();
 				break;
 			case 'LEAFLET':
-				imageId = $(this).attr('data-image-id');
-				attribution = $(this).attr('data-footer');
-				recordUrl = $(this).attr('data-record-url');
+				imageId = $(this).parent().attr('data-image-id');
+				if (imageId == undefined) {
+					imageId = $(this).attr('data-image-id');
+					attribution = $(this).attr('data-footer');
+					recordUrl = $(this).attr('data-record-url');
+				} else {
+					attribution = $(this).parent().attr('data-footer');
+					recordUrl = $(this).parent().attr('data-record-url');
+				}
 				setDialogSize();
 				$('#imageDialog').modal('show');
 				break;
