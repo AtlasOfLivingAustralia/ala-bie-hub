@@ -279,3 +279,9 @@ springcache:
             timeToLive: 600
         bhlCache:
             timeToLive: 600
+        sitemap:
+            timeToLive: 600
+
+# sitemap proxied and edited from bie-index
+sitemap:
+    enabled: true
