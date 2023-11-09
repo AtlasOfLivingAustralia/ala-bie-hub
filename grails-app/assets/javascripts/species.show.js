@@ -13,8 +13,6 @@
  * rights and limitations under the License.
  */
 
-var IMAGE_FILTER = '&fq=spatiallyValid:true&fq=-user_assertions:50001&fq=-user_assertions:50005'
-
 function showSpeciesPage(traitsTabSet) {
     //console.log("Starting show species page");
 
@@ -643,7 +641,7 @@ function loadOverviewImages() {
         var imageIds = SHOW_CONF.preferredImageId.split(',')
         $.each(imageIds, function(idx, imageId) {
             var prefUrl = SHOW_CONF.biocacheServiceUrl +
-                '/occurrences/search?q=images:' + imageId + IMAGE_FILTER +
+                '/occurrences/search?q=images:' + imageId + SHOW_CONF.imageFilter +
                 '&im=true&facet=off&pageSize=1&start=0';
             $.ajax({
                 url: prefUrl,
@@ -674,7 +672,7 @@ function loadOverviewImages() {
     var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
-        '&fq=multimedia:"Image"&im=true&facet=off&pageSize=5&start=0' + IMAGE_FILTER;
+        '&fq=multimedia:"Image"&im=true&facet=off&pageSize=5&start=0' + SHOW_CONF.imageFilter;
 
     $.getJSON(url, function (data) {
         if (data && data.totalRecords > 0) {
@@ -889,7 +887,7 @@ function loadGalleryType(category, start) {
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
         '&fq=multimedia:"Image"&pageSize=' + pageSize +
-        '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true' + IMAGE_FILTER;
+        '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true' + SHOW_CONF.imageFilter;
 
     $.getJSON(url, function (data) {
 
