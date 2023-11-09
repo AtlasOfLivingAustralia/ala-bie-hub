@@ -464,7 +464,8 @@
         ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
         ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}",
         ausTraitsSourceUrl:"${grailsApplication.config.ausTraits.sourceURL}",
-        showHiddenImages: false
+        showHiddenImages: false,
+        imageFilter: "${raw(grailsApplication.config.imageFilter)}"
     };
 
     $(function(){
