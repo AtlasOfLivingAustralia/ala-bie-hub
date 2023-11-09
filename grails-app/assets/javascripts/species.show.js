@@ -13,7 +13,7 @@
  * rights and limitations under the License.
  */
 
-var IMAGE_FILTER = '&fq=geospatial_kosher:true&fq=-user_assertions:50001&fq=-user_assertions:50005'
+var IMAGE_FILTER = '&fq=spatiallyValid:true&fq=-user_assertions:50001&fq=-user_assertions:50005'
 
 function showSpeciesPage(traitsTabSet) {
     //console.log("Starting show species page");
@@ -332,12 +332,15 @@ function loadDataProviders() {
 
                     var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
                     var dataResourceUrl = SHOW_CONF.collectoryUrl + "/public/show/" + uid;
-                    var tableRow = "<tr><td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
+                    var tableRowPlaceholder = "<tr id='dataset_" + uid + "'></tr>"
+
+                    $('#data-providers-list tbody').append(tableRowPlaceholder);
+
+                    var tableRow = "<td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
 
                     $.ajax({
                         url: SHOW_CONF.collectoryServiceUrl + "/ws/dataResource/" + uid,
                         dataType: 'json',
-                        async: false,
                         success: function (collectoryData) {
                             if (collectoryData.provider) {
                                 tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
@@ -347,8 +350,7 @@ function loadDataProviders() {
 
                             var queryUrl = uiUrl + "&fq=" + facetValue.fq;
                             tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetValue.count + "</span></a></td>"
-                            tableRow += "</tr>";
-                            $('#data-providers-list tbody').append(tableRow);
+                            $('#dataset_' + collectoryData.uid).html(tableRow);
                         }
                     });
                 }
@@ -871,7 +873,7 @@ function loadGalleryType(category, start) {
     var imageCategoryParams = {
         type: '&fq=type_status:*',
         specimen: '&fq=basis_of_record:PreservedSpecimen&fq=-type_status:*',
-        other: '&fq=-type_status:*&fq=-basis_of_record:PreservedSpecimen&fq=-identification_qualifier_s:"Uncertain"&fq=geospatial_kosher:true&fq=-user_assertions:50001&fq=-user_assertions:50005',
+        other: '&fq=-type_status:*&fq=-basis_of_record:PreservedSpecimen&fq=-identification_qualifier_s:"Uncertain"&fq=spatiallyValid:true&fq=-user_assertions:50001&fq=-user_assertions:50005',
         uncertain: '&fq=-type_status:*&fq=-basis_of_record:PreservedSpecimen&fq=identification_qualifier_s:"Uncertain"'
     };
 
@@ -1070,7 +1072,7 @@ let distributions = []
 var distributionsIdx = 0
 
 function loadExpertDistroMap() {
-    var url = SHOW_CONF.layersServiceUrl + "/distribution/lsids/" + SHOW_CONF.guid;
+    var url = SHOW_CONF.layersServiceUrl + "/distribution/lsids/" + SHOW_CONF.guid + "?nowkt=true";
     $.getJSON(url, function (data) {
         if (data) {
             $.each(data, function (idx, distribution) {
