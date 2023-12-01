@@ -325,34 +325,71 @@ function loadDataProviders() {
             }
 
             $('.datasetCount').html(datasetCount);
+
+            var uidList = []
+            var facetMap = {}
             $.each(data.facetResults[0].fieldResult, function (idx, facetValue) {
                 if (facetValue.count > 0) {
 
                     var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
-                    var dataResourceUrl = SHOW_CONF.collectoryUrl + "/public/show/" + uid;
                     var tableRowPlaceholder = "<tr id='dataset_" + uid + "'></tr>"
 
                     $('#data-providers-list tbody').append(tableRowPlaceholder);
 
-                    var tableRow = "<td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
-
-                    $.ajax({
-                        url: SHOW_CONF.collectoryServiceUrl + "/ws/dataResource/" + uid,
-                        dataType: 'json',
-                        success: function (collectoryData) {
-                            if (collectoryData.provider) {
-                                tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
-                            }
-                            tableRow += "</td>";
-                            tableRow += "<td>" + collectoryData.licenseType + "</td>";
-
-                            var queryUrl = uiUrl + "&fq=" + facetValue.fq;
-                            tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetValue.count + "</span></a></td>"
-                            $('#dataset_' + collectoryData.uid).html(tableRow);
-                        }
-                    });
+                    uidList.push(uid)
+                    facetMap[uid] = facetValue
                 }
             });
+
+            $.post({
+                url: SHOW_CONF.collectoryServiceUrl + "/ws/dataResource",
+                data: JSON.stringify(uidList),
+                contentType : 'application/json',
+                dataType: 'json',
+                success: function (dataList) {
+                    $.each(dataList, function(idx, d) {
+                        var collectoryData = JSON.parse(d)
+                        var dataResourceUrl = SHOW_CONF.collectoryUrl + "/public/show/" + collectoryData.uid;
+                        var tableRow = "<td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetMap[collectoryData.uid].label + "</span></a>";
+
+                        if (collectoryData.provider) {
+                            tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + collectoryData.uid + "'>" + collectoryData.provider.name + "</a></small>";
+                        }
+                        tableRow += "</td>";
+                        tableRow += "<td>" + collectoryData.licenseType + "</td>";
+
+                        var queryUrl = uiUrl + "&fq=" + facetMap[collectoryData.uid].fq;
+                        tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetMap[collectoryData.uid].count + "</span></a></td>"
+                        $('#dataset_' + collectoryData.uid).html(tableRow);
+                    })
+                }
+            }).fail(function () {
+                // fallback to the method used pre collectory 5.1.0
+                $.each(data.facetResults[0].fieldResult, function (idx, facetValue) {
+                    if (facetValue.count > 0) {
+                        var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
+
+                        var dataResourceUrl = SHOW_CONF.collectoryUrl + "/public/show/" + uid;
+                        var tableRow = "<td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
+
+                        $.ajax({
+                            url: SHOW_CONF.collectoryServiceUrl + "/ws/dataResource/" + uid,
+                            dataType: 'json',
+                            success: function (collectoryData) {
+                                if (collectoryData.provider) {
+                                    tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
+                                }
+                                tableRow += "</td>";
+                                tableRow += "<td>" + collectoryData.licenseType + "</td>";
+
+                                var queryUrl = uiUrl + "&fq=" + facetValue.fq;
+                                tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetValue.count + "</span></a></td>"
+                                $('#dataset_' + collectoryData.uid).html(tableRow);
+                            }
+                        });
+                    }
+                })
+            })
         }
     });
 }
