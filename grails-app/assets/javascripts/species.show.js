@@ -342,7 +342,7 @@ function loadDataProviders() {
             });
 
             $.post({
-                url: SHOW_CONF.collectoryServiceUrl + "/ws/dataResource",
+                url: SHOW_CONF.collectoryServiceUrl + "/ws/find/dataResource",
                 data: JSON.stringify(uidList),
                 contentType : 'application/json',
                 dataType: 'json',
