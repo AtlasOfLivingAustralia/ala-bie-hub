@@ -462,7 +462,7 @@ function loadIndigenousData() {
     });
 }
 
-function showWikipediaData(data, testPage) {
+function showWikipediaData(data, testPage, targetName) {
     var node = $(data)
     node.find('[role="note"]').remove()
 
@@ -481,7 +481,7 @@ function showWikipediaData(data, testPage) {
                 var redirectItem = redirect[0].href.replace(/^.*\//, "")
                 var url = "/externalSite/wikipedia?name=" + encodeURI(redirectItem)
                 $.ajax({url: url}).done(function (data) {
-                    showWikipediaData(data, testPage)
+                    showWikipediaData(data, testPage, redirectItem)
                 });
                 return
             }
@@ -543,7 +543,7 @@ function showWikipediaData(data, testPage) {
             $description.css({'display': 'block'});
 
             // set the source of this description
-            var sourceHtml = "<a href='https://wikipedia.org/wiki/" + encodeURI(SHOW_CONF.scientificName) + "' target='wikipedia'>Wikipedia</a>&nbsp;" + jQuery.i18n.prop("wikipedia.licence.comment")
+            var sourceHtml = "<a href='https://wikipedia.org/wiki/" + encodeURI(targetName) + "' target='wikipedia'>Wikipedia</a>&nbsp;" + jQuery.i18n.prop("wikipedia.licence.comment")
             $description.find(".sourceText").html(sourceHtml);
 
             // hide unused properties of this description
@@ -567,12 +567,12 @@ function loadExternalSources() {
 
             var url = "/externalSite/wikipedia?name=" + encodeURI(name)
             $.ajax({url: url}).done(function (data) {
-                showWikipediaData(data, false)
+                showWikipediaData(data, false, name)
             });
         } else {
             var url = "/externalSite/wikipedia?name=" + encodeURI(name)
             $.ajax({url: url}).done(function (data) {
-                showWikipediaData(data, true)
+                showWikipediaData(data, true, name)
             });
         }
     }
