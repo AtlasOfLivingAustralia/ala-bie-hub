@@ -693,6 +693,7 @@ function loadOverviewImages() {
                     }
                     if (data && data.totalRecords > 0) {
                         record.uuid = data.occurrences[0].uuid;
+                        record.imageMetadata = data.occurrences[0].imageMetadata
                     }
 
                     if (countPreferredImages == 0) {
@@ -1010,16 +1011,23 @@ function getImageTitleFromOccurrence(el) {
         briefHtml += ((el.typeStatus) ? ' | ' : br) + el.institutionName;
     }
 
-    if (el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].creator != null) {
-        if (briefHtml.length > 0) briefHtml += br;
-        briefHtml += "Photographer: " + el.imageMetadata[0].creator;
-    } else if (el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].rightsHolder != null) {
-        if (briefHtml.length > 0) briefHtml += br;
-        briefHtml += "Rights holder: " + el.imageMetadata[0].rightsHolder;
+    if (el.imageMetadata && el.imageMetadata.length > 0) {
+        $.each(el.imageMetadata, function (idx, im) {
+            if (im.imageId == el.image) {
+                if (im.creator != null) {
+                    if (briefHtml.length > 0) briefHtml += br;
+                    briefHtml += "Photographer: " + im.creator;
+                } else if (im.rightsHolder != null) {
+                    if (briefHtml.length > 0) briefHtml += br;
+                    briefHtml += "Rights holder: " + im.rightsHolder;
+                }
+            }
+        })
     } else if (el.collector) {
         if (briefHtml.length > 0) briefHtml += br;
         briefHtml += "Supplied by: " + el.collector;
     }
+
 
     return briefHtml;
 }
