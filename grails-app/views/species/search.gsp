@@ -322,6 +322,11 @@
                                 <g:if test="${result.content}">
                                     <p>${result.content.trimLength(500)}</p>
                                 </g:if>
+                                <g:if test="${result.image}">
+                                    <div class="result-thumbnail">
+                                        <img src="${result.image}" alt="">
+                                    </div>
+                                </g:if>
                             </g:elseif>
                             <g:elseif test="${result.has("acronym") && result.get("acronym")}">
                                 <h4><g:message code="idxtype.${result.idxtype}"/>:
