@@ -1,22 +1,18 @@
 buildscript {
-    repositories {
-        mavenLocal()
-        maven { url "https://nexus.ala.org.au/content/groups/public/" }
-        maven { url "https://repo.grails.org/grails/core" }
-    }
-    dependencies {
-        classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-        classpath "gradle.plugin.com.github.erdi.webdriver-binaries:webdriver-binaries-gradle-plugin:$webdriverBinariesVersion"
-        classpath "com.bertramlabs.plugins:asset-pipeline-gradle:3.4.6"
-    }
+    version "4.1.0-SNAPSHOT"
+    group "au.org.ala"
 }
 
 plugins {
+    id "groovy"
+    id "org.grails.grails-web"
+    id "org.grails.grails-gsp"
+    id "application"
+    id "war"
+    id "maven-publish"
+    id "com.bertramlabs.asset-pipeline"
     id "com.gorylenko.gradle-git-properties" version "2.4.1"
 }
-
-version "4.1.0-SNAPSHOT"
-group "au.org.ala"
 
 apply plugin:"eclipse"
 apply plugin:"idea"
