@@ -128,7 +128,6 @@ bie:
         url: https://bie-ws-test.ala.org.au/ws
 
 facets: idxtype,rank,speciesGroup,locatedInHubCountry,imageAvailable,conservationStatusAUS_s,conservationStatusACT_s,conservationStatusNSW_s,conservationStatusQLD_s,conservationStatusVIC_s,conservationStatusTAS_s,conservationStatusSA_s,conservationStatusWA_s,conservationStatusNT_s
-speciesParent: https://lists.ala.org.au/iconic-species
 serverName: http://localhost:8080
 projectNameShort: Atlas
 projectName: Atlas of Living Australia
@@ -165,6 +164,9 @@ speciesList:
     preferredSpeciesListDruid:
     preferredListName: ALA Preferred Species Images
     apiKey:
+    # useListWs:true and a wsURL are required to use the newer species-list service instead of the older specieslist-webapp
+    useListWs: false
+    wsURL: https://lists-ws.ala.org.au
 alerts:
     baseUrl: https://alerts.ala.org.au/ws/
 sightings:

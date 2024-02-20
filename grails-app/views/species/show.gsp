@@ -16,7 +16,6 @@
 <g:set var="alaUrl" value="${grailsApplication.config.ala.baseURL}"/>
 <g:set var="biocacheUrl" value="${grailsApplication.config.biocache.baseURL}"/>
 <g:set var="speciesListUrl" value="${grailsApplication.config.speciesListService.baseURL ?: grailsApplication.config.speciesList.baseURL}"/>
-<g:set var="speciesListServiceUrl" value="${grailsApplication.config.speciesList.baseURL}"/>
 <g:set var="spatialPortalUrl" value="${grailsApplication.config.spatial.baseURL}"/>
 <g:set var="collectoryUrl" value="${grailsApplication.config.collectory.baseURL}"/>
 <g:set var="collectoryServiceUrl" value="${grailsApplication.config.collectoryService.baseURL ?: grailsApplication.config.collectory.baseURL}"/>
@@ -423,7 +422,6 @@
         citizenSciUrl:      "${citizenSciUrl}",
         serverName:         "${grailsApplication.config.grails.serverURL}",
         speciesListUrl:     "${grailsApplication.config.speciesList.baseURL}",
-        speciesListServiceUrl: "${grailsApplication.config.speciesListService.baseURL ?: grailsApplication.config.speciesList.baseURL}",
         bieUrl:             "${grailsApplication.config.bie.baseURL}",
         alertsUrl:          "${grailsApplication.config.alerts.baseUrl}",
         remoteUser:         "${request.remoteUser ?: ''}",
@@ -465,7 +463,8 @@
         ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}",
         ausTraitsSourceUrl:"${grailsApplication.config.ausTraits.sourceURL}",
         showHiddenImages: false,
-        imageFilter: "${raw(grailsApplication.config.imageFilter)}"
+        imageFilter: "${raw(grailsApplication.config.imageFilter)}",
+        speciesList: ${raw((speciesList as grails.converters.JSON).toString())}
     };
 
     $(function(){
