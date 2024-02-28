@@ -180,7 +180,6 @@ class SpeciesController implements GrailsConfigurationAware {
 
             render(view: 'show', model: [
                     tc: taxonDetails,
-                    statusRegionMap: utilityService.getStatusRegionCodes(),
                     infoSourceMap:[],
                     textProperties: [],
                     synonyms: utilityService.getSynonymsForTaxon(taxonDetails),
