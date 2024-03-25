@@ -158,7 +158,7 @@ ausTraits:
     baseURL: http://traitdata.austraits.cloud.edu.au
     homeURL: https://austraits.org/
     sourceURL: https://doi.org/10.5281/zenodo.3568417
-    definitionsURL: https://traitecoevo.github.io/austraits.build/articles/trait_definitions.html
+    definitionsURL: https://w3id.org/APD
 alaCitingURL: https://support.ala.org.au/support/solutions/articles/6000261662-citing-the-ala#website
 speciesList:
     baseURL: https://lists.ala.org.au
@@ -285,3 +285,6 @@ springcache:
 # sitemap proxied and edited from bie-index
 sitemap:
     enabled: true
+
+# filter applied to occurrence search requests that fetch images for the gallery
+imageFilter: '&fq=spatiallyValid:true&fq=-user_assertions:50001&fq=-user_assertions:50005&fq=-duplicate_status:ASSOCIATED&fq=-duplicateType:DIFFERENT_DATASET'

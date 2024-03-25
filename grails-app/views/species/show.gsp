@@ -33,7 +33,7 @@
 <g:else>
     <g:set var="tabs" value="${grailsApplication.config.show.tabs.replace('ausTraits':'').split(',')}"/>
 </g:else>
-<g:set var="jsonLink" value="${grailsApplication.config.bie.index.url}/species/${tc?.taxonConcept?.guid}.json"/>
+<g:set var="jsonLink" value="${grailsApplication.config.bie.index.url}/species/${tc?.taxonConcept?.guid}"/>
 <g:set var="sciNameFormatted"><bie:formatSciName rankId="${tc?.taxonConcept?.rankID}"
                                                  nameFormatted="${tc?.taxonConcept?.nameFormatted}"
                                                  nameComplete="${tc?.taxonConcept?.nameComplete}"
@@ -464,7 +464,8 @@
         ausTraitsCountUrl: "${raw(createLink(controller: 'externalSite', action: 'ausTraitsCount', params: [s: tc?.taxonConcept?.nameString ?: '', guid: guid]))}",
         ausTraitsHomeUrl: "${grailsApplication.config.ausTraits.homeURL}",
         ausTraitsSourceUrl:"${grailsApplication.config.ausTraits.sourceURL}",
-        showHiddenImages: false
+        showHiddenImages: false,
+        imageFilter: "${raw(grailsApplication.config.imageFilter)}"
     };
 
     $(function(){

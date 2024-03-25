@@ -61,7 +61,7 @@ class BieService {
         if (!guid && guid != "undefined") {
             return null
         }
-        def json = webClientService.get(grailsApplication.config.bie.index.url + "/taxon/" + guid.replaceAll(/\s+/,'+'))
+        def json = webClientService.get(grailsApplication.config.bie.index.url + "/species/" + guid.replaceAll(/\s+/,'+'))
         //log.debug "ETC json: " + json
         try{
             JSON.parse(json)

@@ -13,8 +13,6 @@
  * rights and limitations under the License.
  */
 
-var IMAGE_FILTER = '&fq=spatiallyValid:true&fq=-user_assertions:50001&fq=-user_assertions:50005'
-
 function showSpeciesPage(traitsTabSet) {
     //console.log("Starting show species page");
 
@@ -268,7 +266,7 @@ function loadAusTraits() {
 
     $.ajax({url: SHOW_CONF.ausTraitsCountUrl}).done(function (data) {
         if (data[0] && data[0]["summary"] && data[0]["AusTraits"] && data[0]["taxon"]) {
-            let htmlContent = "<span> There are " + data[0]["summary"] + " available for <span class='scientific-name rank-" + SHOW_CONF.rankString + "'><span class='name'>" + data[0]["taxon"] + "</span></span>  with data for " + data[0]["AusTraits"] +
+            let htmlContent = "<span> There are " + data[0]["summary"] + " traits available for <span class='scientific-name rank-" + SHOW_CONF.rankString + "'><span class='name'>" + data[0]["taxon"] + "</span></span>  with data for " + data[0]["AusTraits"] +
                 " further traits in the <a  target='_blank' href='" + SHOW_CONF.ausTraitsHomeUrl + "'>AusTraits</a> database. These are accessible via the download CSV button or alternatively the entire database can be accessed at  <a target='_blank' href='" + SHOW_CONF.ausTraitsSourceUrl + "'>" + SHOW_CONF.ausTraitsSourceUrl + "</a>. </span>"
             $('#traits-description').html(htmlContent);
         }
@@ -327,34 +325,71 @@ function loadDataProviders() {
             }
 
             $('.datasetCount').html(datasetCount);
+
+            var uidList = []
+            var facetMap = {}
             $.each(data.facetResults[0].fieldResult, function (idx, facetValue) {
                 if (facetValue.count > 0) {
 
                     var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
-                    var dataResourceUrl = SHOW_CONF.collectoryUrl + "/public/show/" + uid;
                     var tableRowPlaceholder = "<tr id='dataset_" + uid + "'></tr>"
 
                     $('#data-providers-list tbody').append(tableRowPlaceholder);
 
-                    var tableRow = "<td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
-
-                    $.ajax({
-                        url: SHOW_CONF.collectoryServiceUrl + "/ws/dataResource/" + uid,
-                        dataType: 'json',
-                        success: function (collectoryData) {
-                            if (collectoryData.provider) {
-                                tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
-                            }
-                            tableRow += "</td>";
-                            tableRow += "<td>" + collectoryData.licenseType + "</td>";
-
-                            var queryUrl = uiUrl + "&fq=" + facetValue.fq;
-                            tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetValue.count + "</span></a></td>"
-                            $('#dataset_' + collectoryData.uid).html(tableRow);
-                        }
-                    });
+                    uidList.push(uid)
+                    facetMap[uid] = facetValue
                 }
             });
+
+            $.post({
+                url: SHOW_CONF.collectoryServiceUrl + "/ws/find/dataResource",
+                data: JSON.stringify(uidList),
+                contentType : 'application/json',
+                dataType: 'json',
+                success: function (dataList) {
+                    $.each(dataList, function(idx, d) {
+                        var collectoryData = JSON.parse(d)
+                        var dataResourceUrl = SHOW_CONF.collectoryUrl + "/public/show/" + collectoryData.uid;
+                        var tableRow = "<td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetMap[collectoryData.uid].label + "</span></a>";
+
+                        if (collectoryData.provider) {
+                            tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + collectoryData.uid + "'>" + collectoryData.provider.name + "</a></small>";
+                        }
+                        tableRow += "</td>";
+                        tableRow += "<td>" + collectoryData.licenseType + "</td>";
+
+                        var queryUrl = uiUrl + "&fq=" + facetMap[collectoryData.uid].fq;
+                        tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetMap[collectoryData.uid].count + "</span></a></td>"
+                        $('#dataset_' + collectoryData.uid).html(tableRow);
+                    })
+                }
+            }).fail(function () {
+                // fallback to the method used pre collectory 5.1.0
+                $.each(data.facetResults[0].fieldResult, function (idx, facetValue) {
+                    if (facetValue.count > 0) {
+                        var uid = facetValue.fq.replace(/data_resource_uid:/, '').replace(/[\\"]*/, '').replace(/[\\"]/, '');
+
+                        var dataResourceUrl = SHOW_CONF.collectoryUrl + "/public/show/" + uid;
+                        var tableRow = "<td><a href='" + dataResourceUrl + "'><span class='data-provider-name'>" + facetValue.label + "</span></a>";
+
+                        $.ajax({
+                            url: SHOW_CONF.collectoryServiceUrl + "/ws/dataResource/" + uid,
+                            dataType: 'json',
+                            success: function (collectoryData) {
+                                if (collectoryData.provider) {
+                                    tableRow += "<br/><small><a href='" + SHOW_CONF.collectoryUrl + '/public/show/' + uid + "'>" + collectoryData.provider.name + "</a></small>";
+                                }
+                                tableRow += "</td>";
+                                tableRow += "<td>" + collectoryData.licenseType + "</td>";
+
+                                var queryUrl = uiUrl + "&fq=" + facetValue.fq;
+                                tableRow += "</td><td><a href='" + queryUrl + "'><span class='record-count'>" + facetValue.count + "</span></a></td>"
+                                $('#dataset_' + collectoryData.uid).html(tableRow);
+                            }
+                        });
+                    }
+                })
+            })
         }
     });
 }
@@ -427,7 +462,7 @@ function loadIndigenousData() {
     });
 }
 
-function showWikipediaData(data, testPage) {
+function showWikipediaData(data, testPage, targetName) {
     var node = $(data)
     node.find('[role="note"]').remove()
 
@@ -446,7 +481,7 @@ function showWikipediaData(data, testPage) {
                 var redirectItem = redirect[0].href.replace(/^.*\//, "")
                 var url = "/externalSite/wikipedia?name=" + encodeURI(redirectItem)
                 $.ajax({url: url}).done(function (data) {
-                    showWikipediaData(data, testPage)
+                    showWikipediaData(data, testPage, redirectItem)
                 });
                 return
             }
@@ -508,7 +543,7 @@ function showWikipediaData(data, testPage) {
             $description.css({'display': 'block'});
 
             // set the source of this description
-            var sourceHtml = "<a href='https://wikipedia.org/wiki/" + encodeURI(SHOW_CONF.scientificName) + "' target='wikipedia'>Wikipedia</a>&nbsp;" + jQuery.i18n.prop("wikipedia.licence.comment")
+            var sourceHtml = "<a href='https://wikipedia.org/wiki/" + encodeURI(targetName) + "' target='wikipedia'>Wikipedia</a>&nbsp;" + jQuery.i18n.prop("wikipedia.licence.comment")
             $description.find(".sourceText").html(sourceHtml);
 
             // hide unused properties of this description
@@ -532,12 +567,12 @@ function loadExternalSources() {
 
             var url = "/externalSite/wikipedia?name=" + encodeURI(name)
             $.ajax({url: url}).done(function (data) {
-                showWikipediaData(data, false)
+                showWikipediaData(data, false, name)
             });
         } else {
             var url = "/externalSite/wikipedia?name=" + encodeURI(name)
             $.ajax({url: url}).done(function (data) {
-                showWikipediaData(data, true)
+                showWikipediaData(data, true, name)
             });
         }
     }
@@ -643,7 +678,7 @@ function loadOverviewImages() {
         var imageIds = SHOW_CONF.preferredImageId.split(',')
         $.each(imageIds, function(idx, imageId) {
             var prefUrl = SHOW_CONF.biocacheServiceUrl +
-                '/occurrences/search?q=images:' + imageId + IMAGE_FILTER +
+                '/occurrences/search?q=images:' + imageId + SHOW_CONF.imageFilter +
                 '&im=true&facet=off&pageSize=1&start=0';
             $.ajax({
                 url: prefUrl,
@@ -658,6 +693,7 @@ function loadOverviewImages() {
                     }
                     if (data && data.totalRecords > 0) {
                         record.uuid = data.occurrences[0].uuid;
+                        record.imageMetadata = data.occurrences[0].imageMetadata
                     }
 
                     if (countPreferredImages == 0) {
@@ -674,7 +710,7 @@ function loadOverviewImages() {
     var url = SHOW_CONF.biocacheServiceUrl +
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
-        '&fq=multimedia:"Image"&im=true&facet=off&pageSize=5&start=0' + IMAGE_FILTER;
+        '&fq=multimedia:"Image"&im=true&facet=off&pageSize=5&start=0' + SHOW_CONF.imageFilter;
 
     $.getJSON(url, function (data) {
         if (data && data.totalRecords > 0) {
@@ -889,7 +925,7 @@ function loadGalleryType(category, start) {
         '/occurrences/search?q=lsid:' +
         SHOW_CONF.guid +
         '&fq=multimedia:"Image"&pageSize=' + pageSize +
-        '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true' + IMAGE_FILTER;
+        '&facet=off&start=' + start + imageCategoryParams[category] + '&im=true' + SHOW_CONF.imageFilter;
 
     $.getJSON(url, function (data) {
 
@@ -975,16 +1011,23 @@ function getImageTitleFromOccurrence(el) {
         briefHtml += ((el.typeStatus) ? ' | ' : br) + el.institutionName;
     }
 
-    if (el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].creator != null) {
-        if (briefHtml.length > 0) briefHtml += br;
-        briefHtml += "Photographer: " + el.imageMetadata[0].creator;
-    } else if (el.imageMetadata && el.imageMetadata.length > 0 && el.imageMetadata[0].rightsHolder != null) {
-        if (briefHtml.length > 0) briefHtml += br;
-        briefHtml += "Rights holder: " + el.imageMetadata[0].rightsHolder;
+    if (el.imageMetadata && el.imageMetadata.length > 0) {
+        $.each(el.imageMetadata, function (idx, im) {
+            if (im.imageId == el.image) {
+                if (im.creator != null) {
+                    if (briefHtml.length > 0) briefHtml += br;
+                    briefHtml += "Photographer: " + im.creator;
+                } else if (im.rightsHolder != null) {
+                    if (briefHtml.length > 0) briefHtml += br;
+                    briefHtml += "Rights holder: " + im.rightsHolder;
+                }
+            }
+        })
     } else if (el.collector) {
         if (briefHtml.length > 0) briefHtml += br;
         briefHtml += "Supplied by: " + el.collector;
     }
+
 
     return briefHtml;
 }
