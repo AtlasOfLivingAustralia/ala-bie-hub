@@ -18,10 +18,16 @@ package au.org.ala.bie
 import au.org.ala.bie.webapp2.SearchRequestParamsDTO
 import grails.converters.JSON
 import org.grails.web.json.JSONObject
+import org.springframework.scheduling.annotation.Scheduled
+
+import java.util.concurrent.ConcurrentHashMap
 
 class BieService {
+    // Required for triggering the @Scheduled at startup
+    boolean lazyInit = false
 
     def webClientService
+    def webService
     def grailsApplication
 
     def searchBie(SearchRequestParamsDTO requestObj) {
@@ -43,14 +49,90 @@ class BieService {
         JSON.parse(json)
     }
 
-    def getSpeciesList(guid){
-        if(!guid || !grailsApplication.config.speciesList.baseURL){
+    def bieSpeciesLists = new ConcurrentHashMap()
+
+    // run hourly, initial delay 0s
+    @Scheduled(fixedDelay = 3600000L, initialDelay = 0L)
+    def initBieSpeciesLists() {
+        new Thread() {
+            @Override
+            void run() {
+                def updatedBieSpeciesLists = new ConcurrentHashMap()
+                if (grailsApplication.config.speciesList.useListWs) {
+                    def delayBetweenRetries = 60 * 1000 // 1 minute
+                    def maxRetries = 30 // 30 minutes
+
+                    while (updatedBieSpeciesLists.isEmpty() && maxRetries) {
+                        maxRetries--
+                        try {
+                            def lists = webService.get(grailsApplication.config.speciesList.wsURL + "/speciesList/?isBIE=true&pageSize=10000")?.resp?.lists
+                            for (def list : lists) {
+                                // The page size is very large to work on most lists
+                                def pageSize = 10000
+                                def page = 1 // page is indexed 1..n
+                                while (true) {
+                                    def items = webService.get(grailsApplication.config.speciesList.wsURL + "/speciesListItems/" + list.id + "?pageSize=" + pageSize + "&page=" + page)?.resp
+                                    page++
+                                    if (!items) {
+                                        break
+                                    }
+                                    for (def item : items) {
+                                        def taxonConceptId = item.classification.taxonConceptID
+                                        if (taxonConceptId) {
+                                            def found = updatedBieSpeciesLists.get(taxonConceptId)
+                                            if (!found) {
+                                                found = []
+                                                updatedBieSpeciesLists.put(taxonConceptId, found)
+                                            }
+                                            // Use a format consistent with the older specieslist-webapp response
+                                            found.add([
+                                                    id       : list.id,
+                                                    guid     : taxonConceptId,
+                                                    list     : [
+                                                            listName: list.title,
+                                                            sds     : list.isSDS,
+                                                            isBIE   : list.isBIE
+                                                    ],
+                                                    kvpValues: item.properties
+                                            ])
+                                        }
+                                    }
+                                }
+                            }
+
+                            // replace list
+                            bieSpeciesLists = updatedBieSpeciesLists
+
+                            // successful, terminate loop even if no content retrieved
+                            maxRetries = 0
+                        } catch (Exception err) {
+                            if (maxRetries) {
+                                log.warn("Failed to get isBIE species lists: " + err.message + ", retrying in " + delayBetweenRetries + "ms")
+                                // wait a little before retrying
+                                sleep(delayBetweenRetries)
+                            } else {
+                                log.error("Failed to get isBIE species lists", e)
+                            }
+                        }
+                    }
+                }
+            }
+        }.start()
+    }
+
+    def getSpeciesList(guid) {
+        if (!guid || !grailsApplication.config.speciesList.baseURL) {
             return null
         }
         try {
-            def json = webClientService.get((grailsApplication.config.speciesListService.baseURL?: grailsApplication.config.speciesList.baseURL) + "/ws/species/" + guid.replaceAll(/\s+/,'+') + "?isBIE=true", true, [:])
-            return JSON.parse(json)
-        } catch(Exception e){
+            // support both specieslist-webapp and species-list services
+            if (grailsApplication.config.speciesList.useListWs) {
+                return bieSpeciesLists[guid] ?: []
+            } else {
+                def json = webClientService.get((grailsApplication.config.speciesListService.baseURL ?: grailsApplication.config.speciesList.baseURL) + "/ws/species/" + guid.replaceAll(/\s+/, '+') + "?isBIE=true", true, [:])
+                return JSON.parse(json)
+            }
+        } catch (Exception e) {
             //handles the situation where time out exceptions etc occur.
             log.error("Error retrieving species list.", e)
             return []

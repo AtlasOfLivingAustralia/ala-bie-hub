@@ -36,47 +36,48 @@ function showSpeciesPage(traitsTabSet) {
 
 function loadSpeciesLists() {
 
-    //console.log('### loadSpeciesLists #### ' + SHOW_CONF.speciesListServiceUrl + '/ws/species/' + SHOW_CONF.guid);
-    $.getJSON(SHOW_CONF.speciesListServiceUrl + '/ws/species/' + SHOW_CONF.guid + '?isBIE=true', function (data) {
-        for (var i = 0; i < data.length; i++) {
-            var specieslist = data[i];
-            var maxListFields = 20;
+    var data = SHOW_CONF.speciesList
 
-            if (specieslist.list.isBIE) {
-                var $description = $('#descriptionTemplate').clone();
-                $description.css({'display': 'block'});
-                $description.attr('id', '#specieslist-block-' + specieslist.dataResourceUid);
-                $description.addClass('species-list-block');
-                $description.find(".title").html(specieslist.list.listName);
+    for (var i = 0; i < data.length; i++) {
+        var specieslist = data[i];
+        var maxListFields = 20;
 
-                if (specieslist.kvpValues.length > 0) {
-                    var content = "<table class='table specieslist-table'>";
-                    $.each(specieslist.kvpValues, function (idx, kvpValue) {
-                        if (idx >= maxListFields) {
-                            return false;
-                        }
-                        var value = kvpValue.value;
-                        if (kvpValue.vocabValue) {
-                            value = kvpValue.vocabValue;
-                        }
-                        content += "<tr><td>" + (kvpValue.key + "</td><td>" + value + "</td></tr>");
-                    });
-                    content += "</table>";
-                    $description.find(".content").html(content);
-                } else {
-                    $description.find(".content").html("A species list provided by " + specieslist.list.listName);
+        var $description = $('#descriptionTemplate').clone();
+        $description.css({'display': 'block'});
+        $description.attr('id', '#specieslist-block-' + (specieslist.dataResourceUid ? specieslist.dataResourceUid : specieslist.id));
+        $description.addClass('species-list-block');
+        $description.find(".title").html(specieslist.list.listName);
+
+        if (specieslist.kvpValues.length > 0) {
+            var content = "<table class='table specieslist-table'>";
+            $.each(specieslist.kvpValues, function (idx, kvpValue) {
+                if (idx >= maxListFields) {
+                    return false;
                 }
-
-                $description.find(".source").css({'display': 'none'});
-                $description.find(".rights").css({'display': 'none'});
-
-                $description.find(".providedBy").attr('href', SHOW_CONF.speciesListUrl + '/speciesListItem/list/' + specieslist.dataResourceUid);
-                $description.find(".providedBy").html(specieslist.list.listName);
-
-                $description.appendTo('#listContent');
-            }
+                var value = kvpValue.value;
+                if (kvpValue.vocabValue) {
+                    value = kvpValue.vocabValue;
+                }
+                content += "<tr><td>" + (kvpValue.key + "</td><td>" + value + "</td></tr>");
+            });
+            content += "</table>";
+            $description.find(".content").html(content);
+        } else {
+            $description.find(".content").html("A species list provided by " + specieslist.list.listName);
         }
-    });
+
+        $description.find(".source").css({'display': 'none'});
+        $description.find(".rights").css({'display': 'none'});
+
+        if (specieslist.dataResourceUid) {
+            $description.find(".providedBy").attr('href', SHOW_CONF.speciesListUrl + '/speciesListItem/list/' + specieslist.dataResourceUid);
+        } else {
+            $description.find(".providedBy").attr('href', SHOW_CONF.speciesListUrl + '/#/list/' + specieslist.id);
+        }
+        $description.find(".providedBy").html(specieslist.list.listName);
+
+        $description.appendTo('#listContent');
+    }
 }
 
 function addAlerts() {
@@ -987,7 +988,7 @@ function loadGalleryType(category, start) {
             }
         }
     }).fail(function (jqxhr, textStatus, error) {
-        alert('Error loading gallery: ' + textStatus + ', ' + error);
+        // alert('Error loading gallery: ' + textStatus + ', ' + error);
     }).always(function () {
         $('#gallerySpinner').hide();
     });
