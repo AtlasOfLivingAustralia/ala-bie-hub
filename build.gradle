@@ -116,7 +116,7 @@ dependencies {
     implementation  "org.codehaus.jackson:jackson-core-asl:1.8.6"
     implementation  "org.codehaus.jackson:jackson-mapper-asl:1.8.6"
     implementation "org.jsoup:jsoup:1.15.4"
-    implementation  group: "org.grails.plugins", name: "ala-bootstrap3", version: "4.4.0", changing: true
+    implementation  group: "org.grails.plugins", name: "ala-bootstrap3", version: "4.5.0", changing: true
     implementation (group: "org.grails.plugins", name: "ala-auth", version:"$alaSecurityLibsVersion", changing: true) {
         exclude group: "javax.servlet", module: "servlet-api"
     }

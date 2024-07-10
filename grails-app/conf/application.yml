@@ -287,4 +287,4 @@ sitemap:
     enabled: true
 
 # filter applied to occurrence search requests that fetch images for the gallery
-imageFilter: '&fq=spatiallyValid:true&fq=-user_assertions:50001&fq=-user_assertions:50005&fq=-duplicate_status:ASSOCIATED&fq=-duplicateType:DIFFERENT_DATASET'
+imageFilter: '&fq=spatiallyValid:true&fq=-user_assertions:50001&fq=-user_assertions:50005&fq=-(duplicate_status:ASSOCIATED%20AND%20duplicateType:DIFFERENT_DATASET)'
