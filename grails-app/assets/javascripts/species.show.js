@@ -987,7 +987,7 @@ function loadGalleryType(category, start) {
             }
         }
     }).fail(function (jqxhr, textStatus, error) {
-        alert('Error loading gallery: ' + textStatus + ', ' + error);
+        //alert('Error loading gallery: ' + textStatus + ', ' + error);
     }).always(function () {
         $('#gallerySpinner').hide();
     });
