@@ -137,6 +137,7 @@ class SpeciesController implements GrailsConfigurationAware {
      * TAXON CONCEPT: A taxon concept defines what the taxon means - a series of properties
      * or details about what we mean when we use the taxon name.
      *
+     * @param guid the identifier of the taxon
      */
     def show = {
         def guid = regularise(params.guid)
@@ -160,6 +161,9 @@ class SpeciesController implements GrailsConfigurationAware {
         } else if (taxonDetails.taxonConcept?.guid && taxonDetails.taxonConcept.guid != guid) {
             // old identifier so redirect to current taxon page
             redirect(uri: "/species/${taxonDetails.taxonConcept.guid}")
+        } else if (taxonDetails.taxonConcept?.acceptedConceptID && taxonDetails.taxonConcept.acceptedConceptID != guid) {
+            // synonym with accepted taxon identifier so redirect to accepted taxon page
+            redirect(uri: "/species/${taxonDetails.taxonConcept.acceptedConceptID}")
         } else {
             def nameSplit = [true: [], false: taxonDetails.commonNames]
             if (pull) {
