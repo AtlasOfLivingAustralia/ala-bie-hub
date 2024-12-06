@@ -254,7 +254,7 @@ function loadAusTraits() {
         } else {
             $("#traitsRecords").html("<h3>" + jQuery.i18n.prop("no.traits.found") + "</h3>");
             $("#download-button-area").hide()
-            $(".panel-footer").hide();
+            $("#traitsRecords .panel-footer").hide();
         }
         // apply table cell styling after content is loaded.
         $(".centered-cell").css({"text-align": "center"})
