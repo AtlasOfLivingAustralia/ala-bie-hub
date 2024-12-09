@@ -249,6 +249,8 @@ vernacularName:
         showLanguage: false
 external:
     blacklist: file:./src/test/resources/test-blacklist.json
+
+customUserAgent: 'ala-bie-hub/${info.app.version}'
 ---
 #headerAndFooter:
 #    baseURL: "https://www.ala.org.au/commonui-bs3-2019"
