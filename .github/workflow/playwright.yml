@@ -1,0 +1,66 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ develop, master ]
+  pull_request:
+    branches: [ develop, master ]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Java for Grails
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Set up Node for Playwright
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      # Install Playwright dependencies
+      - name: Install Playwright dependencies
+        working-directory: e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
+      # Set up config files
+      - name: Setup required folders
+        run: |
+          sudo mkdir -p /data/ala-bie-hub/config/
+          sudo chmod o+xw /data
+          sudo chmod o+xw /data/ala-bie-hub
+          sudo chmod o+xw /data/ala-bie-hub/config
+
+      - name: Copy charts.json to config directory
+        run: sudo cp src/test/resources/charts.json /data/ala-bie-hub/config/
+
+      # Build and start Grails application
+      - name: Start Grails application
+        run: |
+          ./grailsw refresh-dependencies
+          ./grailsw run-app &
+          echo "Waiting for Grails to start..."
+          timeout 300 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8080)" != "200" ]]; do sleep 5; done' || false
+
+      # Run Playwright tests
+      - name: Run Playwright tests
+        working-directory: e2e
+        run: npx playwright test
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://localhost:8080
+
+      # Upload test results
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 30
