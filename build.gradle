@@ -56,6 +56,7 @@ repositories {
     maven { url "https://nexus.ala.org.au/content/groups/public/" }
     mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
+    maven { url "https://repo.grails.org/artifactory/core/" }
 }
 
 dependencies {

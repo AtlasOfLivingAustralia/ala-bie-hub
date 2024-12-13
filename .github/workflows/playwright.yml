@@ -17,8 +17,8 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: '11'
+          distribution: 'corretto'
 
       # Set up Node for Playwright
       - uses: actions/setup-node@v4
