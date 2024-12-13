@@ -3,7 +3,8 @@ on:
   push:
     branches: [ develop, master ]
   pull_request:
-    branches: [ develop, master, 139-add-functional-tests-using-playwright ]
+    types: [ opened, reopened ]
+    # branches: [ develop, master, 139-add-functional-tests-using-playwright ]
 jobs:
   test:
     timeout-minutes: 60
