@@ -47,16 +47,31 @@ jobs:
       - name: Start Grails application
         run: |
           ./gradlew build
-          nohup ./gradlew bootRun &> grails.log &
+          nohup ./gradlew bootRun -Dgrails.env=test &> grails.log &
           echo "Waiting for Grails to start..."
           timeout 300 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8080)" != "200" ]]; do sleep 5; done' || false
+
+#      # Wait for a few seconds to ensure the application is fully ready
+#      - name: Wait for application to be ready
+#        run: sleep 30
+
+      # Test the URL for 200 response
+      - name: Test application URL
+        run: |
+          http_status=$(curl -s -o /dev/null -w "%{http_code}" 'http://localhost:8080/search?q=Acacia')
+          if [ "$http_status" -ne 200 ]; then
+            echo "Application is not ready. HTTP status code: $http_status"
+            exit 1
+          fi
 
       # Run Playwright tests
       - name: Run Playwright tests
         working-directory: e2e
         run: npx playwright test
         env:
+#          PLAYWRIGHT_TEST_BASE_URL: http://host.docker.internal:8080
           PLAYWRIGHT_TEST_BASE_URL: http://localhost:8080
+
 
       # Upload test results
       - uses: actions/upload-artifact@v4

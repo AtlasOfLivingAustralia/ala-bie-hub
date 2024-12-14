@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import exp from 'constants';
+// import exp from 'constants';
 
 // const baseUrl = 'https://bie-test.ala.org.au';
 const searchUrl = '/search?q=Acacia&rows=20';
@@ -17,7 +17,10 @@ test('Acacia Mill - names check', async ({ page }) => {
   await page.locator('a[href="/species/Acacia"]').nth(1).click();
   await page.waitForSelector('h1 .accepted-name', { timeout: 30000 })
   await expect(page.locator('h1 .accepted-name')).toContainText('Acacia Mill.');
+  await page.waitForSelector('.language-name', { timeout: 30000 });
   await expect(page.locator('.language-name').nth(0)).toContainText('Wudjari');
+  const errorsList = page.locator('ul.errors'); // error page should not be present
+  await expect(errorsList).toHaveCount(0);
 });
 
 test('Acacia Mill - API URL', async ({ page }) => {

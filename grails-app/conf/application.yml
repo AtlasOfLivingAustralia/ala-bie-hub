@@ -290,3 +290,25 @@ sitemap:
 
 # filter applied to occurrence search requests that fetch images for the gallery
 imageFilter: '&fq=spatiallyValid:true&fq=-user_assertions:50001&fq=-user_assertions:50005&fq=-(duplicate_status:ASSOCIATED%20AND%20duplicateType:DIFFERENT_DATASET)'
+
+environments:
+    development:
+        vernacularName:
+            # A category of vernacular names pulled out from the standard list and given special display treatment
+            pull:
+                categories: traditionalKnowledge
+                active: true
+                label: Indigenous Knowledge Name
+                labelDetail: Names in indigenous languages
+                showHeader: true
+                showLanguage: true
+    test:
+        vernacularName:
+            # A category of vernacular names pulled out from the standard list and given special display treatment
+            pull:
+                categories: traditionalKnowledge
+                active: true
+                label: Indigenous Knowledge Name
+                labelDetail: Names in indigenous languages
+                showHeader: true
+                showLanguage: true

@@ -27,11 +27,14 @@ export default defineConfig({
   timeout: 60000,
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'https://bie-test.ala.org.au',
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:8080',
     // Allow downloads for all tests
     acceptDownloads: true,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+  },
+  expect: {
+    timeout: 30000, // Default timeout for expect assertions
   },
 
   /* Configure projects for major browsers */
