@@ -165,6 +165,8 @@ speciesList:
     preferredSpeciesListDruid:
     preferredListName: ALA Preferred Species Images
     apiKey:
+speciesListService:
+    baseURL: https://api.test.ala.org.au/specieslist
 alerts:
     baseUrl: https://alerts.ala.org.au/ws/
 sightings:
@@ -312,3 +314,9 @@ environments:
                 labelDetail: Names in indigenous languages
                 showHeader: true
                 showLanguage: true
+        speciesParent: https://lists-test.ala.org.au/iconic-species
+        speciesList:
+            baseURL: https://lists-test.ala.org.au
+            preferredSpeciesListDruid: dr4778
+            preferredListName: ALA Preferred Species Images
+            apiKey:
