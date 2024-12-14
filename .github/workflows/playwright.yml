@@ -17,7 +17,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'corretto'
 
       # Set up Node for Playwright
@@ -46,8 +46,8 @@ jobs:
       # Build and start Grails application
       - name: Start Grails application
         run: |
-          ./grailsw refresh-dependencies
-          ./grailsw run-app &
+          ./gradlew build
+          nohup ./gradlew bootRun &> grails.log &
           echo "Waiting for Grails to start..."
           timeout 300 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8080)" != "200" ]]; do sleep 5; done' || false
 
