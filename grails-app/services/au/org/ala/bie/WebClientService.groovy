@@ -22,6 +22,7 @@ import org.grails.web.converters.exceptions.ConverterException
 import org.springframework.beans.factory.InitializingBean
 
 class WebClientService implements InitializingBean {
+    def grailsApplication
 
     public void afterPropertiesSet() {
         // JSONObject.NULL.metaClass.asBoolean = {-> false}
@@ -39,6 +40,7 @@ class WebClientService implements InitializingBean {
             }
             conn.setConnectTimeout(10000)
             conn.setReadTimeout(50000)
+            conn.setRequestProperty('User-Agent', grailsApplication.config.getProperty("customUserAgent", "ala-bie-hub"))
             return conn.content.text
         } catch (SocketTimeoutException e) {
             if(throwError)
@@ -67,6 +69,7 @@ class WebClientService implements InitializingBean {
         try {
             conn.setConnectTimeout(10000)
             conn.setReadTimeout(50000)
+            conn.setRequestProperty('User-Agent', grailsApplication.config.getProperty("customUserAgent", "ala-bie-hub"))
             def json = conn.content.text
             return JSON.parse(json)
         } catch (ConverterException e) {
@@ -143,7 +146,8 @@ class WebClientService implements InitializingBean {
         def conn = new URL(url).openConnection()
         try {
             conn.setDoOutput(true)
-            conn.setRequestProperty("Content-Type", contentType);
+            conn.setRequestProperty("Content-Type", contentType)
+            conn.setRequestProperty('User-Agent', grailsApplication.config.getProperty("customUserAgent", "ala-bie-hub"))
             OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream())
             wr.write(postBody)
             wr.flush()
