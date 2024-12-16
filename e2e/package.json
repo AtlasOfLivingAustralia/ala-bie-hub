@@ -1,0 +1,17 @@
+{
+  "name": "specieslist-functional-tests",
+  "version": "1.0.0",
+  "description": "[Playwright](https://playwright.dev/) tests for `ala-bie-hub` front end",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0"
+  },
+  "directories": {
+    "test": "tests"
+  }
+}

@@ -16,6 +16,9 @@ cache:
 #  - $HOME/.gradle/caches/
   - $HOME/.gradle/wrapper/
 
+script:
+  - travis_wait ./gradlew assemble --stacktrace --info
+
 after_success:
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && travis_retry ./gradlew publish --stacktrace --info '
 env:
