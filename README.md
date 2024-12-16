@@ -1,5 +1,5 @@
 # ala-bie-hub
-###    [![Build Status](https://app.travis-ci.com/AtlasOfLivingAustralia/ala-bie-hub.svg?branch=develop)](https://app.travis-ci.com/AtlasOfLivingAustralia/ala-bie-hub)
+###    [![Build Status](https://app.travis-ci.com/AtlasOfLivingAustralia/ala-bie-hub.svg?branch=develop)](https://app.travis-ci.com/AtlasOfLivingAustralia/ala-bie-hub) [![E2E test status](https://github.com/AtlasOfLivingAustralia/ala-bie-hub/actions/workflows/e2e.yml/badge.svg)](https://github.com/AtlasOfLivingAustralia/ala-bie-hub/actions/workflows/e2e.yml)
 
 This is the BIE (Biodiversity Information Explorer) front end - merge of old ala-bie and bie-plugin. 
 
