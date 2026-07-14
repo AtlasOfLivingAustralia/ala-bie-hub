@@ -30,6 +30,8 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps
+        env:
+          ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true 
 
       # Set up config files
       - name: Setup required folders
@@ -65,7 +67,7 @@ jobs:
         run: npx playwright test
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://localhost:8080
-
+          ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true 
 
       # Upload test results
       - uses: actions/upload-artifact@v5
