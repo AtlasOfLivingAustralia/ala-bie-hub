@@ -76,3 +76,5 @@ jobs:
           name: playwright-report
           path: e2e/playwright-report/
           retention-days: 30
+        env:
+          ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true 
