@@ -564,17 +564,15 @@ function loadExternalSources() {
         name = name[0] + name.substring(1, name.length).toLowerCase()
         if (SHOW_CONF.wikiUrl.match("^http.*")) {
             name = SHOW_CONF.wikiUrl.replace(/^.*\//, "")
-
-            var url = "/externalSite/wikipedia?name=" + encodeURI(name)
-            $.ajax({url: url}).done(function (data) {
-                showWikipediaData(data, false, name)
-            });
-        } else {
-            var url = "/externalSite/wikipedia?name=" + encodeURI(name)
-            $.ajax({url: url}).done(function (data) {
-                showWikipediaData(data, true, name)
-            });
         }
+
+        var url = "/externalSite/wikipedia?name=" + encodeURI(name)
+        var testPage = !SHOW_CONF.wikiUrl.match("^http.*")
+        $.ajax({url: url, dataType: "json"}).done(function (data) {
+            var html = data && data.html ? data.html : data
+            var title = data && data.title ? data.title : name
+            showWikipediaData(html, testPage, title)
+        });
     }
 
     //load Genbank content
