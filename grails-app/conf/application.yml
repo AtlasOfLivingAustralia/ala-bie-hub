@@ -166,7 +166,7 @@ speciesList:
     preferredListName: ALA Preferred Species Images
     apiKey:
 speciesListService:
-    baseURL: https://api.test.ala.org.au/specieslist
+    baseURL: https://lists-ws.test.ala.org.au
 alerts:
     baseUrl: https://alerts.ala.org.au/ws/
 sightings:
@@ -224,7 +224,10 @@ show:
 wikipedia:
     # https://en.wikipedia.org/api/rest_v1/#/Page%20content/get_page_html__title_
     url: https://en.wikipedia.org/api/rest_v1/page/html/
+    # https://www.mediawiki.org/wiki/API:Search
+    api: https://en.wikipedia.org/w/api.php
     lang: en
+    rankPattern: (?i)species|genus|family|order|class|phylum|kingdom
 imageServiceBaseUrl: https://images.ala.org.au/
 survey:
     indexPage: false

@@ -37,13 +37,15 @@ class ExternalSiteController {
     def index() {}
 
     def wikipedia = {
-        def results
+        def model = [title: null, html: '']
+        def kingdom = params.kingdom ?: ''
         if (params.name) {
-            results = externalSiteService.searchWikipedia(params.name)
+            model = externalSiteService.searchWikipedia(params.name, kingdom)
         } else if (params.redirect) {
-            results = externalSiteService.searchWikipedia(params.redirect)
+            model = externalSiteService.searchWikipedia(params.redirect, kingdom)
         }
-        render results
+        response.setContentType("application/json")
+        render (model as JSON)
     }
 
     def genbank = {

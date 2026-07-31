@@ -50,7 +50,9 @@ class ExternalSiteService implements GrailsConfigurationAware {
     Blacklist blacklist
     String ausTraitsBase
     String wikipediaUrl
+    String wikipediaApi
     String wikipediaLang
+    String wikipediaRankPattern
 
     def webClientService
 
@@ -65,7 +67,9 @@ class ExternalSiteService implements GrailsConfigurationAware {
         blacklist = blacklistURL ? Blacklist.read(blacklistURL) : null
         ausTraitsBase = config.getProperty("ausTraits.baseURL")
         wikipediaUrl = config.getProperty("wikipedia.url")
+        wikipediaApi = config.getProperty("wikipedia.api")
         wikipediaLang = config.getProperty("wikipedia.lang")
+        wikipediaRankPattern = config.getProperty("wikipedia.rankPattern", "(?i)species|genus|family|order|class|phylum|kingdom")
     }
 
     /**
@@ -179,17 +183,132 @@ class ExternalSiteService implements GrailsConfigurationAware {
         return json
     }
 
+    /**
+     * Search Wikipedia for a taxon page matching the supplied name.
+     *
+     * Uses the MediaWiki search API with an intitle: query, filters results to those whose
+     * snippet mentions a taxonomic rank, then fetches and validates the first candidate that
+     * looks like a taxon article and, if a kingdom is provided, belongs to that kingdom.
+     *
+     * @param name The taxon name to search for
+     * @param kingdom Optional ALA kingdom to use as a homonym check
+     * @return A map with keys {@code title} (the selected Wikipedia page title) and
+     *          {@code html} (the page HTML). When nothing suitable is found, returns
+     *          {@code [title: null, html: '']}.
+     */
     @Cacheable("wikiCache")
-    def searchWikipedia(String name) {
+    def searchWikipedia(String name, String kingdom = '') {
         if (blacklist && blacklist.isBlacklisted(name, null, null)) {
-            return ''
+            return [title: null, html: '']
         }
 
-        String url = wikipediaUrl +  URLEncoder.encode(name.replace(' ', '_'), 'UTF-8')
+        if (!wikipediaApi) {
+            log.warn "wikipedia.api not configured, cannot search Wikipedia for ${name}"
+            return [title: null, html: '']
+        }
 
-        var header = ["Accept-Language": wikipediaLang]
+        Pattern taxonRankPattern = Pattern.compile(wikipediaRankPattern)
+        def candidates = searchWikipediaCandidates(name, taxonRankPattern)
+        if (!candidates) {
+            log.debug "No Wikipedia search candidates for ${name}"
+            return [title: null, html: '']
+        }
 
-        webClientService.get(url, false, header)
+        String expectedKingdom = kingdom ? normaliseKingdom(kingdom) : ''
+        def header = ["Accept-Language": wikipediaLang]
+        for (String title : candidates) {
+            String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
+            try {
+                String html = webClientService.get(pageUrl, false, header)
+                if (html && isTaxonArticle(html)) {
+                    if (!expectedKingdom || pageMatchesKingdom(html, expectedKingdom)) {
+                        return [title: title, html: html]
+                    }
+                    log.debug "Wikipedia candidate ${title} for ${name} does not match kingdom ${kingdom}"
+                } else {
+                    log.debug "Wikipedia candidate ${title} for ${name} failed taxon validation"
+                }
+            } catch (Exception ex) {
+                log.warn "Error retrieving Wikipedia page ${pageUrl}: ${ex.message}"
+            }
+        }
+
+        log.debug "No Wikipedia candidates for ${name} passed taxon validation"
+        return [title: null, html: '']
+    }
+
+    /**
+     * Normalise an ALA kingdom value so it can be matched against Wikipedia page text.
+     */
+    private String normaliseKingdom(String kingdom) {
+        return kingdom.trim().toLowerCase().replaceAll(/[^a-z]/, '')
+    }
+
+    /**
+     * Check whether the supplied taxon article HTML appears to belong to the expected kingdom.
+     * The check is intentionally conservative: the kingdom name must appear in the page text
+     * close to other taxonomy indicators.
+     */
+    private boolean pageMatchesKingdom(String html, String expectedKingdom) {
+        if (!expectedKingdom) {
+            return true
+        }
+        def doc = Jsoup.parse(html)
+        String pageText = doc.text().toLowerCase()
+        return pageText.contains("kingdom") && pageText.contains(expectedKingdom)
+    }
+
+    /**
+     * Query the MediaWiki search API and return a list of candidate page titles
+     * whose snippets mention a taxonomic rank.
+     *
+     * @param name The taxon name to search for
+     * @param taxonRankPattern Pattern to apply to each result snippet
+     */
+    private List<String> searchWikipediaCandidates(String name, Pattern taxonRankPattern) {
+        def candidates = []
+        try {
+            String query = "intitle:\"${name}\""
+            String url = "${wikipediaApi}?action=query&list=search" +
+                    "&srsearch=" + URLEncoder.encode(query, 'UTF-8') +
+                    "&srnamespace=0" +
+                    "&srlimit=10" +
+                    "&utf8=1&format=json"
+            def json = webClientService.getJson(url)
+            if (json instanceof JSONObject && json.has("error")) {
+                log.warn "Error searching Wikipedia for ${name}: ${json.error}"
+                return candidates
+            }
+            def results = json?.query?.search
+            if (results) {
+                results.each { result ->
+                    String snippet = result.snippet ?: ''
+                    if (taxonRankPattern.matcher(snippet).find()) {
+                        candidates << result.title.replace(' ', '_')
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.warn "Error searching Wikipedia candidates for ${name}: ${ex.message}"
+        }
+        return candidates
+    }
+
+    /**
+     * Determine whether the supplied HTML is a Wikipedia taxon article.
+     */
+    private boolean isTaxonArticle(String html) {
+        if (!html) {
+            return false
+        }
+        try {
+            def doc = Jsoup.parse(html)
+            return !doc.select(".infobox.biota").isEmpty() ||
+                    !doc.select('[aria-labelledby="Taxon_identifiers"]').isEmpty()
+        } catch (Exception ex) {
+            log.warn "Error parsing Wikipedia HTML for taxon validation: ${ex.message}"
+            return false
+        }
     }
 
 }

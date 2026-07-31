@@ -480,8 +480,13 @@ function showWikipediaData(data, testPage, targetName) {
             if (redirect.length > 0) {
                 var redirectItem = redirect[0].href.replace(/^.*\//, "")
                 var url = "/externalSite/wikipedia?name=" + encodeURI(redirectItem)
-                $.ajax({url: url}).done(function (data) {
-                    showWikipediaData(data, testPage, redirectItem)
+                if (SHOW_CONF.kingdom) {
+                    url += "&kingdom=" + encodeURI(SHOW_CONF.kingdom)
+                }
+                $.ajax({url: url, dataType: "json"}).done(function (data) {
+                    var html = data && data.html ? data.html : data
+                    var title = data && data.title ? data.title : redirectItem
+                    showWikipediaData(html, testPage, title)
                 });
                 return
             }
@@ -564,17 +569,18 @@ function loadExternalSources() {
         name = name[0] + name.substring(1, name.length).toLowerCase()
         if (SHOW_CONF.wikiUrl.match("^http.*")) {
             name = SHOW_CONF.wikiUrl.replace(/^.*\//, "")
-
-            var url = "/externalSite/wikipedia?name=" + encodeURI(name)
-            $.ajax({url: url}).done(function (data) {
-                showWikipediaData(data, false, name)
-            });
-        } else {
-            var url = "/externalSite/wikipedia?name=" + encodeURI(name)
-            $.ajax({url: url}).done(function (data) {
-                showWikipediaData(data, true, name)
-            });
         }
+
+        var url = "/externalSite/wikipedia?name=" + encodeURI(name)
+        if (SHOW_CONF.kingdom) {
+            url += "&kingdom=" + encodeURI(SHOW_CONF.kingdom)
+        }
+        var testPage = !SHOW_CONF.wikiUrl.match("^http.*")
+        $.ajax({url: url, dataType: "json"}).done(function (data) {
+            var html = data && data.html ? data.html : data
+            var title = data && data.title ? data.title : name
+            showWikipediaData(html, testPage, title)
+        });
     }
 
     //load Genbank content
