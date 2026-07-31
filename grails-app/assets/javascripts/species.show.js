@@ -480,8 +480,13 @@ function showWikipediaData(data, testPage, targetName) {
             if (redirect.length > 0) {
                 var redirectItem = redirect[0].href.replace(/^.*\//, "")
                 var url = "/externalSite/wikipedia?name=" + encodeURI(redirectItem)
-                $.ajax({url: url}).done(function (data) {
-                    showWikipediaData(data, testPage, redirectItem)
+                if (SHOW_CONF.kingdom) {
+                    url += "&kingdom=" + encodeURI(SHOW_CONF.kingdom)
+                }
+                $.ajax({url: url, dataType: "json"}).done(function (data) {
+                    var html = data && data.html ? data.html : data
+                    var title = data && data.title ? data.title : redirectItem
+                    showWikipediaData(html, testPage, title)
                 });
                 return
             }

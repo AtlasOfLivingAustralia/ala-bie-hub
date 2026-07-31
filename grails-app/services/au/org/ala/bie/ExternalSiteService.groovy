@@ -193,7 +193,8 @@ class ExternalSiteService implements GrailsConfigurationAware {
      * @param name The taxon name to search for
      * @param kingdom Optional ALA kingdom to use as a homonym check
      * @return A map with keys {@code title} (the selected Wikipedia page title) and
-     *         {@code html} (the page HTML), or {@code null} if nothing suitable is found.
+     *          {@code html} (the page HTML). When nothing suitable is found, returns
+     *          {@code [title: null, html: '']}.
      */
     @Cacheable("wikiCache")
     def searchWikipedia(String name, String kingdom = '') {
@@ -214,7 +215,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
         }
 
         String expectedKingdom = kingdom ? normaliseKingdom(kingdom) : ''
-        var header = ["Accept-Language": wikipediaLang]
+        def header = ["Accept-Language": wikipediaLang]
         for (String title : candidates) {
             String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
             try {
