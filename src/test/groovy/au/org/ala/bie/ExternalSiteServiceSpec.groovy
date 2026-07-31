@@ -305,6 +305,133 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         response.html.contains('infobox biota')
     }
 
+    void "test search Wikipedia kingdom check rejects cross-kingdom homonym"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Vertebrata"')
+                query('srnamespace', '0')
+                query('srlimit', '10')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Vertebrata', snippet: 'a <span class="searchmatch">genus</span> of algae'],
+                                            [ns: 0, title: 'Vertebrate', snippet: 'a <span class="searchmatch">genus</span> of animals']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Vertebrata') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Plantae</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Vertebrata', 'Animalia')
+
+        then:
+        response != null
+        response.title == null
+        response.html == ''
+    }
+
+    void "test search Wikipedia kingdom check accepts same-kingdom match"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Moggridgea rainbowi"')
+                query('srnamespace', '0')
+                query('srlimit', '10')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Moggridgea rainbowi', snippet: 'a <span class="searchmatch">species</span> of spider']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Moggridgea_rainbowi') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Animalia</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Moggridgea rainbowi', 'Animalia')
+
+        then:
+        response != null
+        response.title == 'Moggridgea_rainbowi'
+        response.html.contains('infobox biota')
+    }
+
+    void "test search Wikipedia returns result when kingdom not supplied"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Something"')
+                query('srnamespace', '0')
+                query('srlimit', '10')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Something', snippet: 'a <span class="searchmatch">species</span> of thing']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Something') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Something')
+
+        then:
+        response != null
+        response.title == 'Something'
+        response.html.contains('infobox biota')
+    }
+
     void "test get BHL literature"() {
         given:
         server.expectations {

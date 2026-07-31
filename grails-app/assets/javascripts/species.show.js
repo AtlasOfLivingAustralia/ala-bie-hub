@@ -567,6 +567,9 @@ function loadExternalSources() {
         }
 
         var url = "/externalSite/wikipedia?name=" + encodeURI(name)
+        if (SHOW_CONF.kingdom) {
+            url += "&kingdom=" + encodeURI(SHOW_CONF.kingdom)
+        }
         var testPage = !SHOW_CONF.wikiUrl.match("^http.*")
         $.ajax({url: url, dataType: "json"}).done(function (data) {
             var html = data && data.html ? data.html : data

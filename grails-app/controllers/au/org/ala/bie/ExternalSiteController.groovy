@@ -38,10 +38,11 @@ class ExternalSiteController {
 
     def wikipedia = {
         def model = [title: null, html: '']
+        def kingdom = params.kingdom ?: ''
         if (params.name) {
-            model = externalSiteService.searchWikipedia(params.name)
+            model = externalSiteService.searchWikipedia(params.name, kingdom)
         } else if (params.redirect) {
-            model = externalSiteService.searchWikipedia(params.redirect)
+            model = externalSiteService.searchWikipedia(params.redirect, kingdom)
         }
         response.setContentType("application/json")
         render (model as JSON)

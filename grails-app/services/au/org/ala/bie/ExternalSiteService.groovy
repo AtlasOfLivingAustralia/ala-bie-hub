@@ -188,14 +188,15 @@ class ExternalSiteService implements GrailsConfigurationAware {
      *
      * Uses the MediaWiki search API with an intitle: query, filters results to those whose
      * snippet mentions a taxonomic rank, then fetches and validates the first candidate that
-     * looks like a taxon article.
+     * looks like a taxon article and, if a kingdom is provided, belongs to that kingdom.
      *
      * @param name The taxon name to search for
+     * @param kingdom Optional ALA kingdom to use as a homonym check
      * @return A map with keys {@code title} (the selected Wikipedia page title) and
      *         {@code html} (the page HTML), or {@code null} if nothing suitable is found.
      */
     @Cacheable("wikiCache")
-    def searchWikipedia(String name) {
+    def searchWikipedia(String name, String kingdom = '') {
         if (blacklist && blacklist.isBlacklisted(name, null, null)) {
             return [title: null, html: '']
         }
@@ -212,15 +213,20 @@ class ExternalSiteService implements GrailsConfigurationAware {
             return [title: null, html: '']
         }
 
+        String expectedKingdom = kingdom ? normaliseKingdom(kingdom) : ''
         var header = ["Accept-Language": wikipediaLang]
         for (String title : candidates) {
             String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
             try {
                 String html = webClientService.get(pageUrl, false, header)
                 if (html && isTaxonArticle(html)) {
-                    return [title: title, html: html]
+                    if (!expectedKingdom || pageMatchesKingdom(html, expectedKingdom)) {
+                        return [title: title, html: html]
+                    }
+                    log.debug "Wikipedia candidate ${title} for ${name} does not match kingdom ${kingdom}"
+                } else {
+                    log.debug "Wikipedia candidate ${title} for ${name} failed taxon validation"
                 }
-                log.debug "Wikipedia candidate ${title} for ${name} failed taxon validation"
             } catch (Exception ex) {
                 log.warn "Error retrieving Wikipedia page ${pageUrl}: ${ex.message}"
             }
@@ -228,6 +234,27 @@ class ExternalSiteService implements GrailsConfigurationAware {
 
         log.debug "No Wikipedia candidates for ${name} passed taxon validation"
         return [title: null, html: '']
+    }
+
+    /**
+     * Normalise an ALA kingdom value so it can be matched against Wikipedia page text.
+     */
+    private String normaliseKingdom(String kingdom) {
+        return kingdom.trim().toLowerCase().replaceAll(/[^a-z]/, '')
+    }
+
+    /**
+     * Check whether the supplied taxon article HTML appears to belong to the expected kingdom.
+     * The check is intentionally conservative: the kingdom name must appear in the page text
+     * close to other taxonomy indicators.
+     */
+    private boolean pageMatchesKingdom(String html, String expectedKingdom) {
+        if (!expectedKingdom) {
+            return true
+        }
+        def doc = Jsoup.parse(html)
+        String pageText = doc.text().toLowerCase()
+        return pageText.contains("kingdom") && pageText.contains(expectedKingdom)
     }
 
     /**
