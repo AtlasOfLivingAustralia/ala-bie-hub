@@ -53,6 +53,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
     String wikipediaApi
     String wikipediaLang
     String wikipediaRankPattern
+    int wikipediaSearchLimit
 
     def webClientService
 
@@ -70,6 +71,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
         wikipediaApi = config.getProperty("wikipedia.api")
         wikipediaLang = config.getProperty("wikipedia.lang")
         wikipediaRankPattern = config.getProperty("wikipedia.rankPattern", "(?i)species|genus|family|order|class|phylum|kingdom")
+        wikipediaSearchLimit = config.getProperty("wikipedia.searchLimit", Integer, 20)
     }
 
     /**
@@ -190,6 +192,10 @@ class ExternalSiteService implements GrailsConfigurationAware {
      * snippet mentions a taxonomic rank, then fetches and validates the first candidate that
      * looks like a taxon article and, if a kingdom is provided, belongs to that kingdom.
      *
+     * If a kingdom is supplied and no candidate matches, the search will also look at the
+     * base-name disambiguation page to find homonym pages that may belong to the requested
+     * kingdom (for example, "Chara (moth)" for kingdom Animalia).
+     *
      * @param name The taxon name to search for
      * @param kingdom Optional ALA kingdom to use as a homonym check
      * @return A map with keys {@code title} (the selected Wikipedia page title) and
@@ -209,12 +215,33 @@ class ExternalSiteService implements GrailsConfigurationAware {
 
         Pattern taxonRankPattern = Pattern.compile(wikipediaRankPattern)
         def candidates = searchWikipediaCandidates(name, taxonRankPattern)
-        if (!candidates) {
-            log.debug "No Wikipedia search candidates for ${name}"
-            return [title: null, html: '']
+        String expectedKingdom = kingdom ? normaliseKingdom(kingdom) : ''
+        def result = evaluateCandidates(candidates, name, expectedKingdom, taxonRankPattern)
+        if (result?.html) {
+            return result
         }
 
-        String expectedKingdom = kingdom ? normaliseKingdom(kingdom) : ''
+        if (expectedKingdom) {
+            log.debug "No matching taxon candidate for ${name}; checking disambiguation page for kingdom ${kingdom}"
+            def homonymCandidates = findDisambiguationHomonyms(name)
+            result = evaluateCandidates(homonymCandidates, name, expectedKingdom, taxonRankPattern)
+            if (result?.html) {
+                return result
+            }
+        }
+
+        log.debug "No Wikipedia candidates for ${name} passed taxon validation"
+        return [title: null, html: '']
+    }
+
+    /**
+     * Fetch and validate each candidate page, returning the first one that is a taxon article
+     * matching the expected kingdom.
+     */
+    private Map evaluateCandidates(List<String> candidates, String name, String expectedKingdom, Pattern taxonRankPattern) {
+        if (!candidates) {
+            return [title: null, html: '']
+        }
         def header = ["Accept-Language": wikipediaLang]
         for (String title : candidates) {
             String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
@@ -224,7 +251,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
                     if (!expectedKingdom || pageMatchesKingdom(html, expectedKingdom)) {
                         return [title: title, html: html]
                     }
-                    log.debug "Wikipedia candidate ${title} for ${name} does not match kingdom ${kingdom}"
+                    log.debug "Wikipedia candidate ${title} for ${name} does not match kingdom ${expectedKingdom}"
                 } else {
                     log.debug "Wikipedia candidate ${title} for ${name} failed taxon validation"
                 }
@@ -232,9 +259,45 @@ class ExternalSiteService implements GrailsConfigurationAware {
                 log.warn "Error retrieving Wikipedia page ${pageUrl}: ${ex.message}"
             }
         }
-
-        log.debug "No Wikipedia candidates for ${name} passed taxon validation"
         return [title: null, html: '']
+    }
+
+    /**
+     * Retrieve the base-name disambiguation page and extract candidate homonym page titles
+     * whose link text or title matches the original name. These are typically entries like
+     * "Chara (alga)" or "Chara (moth)".
+     */
+    private List<String> findDisambiguationHomonyms(String name) {
+        def candidates = []
+        try {
+            String pageUrl = wikipediaUrl + URLEncoder.encode(name.replace(' ', '_'), 'UTF-8')
+            String html = webClientService.get(pageUrl, false, ["Accept-Language": wikipediaLang])
+            if (!html) {
+                return candidates
+            }
+            def doc = Jsoup.parse(html)
+            def links = doc.select('a[href^="/wiki/"], a[href^="./"]')
+            String targetName = name.toLowerCase()
+            links.each { link ->
+                String href = link.attr('href')
+                String linkText = link.text().toLowerCase()
+                if (href.startsWith('/wiki/')) {
+                    href = href.substring(6)
+                } else if (href.startsWith('./')) {
+                    href = href.substring(2)
+                }
+                String cleanHref = URLDecoder.decode(href, 'UTF-8').replace('_', ' ').toLowerCase()
+                if (cleanHref.startsWith(targetName + ' (') || linkText.startsWith(targetName + ' (')) {
+                    String candidate = href.replace(' ', '_').replaceAll(/^\/+/, '')
+                    if (candidate && !candidates.contains(candidate)) {
+                        candidates << candidate
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.warn "Error retrieving disambiguation page for ${name}: ${ex.message}"
+        }
+        return candidates
     }
 
     /**
@@ -272,7 +335,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
             String url = "${wikipediaApi}?action=query&list=search" +
                     "&srsearch=" + URLEncoder.encode(query, 'UTF-8') +
                     "&srnamespace=0" +
-                    "&srlimit=10" +
+                    "&srlimit=" + wikipediaSearchLimit +
                     "&utf8=1&format=json"
             def json = webClientService.getJson(url)
             if (json instanceof JSONObject && json.has("error")) {
@@ -282,7 +345,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
             def results = json?.query?.search
             if (results) {
                 results.each { result ->
-                    String snippet = result.snippet ?: ''
+                    String snippet = stripHtml(result.snippet ?: '')
                     if (taxonRankPattern.matcher(snippet).find()) {
                         candidates << result.title.replace(' ', '_')
                     }
@@ -292,6 +355,13 @@ class ExternalSiteService implements GrailsConfigurationAware {
             log.warn "Error searching Wikipedia candidates for ${name}: ${ex.message}"
         }
         return candidates
+    }
+
+    /**
+     * Strip HTML markup from a string.
+     */
+    private String stripHtml(String html) {
+        return html.replaceAll(/<[^>]+>/, '')
     }
 
     /**

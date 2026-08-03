@@ -228,6 +228,7 @@ wikipedia:
     api: https://en.wikipedia.org/w/api.php
     lang: en
     rankPattern: (?i)species|genus|family|order|class|phylum|kingdom
+    searchLimit: 20
 imageServiceBaseUrl: https://images.ala.org.au/
 survey:
     indexPage: false
