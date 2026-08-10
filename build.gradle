@@ -58,6 +58,20 @@ repositories {
     maven { url "https://repo.grails.org/grails/core" }
 }
 
+sourceSets {
+    liveWikipediaTest {
+        groovy.srcDir file('src/liveWikipediaTest/groovy')
+        resources.srcDir file('src/liveWikipediaTest/resources')
+        compileClasspath += sourceSets.main.output + sourceSets.test.output
+        runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+    }
+}
+
+configurations {
+    liveWikipediaTestImplementation.extendsFrom testImplementation
+    liveWikipediaTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
 dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     implementation  "org.springframework.boot:spring-boot-starter-logging"
@@ -164,6 +178,30 @@ bootRun {
 //    systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
 //    systemProperty "webdriver.gecko.driver", System.getProperty('webdriver.gecko.driver')
 //}
+
+processLiveWikipediaTestResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+task liveWikipediaTest(type: Test) {
+    description = 'Runs integration tests against the live Wikipedia API. Does not run by default.'
+    group = 'verification'
+    testClassesDirs = sourceSets.liveWikipediaTest.output.classesDirs
+    classpath = sourceSets.liveWikipediaTest.runtimeClasspath
+    systemProperty 'wikipedia.live.tests', 'true'
+    useJUnitPlatform()
+    shouldRunAfter test, integrationTest
+}
+
+// Ensure live Wikipedia tests are never part of default build/check.
+afterEvaluate {
+    tasks.named('mergeTestReports') { mergeTask ->
+        mergeTask.dependsOn.removeAll { it.name == 'liveWikipediaTest' }
+    }
+    tasks.named('check') { checkTask ->
+        checkTask.dependsOn.removeAll { it.name == 'liveWikipediaTest' }
+    }
+}
 
 
 assets {

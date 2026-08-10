@@ -1,0 +1,40 @@
+name: Live Wikipedia Check
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+  # Weekly on Mondays at 08:00 UTC
+  schedule:
+    - cron: '0 8 * * 1'
+
+jobs:
+  live-wikipedia-test:
+    name: Run live Wikipedia integration tests
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Run live Wikipedia integration tests
+        id: live_wikipedia
+        run: ./gradlew liveWikipediaTest --no-daemon
+
+      - name: Summary on failure
+        if: ${{ failure() || steps.live_wikipedia.outcome == 'failure' }}
+        run: |
+          echo "## :warning: Live Wikipedia check failed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "One or more taxa in \`wikipedia-live-tests.csv\` did not return the expected content from Wikipedia." >> $GITHUB_STEP_SUMMARY
+          echo "This usually means either:" >> $GITHUB_STEP_SUMMARY
+          echo "- Wikipedia page content has changed, or" >> $GITHUB_STEP_SUMMARY
+          echo "- the filtering logic in \`ExternalSiteService.searchWikipedia()\` has become too restrictive." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Review the test report for details. This failure does not block any builds." >> $GITHUB_STEP_SUMMARY

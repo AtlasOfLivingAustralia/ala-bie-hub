@@ -42,7 +42,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         grailsApplication.config.wikipedia.url = server.httpUrl + '/page/html/'
         grailsApplication.config.wikipedia.api = server.httpUrl + '/api.php'
         grailsApplication.config.wikipedia.lang = 'en'
-        grailsApplication.config.wikipedia.rankPattern = '(?i)species|genus|family|order|class|phylum|kingdom'
+        grailsApplication.config.wikipedia.snippetPattern = '(?i)species|genus|family|order|class|phylum|kingdom|australia|endemic'
         grailsApplication.config.wikipedia.searchLimit = 20
         service.setConfiguration(grailsApplication.config)
 
@@ -262,9 +262,9 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         response.html == ''
     }
 
-    void "test search Wikipedia uses custom rank pattern from config"() {
+    void "test search Wikipedia uses custom snippet pattern from config"() {
         given:
-        service.wikipediaRankPattern = '(?i)clam|bivalve'
+        service.wikipediaSnippetPattern = '(?i)clam|bivalve'
         server.expectations {
             get('/api.php') {
                 query('action', 'query')
@@ -480,7 +480,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         response.html.contains('infobox biota')
     }
 
-    void "test search Wikipedia rank pattern does not match snippet HTML markup"() {
+    void "test search Wikipedia snippet pattern does not match snippet HTML markup"() {
         given:
         server.expectations {
             get('/api.php') {
@@ -582,6 +582,48 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         then:
         response != null
         response.title == 'Chara_(moth)'
+        response.html.contains('Kingdom: Animalia')
+    }
+
+    void "test search Wikipedia strips subgenus from intitle search"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Anthochaera carunculata"')
+                query('srnamespace', '0')
+                query('srlimit', '20')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Red wattlebird', snippet: 'The red wattlebird (<span class="searchmatch">Anthochaera</span> <span class="searchmatch">carunculata</span>) is a passerine bird']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Red_wattlebird') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Animalia</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Anthochaera (Anthochaera) carunculata', 'Animalia')
+
+        then:
+        response != null
+        response.title == 'Red_wattlebird'
         response.html.contains('Kingdom: Animalia')
     }
 
