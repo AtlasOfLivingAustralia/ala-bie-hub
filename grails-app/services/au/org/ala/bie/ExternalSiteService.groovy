@@ -257,8 +257,10 @@ class ExternalSiteService implements GrailsConfigurationAware {
         def names = []
         // Strip subgenus parentheses and normalise whitespace. Use a Java-style string
         // literal for the regex so Groovy 3.x compiles it as \s*\([^)]*\).
-        String withoutSubgenus = name.replaceAll('\\s*\\([^)]*\\)', '').trim().replaceAll('\\s+', ' ')
-        if (withoutSubgenus && withoutSubgenus != name) {
+        // Replace any remaining underscores/spaces with a single space and trim so a
+        // disambiguated title such as "Meretrix_(bivalve)" does not produce "Meretrix_".
+        String withoutSubgenus = name.replaceAll('\\s*\\([^)]*\\)', '').trim().replaceAll('[_\\s]+', ' ')
+        if (withoutSubgenus && withoutSubgenus != name.replaceAll('[_\\s]+', ' ')) {
             names << withoutSubgenus
         }
         names << name
@@ -289,13 +291,23 @@ class ExternalSiteService implements GrailsConfigurationAware {
     /**
      * Fetch and validate each candidate page, returning the first one that is a taxon article
      * matching the expected kingdom.
+     *
+     * Candidates are tried in order of title similarity to the requested name: exact matches
+     * first, then disambiguated forms ("Name (something)"), then other related pages. This
+     * prevents a more specific page such as "Meretrix lusoria" from being chosen over the
+     * genus page "Meretrix (bivalve)" when the caller searched for "Meretrix".
      */
     private Map evaluateCandidates(List<String> candidates, String name, String expectedKingdom) {
         if (!candidates) {
             return [title: null, html: '']
         }
         def header = ["Accept-Language": wikipediaLang]
-        for (String title : candidates) {
+        def ranked = candidates.sort(false) { a, b ->
+            Integer scoreA = scoreTitleMatch(a, name)
+            Integer scoreB = scoreTitleMatch(b, name)
+            return scoreB <=> scoreA
+        }
+        for (String title : ranked) {
             String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
             try {
                 String html = webClientService.get(pageUrl, false, header)
@@ -312,6 +324,32 @@ class ExternalSiteService implements GrailsConfigurationAware {
             }
         }
         return [title: null, html: '']
+    }
+
+    /**
+     * Score how closely a Wikipedia page title matches the searched-for name.
+     * Higher scores indicate a stronger preference.
+     *
+     * 3 = exact match (ignoring underscores/spaces)
+     * 2 = disambiguated exact match, e.g. "Meretrix (bivalve)" for "Meretrix"
+     * 1 = starts with the name followed by more text, e.g. "Meretrix lusoria"
+     * 0 = no match
+     */
+    private int scoreTitleMatch(String candidateTitle, String searchName) {
+        // Normalise both sides the same way so "Meretrix_(bivalve)" scores as an exact
+        // match against the "Meretrix (bivalent)" candidate title.
+        String normalisedTitle = candidateTitle.replace('_', ' ').trim().toLowerCase()
+        String normalisedName = searchName.replace('_', ' ').trim().toLowerCase()
+        if (normalisedTitle == normalisedName) {
+            return 3
+        }
+        if (normalisedTitle.startsWith(normalisedName + ' (')) {
+            return 2
+        }
+        if (normalisedTitle.startsWith(normalisedName + ' ')) {
+            return 1
+        }
+        return 0
     }
 
     /**

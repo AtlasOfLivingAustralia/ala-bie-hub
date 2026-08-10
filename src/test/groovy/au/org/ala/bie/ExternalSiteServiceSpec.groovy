@@ -627,6 +627,99 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         response.html.contains('Kingdom: Animalia')
     }
 
+    void "test search Wikipedia normalises disambiguated title to base name"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Meretrix"')
+                query('srnamespace', '0')
+                query('srlimit', '20')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Meretrix lusoria', snippet: '<span class="searchmatch">Meretrix</span> lusoria is a <span class="searchmatch">species</span> of saltwater clam'],
+                                            [ns: 0, title: 'Meretrix (bivalve)', snippet: '<span class="searchmatch">Meretrix</span> is a <span class="searchmatch">genus</span> of saltwater clams']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Meretrix_(bivalve)') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Animalia</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Meretrix_(bivalve)', 'Animalia')
+
+        then:
+        response != null
+        response.title == 'Meretrix_(bivalve)'
+        response.html.contains('infobox biota')
+    }
+
+    void "test search Wikipedia prefers disambiguated genus page over species when called with underscore title"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Meretrix"')
+                query('srnamespace', '0')
+                query('srlimit', '20')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Meretrix lusoria', snippet: '<span class="searchmatch">Meretrix</span> lusoria is a <span class="searchmatch">species</span> of saltwater clam'],
+                                            [ns: 0, title: 'Meretrix (bivalve)', snippet: '<span class="searchmatch">Meretrix</span> is a <span class="searchmatch">genus</span> of saltwater clams']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Meretrix_lusoria') {
+                called(0)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Animalia</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+            get('/page/html/Meretrix_(bivalve)') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Animalia</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Meretrix_(bivalve)', 'Animalia')
+
+        then:
+        response != null
+        response.title == 'Meretrix_(bivalve)'
+        response.html.contains('infobox biota')
+    }
+
     void "test get BHL literature"() {
         given:
         server.expectations {
