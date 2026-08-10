@@ -220,7 +220,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
         List<String> searchNames = buildSearchNames(name)
         for (String searchName : searchNames) {
             def candidates = searchWikipediaCandidates(searchName, snippetPattern)
-            def result = evaluateCandidates(candidates, name, expectedKingdom, snippetPattern)
+            def result = evaluateCandidates(candidates, name, expectedKingdom)
             if (result?.html) {
                 return result
             }
@@ -236,7 +236,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
             log.debug "No matching taxon candidate for ${name}; checking disambiguation page for kingdom ${kingdom}"
             for (String searchName : searchNames) {
                 def homonymCandidates = findDisambiguationHomonyms(searchName)
-                def result = evaluateCandidates(homonymCandidates, name, expectedKingdom, snippetPattern)
+                def result = evaluateCandidates(homonymCandidates, name, expectedKingdom)
                 if (result?.html) {
                     return result
                 }
@@ -290,7 +290,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
      * Fetch and validate each candidate page, returning the first one that is a taxon article
      * matching the expected kingdom.
      */
-    private Map evaluateCandidates(List<String> candidates, String name, String expectedKingdom, Pattern snippetPattern) {
+    private Map evaluateCandidates(List<String> candidates, String name, String expectedKingdom) {
         if (!candidates) {
             return [title: null, html: '']
         }
