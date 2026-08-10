@@ -108,7 +108,11 @@ class LiveWikipediaSearchSpec extends Specification {
         def lowerName = scientificName.toLowerCase()
         def htmlMatched = expectedHtml && lowerHtml.contains(expectedHtml.toLowerCase())
         def commonNameMatched = commonName && lowerHtml.contains(commonName.toLowerCase())
-        htmlMatched || commonNameMatched || lowerHtml.contains(lowerName)
+        def nameMatched = lowerHtml.contains(lowerName)
+        assert htmlMatched || commonNameMatched || nameMatched :
+                "Wikipedia page for ${scientificName} (resolved title: ${response.title}) " +
+                "did not contain expected fragment '${expectedHtml}', common name '${commonName}', or name '${scientificName}'. " +
+                "HTML length: ${response.html.length()}"
 
         where:
         testCase << getLiveTestCases()
