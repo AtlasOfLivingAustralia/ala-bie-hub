@@ -42,7 +42,8 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         grailsApplication.config.wikipedia.url = server.httpUrl + '/page/html/'
         grailsApplication.config.wikipedia.api = server.httpUrl + '/api.php'
         grailsApplication.config.wikipedia.lang = 'en'
-        grailsApplication.config.wikipedia.rankPattern = '(?i)species|genus|family|order|class|phylum|kingdom'
+        grailsApplication.config.wikipedia.snippetPattern = '(?i)species|genus|family|order|class|phylum|kingdom|australia|endemic'
+        grailsApplication.config.wikipedia.searchLimit = 20
         service.setConfiguration(grailsApplication.config)
 
         String allowedElements = "h2,div,a,br,i,b,span,ul,li,p,sup"
@@ -92,7 +93,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
                 query('list', 'search')
                 query('srsearch', 'intitle:"Acipenser brevirostrum"')
                 query('srnamespace', '0')
-                query('srlimit', '10')
+                query('srlimit', '20')
                 query('utf8', '1')
                 query('format', 'json')
                 called(1)
@@ -134,7 +135,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
                 query('list', 'search')
                 query('srsearch', 'intitle:"Meretrix"')
                 query('srnamespace', '0')
-                query('srlimit', '10')
+                query('srlimit', '20')
                 query('utf8', '1')
                 query('format', 'json')
                 called(1)
@@ -178,7 +179,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
                 query('list', 'search')
                 query('srsearch', 'intitle:"Foo"')
                 query('srnamespace', '0')
-                query('srlimit', '10')
+                query('srlimit', '20')
                 query('utf8', '1')
                 query('format', 'json')
                 called(1)
@@ -214,7 +215,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
                 query('list', 'search')
                 query('srsearch', 'intitle:"Badtaxon"')
                 query('srnamespace', '0')
-                query('srlimit', '10')
+                query('srlimit', '20')
                 query('utf8', '1')
                 query('format', 'json')
                 called(1)
@@ -261,16 +262,16 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         response.html == ''
     }
 
-    void "test search Wikipedia uses custom rank pattern from config"() {
+    void "test search Wikipedia uses custom snippet pattern from config"() {
         given:
-        service.wikipediaRankPattern = '(?i)clam|bivalve'
+        service.wikipediaSnippetPattern = '(?i)clam|bivalve'
         server.expectations {
             get('/api.php') {
                 query('action', 'query')
                 query('list', 'search')
                 query('srsearch', 'intitle:"Paged"')
                 query('srnamespace', '0')
-                query('srlimit', '10')
+                query('srlimit', '20')
                 query('utf8', '1')
                 query('format', 'json')
                 called(1)
@@ -313,7 +314,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
                 query('list', 'search')
                 query('srsearch', 'intitle:"Vertebrata"')
                 query('srnamespace', '0')
-                query('srlimit', '10')
+                query('srlimit', '20')
                 query('utf8', '1')
                 query('format', 'json')
                 called(1)
@@ -356,7 +357,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
                 query('list', 'search')
                 query('srsearch', 'intitle:"Moggridgea rainbowi"')
                 query('srnamespace', '0')
-                query('srlimit', '10')
+                query('srlimit', '20')
                 query('utf8', '1')
                 query('format', 'json')
                 called(1)
@@ -398,7 +399,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
                 query('list', 'search')
                 query('srsearch', 'intitle:"Something"')
                 query('srnamespace', '0')
-                query('srlimit', '10')
+                query('srlimit', '20')
                 query('utf8', '1')
                 query('format', 'json')
                 called(1)
@@ -430,6 +431,200 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         response != null
         response.title == 'Something'
         response.html.contains('infobox biota')
+    }
+
+    void "test search Wikipedia for Chara finds alga page beyond initial top results"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Chara"')
+                query('srnamespace', '0')
+                query('srlimit', '20')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Shugo Chara!', snippet: 'also known as My Guardian Characters, is a Japanese manga series'],
+                                            [ns: 0, title: 'Chara Airport', snippet: 'an airport in Russia'],
+                                            [ns: 0, title: 'Canes Venatici', snippet: 'a constellation in the northern sky'],
+                                            [ns: 0, title: 'Chara (singer)', snippet: 'a Japanese singer'],
+                                            [ns: 0, title: 'Chara (alga)', snippet: '<span class="searchmatch">Chara</span> is a <span class="searchmatch">genus</span> of charophyte green algae'],
+                                            [ns: 0, title: 'Chara people', snippet: 'a people group of Ethiopia']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Chara_(alga)') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Plantae</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Chara', 'Plantae')
+
+        then:
+        response != null
+        response.title == 'Chara_(alga)'
+        response.html.contains('infobox biota')
+    }
+
+    void "test search Wikipedia snippet pattern does not match snippet HTML markup"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Chara"')
+                query('srnamespace', '0')
+                query('srlimit', '20')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Chara Manga', snippet: 'Japanese <span class="searchmatch">Chara</span> manga'],
+                                            [ns: 0, title: 'Chara (alga)', snippet: '<span class="searchmatch">Chara</span> is a <span class="searchmatch">genus</span> of green algae']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Chara_(alga)') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Plantae</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Chara', 'Plantae')
+
+        then:
+        response != null
+        response.title == 'Chara_(alga)'
+    }
+
+    void "test search Wikipedia falls back to disambiguation page for cross-kingdom homonym"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Chara"')
+                query('srnamespace', '0')
+                query('srlimit', '20')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Chara (alga)', snippet: '<span class="searchmatch">Chara</span> is a <span class="searchmatch">genus</span> of charophyte green algae']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Chara_(alga)') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Plantae</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+            get('/page/html/Chara') {
+                called(1)
+                responder {
+                    code(200)
+                    body('''<section>
+                        <p>Chara may refer to:</p>
+                        <ul>
+                            <li><a href="/wiki/Chara_(alga)">Chara (alga)</a>, a genus of algae</li>
+                            <li><a href="/wiki/Chara_(moth)">Chara (moth)</a>, a genus of moths</li>
+                            <li><a href="/wiki/Chara_(star)">Chara (star)</a></li>
+                        </ul>
+                    </section>''', ContentType.TEXT_HTML)
+                }
+            }
+            get('/page/html/Chara_(moth)') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Animalia</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Chara', 'Animalia')
+
+        then:
+        response != null
+        response.title == 'Chara_(moth)'
+        response.html.contains('Kingdom: Animalia')
+    }
+
+    void "test search Wikipedia strips subgenus from intitle search"() {
+        given:
+        server.expectations {
+            get('/api.php') {
+                query('action', 'query')
+                query('list', 'search')
+                query('srsearch', 'intitle:"Anthochaera carunculata"')
+                query('srnamespace', '0')
+                query('srlimit', '20')
+                query('utf8', '1')
+                query('format', 'json')
+                called(1)
+                responder {
+                    encoder(ContentType.APPLICATION_JSON, Map, Encoders.json)
+                    code(200)
+                    body([
+                            query: [
+                                    search: [
+                                            [ns: 0, title: 'Red wattlebird', snippet: 'The red wattlebird (<span class="searchmatch">Anthochaera</span> <span class="searchmatch">carunculata</span>) is a passerine bird']
+                                    ]
+                            ]
+                    ], ContentType.APPLICATION_JSON)
+                }
+            }
+            get('/page/html/Red_wattlebird') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><table class="infobox biota">Scientific classification</table><p>Kingdom: Animalia</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.searchWikipedia('Anthochaera (Anthochaera) carunculata', 'Animalia')
+
+        then:
+        response != null
+        response.title == 'Red_wattlebird'
+        response.html.contains('Kingdom: Animalia')
     }
 
     void "test get BHL literature"() {

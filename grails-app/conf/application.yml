@@ -227,7 +227,8 @@ wikipedia:
     # https://www.mediawiki.org/wiki/API:Search
     api: https://en.wikipedia.org/w/api.php
     lang: en
-    rankPattern: (?i)species|genus|family|order|class|phylum|kingdom
+    snippetPattern: (?i)species|genus|family|order|class|phylum|kingdom|australia|endemic
+    searchLimit: 20
 imageServiceBaseUrl: https://images.ala.org.au/
 survey:
     indexPage: false

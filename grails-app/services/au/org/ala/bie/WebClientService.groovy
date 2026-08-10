@@ -31,7 +31,11 @@ class WebClientService implements InitializingBean {
     def get(String url){
         get(url,false, [:])
     }
-    def get(String url, boolean throwError, Map<String, String> headers) {
+def get(String url, boolean throwError, Map<String, String> headers) {
+    return get(url, throwError, headers, true)
+}
+
+    def get(String url, boolean throwError, Map<String, String> headers, boolean followRedirects) {
         log.debug "GET on " + url
         def conn = new URL(url).openConnection()
         try {
@@ -40,6 +44,12 @@ class WebClientService implements InitializingBean {
             }
             conn.setConnectTimeout(10000)
             conn.setReadTimeout(50000)
+            // HttpURLConnection follows redirects across protocols by default, but the REST API
+            // returns 307 redirects for page redirects (e.g. binomial -> common name). Ensure
+            // redirection is enabled so callers receive the target page content.
+            if (conn.metaClass.respondsTo(conn, 'setInstanceFollowRedirects', boolean)) {
+                conn.setInstanceFollowRedirects(followRedirects)
+            }
             conn.setRequestProperty('User-Agent', grailsApplication.config.getProperty("customUserAgent", "ala-bie-hub"))
             return conn.content.text
         } catch (SocketTimeoutException e) {

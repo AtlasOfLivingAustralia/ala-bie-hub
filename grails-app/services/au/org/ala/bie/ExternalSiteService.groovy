@@ -52,7 +52,8 @@ class ExternalSiteService implements GrailsConfigurationAware {
     String wikipediaUrl
     String wikipediaApi
     String wikipediaLang
-    String wikipediaRankPattern
+    String wikipediaSnippetPattern
+    int wikipediaSearchLimit
 
     def webClientService
 
@@ -69,7 +70,8 @@ class ExternalSiteService implements GrailsConfigurationAware {
         wikipediaUrl = config.getProperty("wikipedia.url")
         wikipediaApi = config.getProperty("wikipedia.api")
         wikipediaLang = config.getProperty("wikipedia.lang")
-        wikipediaRankPattern = config.getProperty("wikipedia.rankPattern", "(?i)species|genus|family|order|class|phylum|kingdom")
+        wikipediaSnippetPattern = config.getProperty("wikipedia.snippetPattern", "(?i)species|genus|family|order|class|phylum|kingdom|australia|endemic")
+        wikipediaSearchLimit = config.getProperty("wikipedia.searchLimit", Integer, 20)
     }
 
     /**
@@ -190,6 +192,10 @@ class ExternalSiteService implements GrailsConfigurationAware {
      * snippet mentions a taxonomic rank, then fetches and validates the first candidate that
      * looks like a taxon article and, if a kingdom is provided, belongs to that kingdom.
      *
+     * If a kingdom is supplied and no candidate matches, the search will also look at the
+     * base-name disambiguation page to find homonym pages that may belong to the requested
+     * kingdom (for example, "Chara (moth)" for kingdom Animalia).
+     *
      * @param name The taxon name to search for
      * @param kingdom Optional ALA kingdom to use as a homonym check
      * @return A map with keys {@code title} (the selected Wikipedia page title) and
@@ -207,14 +213,87 @@ class ExternalSiteService implements GrailsConfigurationAware {
             return [title: null, html: '']
         }
 
-        Pattern taxonRankPattern = Pattern.compile(wikipediaRankPattern)
-        def candidates = searchWikipediaCandidates(name, taxonRankPattern)
-        if (!candidates) {
-            log.debug "No Wikipedia search candidates for ${name}"
-            return [title: null, html: '']
+        Pattern snippetPattern = Pattern.compile(wikipediaSnippetPattern)
+        String expectedKingdom = kingdom ? normaliseKingdom(kingdom) : ''
+
+        // Try a version with any subgenus parenthetical removed first (if applicable), then the supplied name.
+        List<String> searchNames = buildSearchNames(name)
+        for (String searchName : searchNames) {
+            def candidates = searchWikipediaCandidates(searchName, snippetPattern)
+            def result = evaluateCandidates(candidates, name, expectedKingdom)
+            if (result?.html) {
+                return result
+            }
+            // If search produced no usable candidates, the exact page URL may still resolve
+            // via a redirect (e.g. binomial -> common-name article). Try it before moving on.
+            result = tryExactPage(searchName, expectedKingdom)
+            if (result?.html) {
+                return result
+            }
         }
 
-        String expectedKingdom = kingdom ? normaliseKingdom(kingdom) : ''
+        if (expectedKingdom) {
+            log.debug "No matching taxon candidate for ${name}; checking disambiguation page for kingdom ${kingdom}"
+            for (String searchName : searchNames) {
+                def homonymCandidates = findDisambiguationHomonyms(searchName)
+                def result = evaluateCandidates(homonymCandidates, name, expectedKingdom)
+                if (result?.html) {
+                    return result
+                }
+            }
+        }
+
+        log.debug "No Wikipedia candidates for ${name} passed taxon validation"
+        return [title: null, html: '']
+    }
+
+    /**
+     * Build the list of names to search for. Wikipedia pages for species with subgenera
+     * are almost always titled using the plain binomial, so if the supplied name contains
+     * a subgenus, also search without it. Non-alphanumeric characters and extra whitespace
+     * are normalised so the title matches the way Wikipedia indexes pages.
+     */
+    private List<String> buildSearchNames(String name) {
+        def names = []
+        // Strip subgenus parentheses and normalise whitespace. Use a Java-style string
+        // literal for the regex so Groovy 3.x compiles it as \s*\([^)]*\).
+        String withoutSubgenus = name.replaceAll('\\s*\\([^)]*\\)', '').trim().replaceAll('\\s+', ' ')
+        if (withoutSubgenus && withoutSubgenus != name) {
+            names << withoutSubgenus
+        }
+        names << name
+        return names
+    }
+
+    /**
+     * Try opening a Wikipedia page for the exact (possibly normalised) name. This is used as a
+     * last-resort fallback for names that MediaWiki search does not index in title form, such as
+     * a plain binomial that redirects to a common-name article.
+     */
+    private Map tryExactPage(String name, String expectedKingdom) {
+        try {
+            String title = name.replace(' ', '_')
+            String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
+            String html = webClientService.get(pageUrl, false, ["Accept-Language": wikipediaLang])
+            if (html && isTaxonArticle(html)) {
+                if (!expectedKingdom || pageMatchesKingdom(html, expectedKingdom)) {
+                    return [title: title, html: html]
+                }
+            }
+        } catch (Exception ex) {
+            log.debug "Exact page fallback for ${name} failed: ${ex.message}"
+        }
+        return [title: null, html: '']
+    }
+
+    /**
+     * Fetch and validate each candidate page, returning the first one that is a taxon article
+     * matching the expected kingdom.
+     */
+    private Map evaluateCandidates(List<String> candidates, String name, String expectedKingdom) {
+        if (!candidates) {
+            return [title: null, html: '']
+        }
         def header = ["Accept-Language": wikipediaLang]
         for (String title : candidates) {
             String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
@@ -224,7 +303,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
                     if (!expectedKingdom || pageMatchesKingdom(html, expectedKingdom)) {
                         return [title: title, html: html]
                     }
-                    log.debug "Wikipedia candidate ${title} for ${name} does not match kingdom ${kingdom}"
+                    log.debug "Wikipedia candidate ${title} for ${name} does not match kingdom ${expectedKingdom}"
                 } else {
                     log.debug "Wikipedia candidate ${title} for ${name} failed taxon validation"
                 }
@@ -232,9 +311,45 @@ class ExternalSiteService implements GrailsConfigurationAware {
                 log.warn "Error retrieving Wikipedia page ${pageUrl}: ${ex.message}"
             }
         }
-
-        log.debug "No Wikipedia candidates for ${name} passed taxon validation"
         return [title: null, html: '']
+    }
+
+    /**
+     * Retrieve the base-name disambiguation page and extract candidate homonym page titles
+     * whose link text or title matches the original name. These are typically entries like
+     * "Chara (alga)" or "Chara (moth)".
+     */
+    private List<String> findDisambiguationHomonyms(String name) {
+        def candidates = []
+        try {
+            String pageUrl = wikipediaUrl + URLEncoder.encode(name.replace(' ', '_'), 'UTF-8')
+            String html = webClientService.get(pageUrl, false, ["Accept-Language": wikipediaLang])
+            if (!html) {
+                return candidates
+            }
+            def doc = Jsoup.parse(html)
+            def links = doc.select('a[href^="/wiki/"], a[href^="./"]')
+            String targetName = name.toLowerCase()
+            links.each { link ->
+                String href = link.attr('href')
+                String linkText = link.text().toLowerCase()
+                if (href.startsWith('/wiki/')) {
+                    href = href.substring(6)
+                } else if (href.startsWith('./')) {
+                    href = href.substring(2)
+                }
+                String cleanHref = URLDecoder.decode(href, 'UTF-8').replace('_', ' ').toLowerCase()
+                if (cleanHref.startsWith(targetName + ' (') || linkText.startsWith(targetName + ' (')) {
+                    String candidate = href.replace(' ', '_').replaceAll(/^\/+/, '')
+                    if (candidate && !candidates.contains(candidate)) {
+                        candidates << candidate
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.warn "Error retrieving disambiguation page for ${name}: ${ex.message}"
+        }
+        return candidates
     }
 
     /**
@@ -259,20 +374,24 @@ class ExternalSiteService implements GrailsConfigurationAware {
     }
 
     /**
-     * Query the MediaWiki search API and return a list of candidate page titles
-     * whose snippets mention a taxonomic rank.
+     * Query the MediaWiki search API and return a list of candidate page titles.
+     * If the search returns a single result we trust the title match and skip the
+     * snippet filter, since many taxon articles have non-taxonomic opening sentences
+     * (e.g. "The great white shark ... is a large shark"). When there are multiple
+     * results, the configured snippet pattern filters out pages that are clearly not
+     * taxon articles (disambiguation pages, bands, airports, manga, etc.).
      *
      * @param name The taxon name to search for
-     * @param taxonRankPattern Pattern to apply to each result snippet
+     * @param snippetPattern Pattern to apply when there are multiple results
      */
-    private List<String> searchWikipediaCandidates(String name, Pattern taxonRankPattern) {
+    private List<String> searchWikipediaCandidates(String name, Pattern snippetPattern) {
         def candidates = []
         try {
             String query = "intitle:\"${name}\""
             String url = "${wikipediaApi}?action=query&list=search" +
                     "&srsearch=" + URLEncoder.encode(query, 'UTF-8') +
                     "&srnamespace=0" +
-                    "&srlimit=10" +
+                    "&srlimit=" + wikipediaSearchLimit +
                     "&utf8=1&format=json"
             def json = webClientService.getJson(url)
             if (json instanceof JSONObject && json.has("error")) {
@@ -281,10 +400,15 @@ class ExternalSiteService implements GrailsConfigurationAware {
             }
             def results = json?.query?.search
             if (results) {
+                boolean singleResult = results.size() == 1
                 results.each { result ->
-                    String snippet = result.snippet ?: ''
-                    if (taxonRankPattern.matcher(snippet).find()) {
+                    if (singleResult) {
                         candidates << result.title.replace(' ', '_')
+                    } else {
+                        String snippet = stripHtml(result.snippet ?: '')
+                        if (snippetPattern.matcher(snippet).find()) {
+                            candidates << result.title.replace(' ', '_')
+                        }
                     }
                 }
             }
@@ -292,6 +416,13 @@ class ExternalSiteService implements GrailsConfigurationAware {
             log.warn "Error searching Wikipedia candidates for ${name}: ${ex.message}"
         }
         return candidates
+    }
+
+    /**
+     * Strip HTML markup from a string.
+     */
+    private String stripHtml(String html) {
+        return html.replaceAll(/<[^>]+>/, '')
     }
 
     /**
@@ -303,8 +434,23 @@ class ExternalSiteService implements GrailsConfigurationAware {
         }
         try {
             def doc = Jsoup.parse(html)
-            return !doc.select(".infobox.biota").isEmpty() ||
-                    !doc.select('[aria-labelledby="Taxon_identifiers"]').isEmpty()
+            if (!doc.select(".infobox.biota").isEmpty() ||
+                    !doc.select('[aria-labelledby="Taxon_identifiers"]').isEmpty()) {
+                return true
+            }
+            // The MediaWiki REST API returns Parsoid HTML where templates are rendered as
+            // transclusion metadata rather than classic infobox markup. Accept pages that
+            // contain a Speciesbox/Automatic taxobox/Taxobox template or a taxonomic short
+            // description such as "Species of spider".
+            def dataMw = doc.select("[data-mw]")
+            return dataMw.any { element ->
+                String mw = element.attr("data-mw")
+                mw.contains('"Speciesbox"') ||
+                        mw.contains('"Automatic taxobox"') ||
+                        mw.contains('"Taxobox"') ||
+                        (mw.contains('"Short description"') &&
+                                mw.toLowerCase().contains("species of"))
+            }
         } catch (Exception ex) {
             log.warn "Error parsing Wikipedia HTML for taxon validation: ${ex.message}"
             return false
