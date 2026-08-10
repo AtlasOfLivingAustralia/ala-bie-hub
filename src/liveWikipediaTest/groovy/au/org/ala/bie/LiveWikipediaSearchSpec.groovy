@@ -98,6 +98,8 @@ class LiveWikipediaSearchSpec extends Specification {
     @Unroll
     void "Wikipedia search for #scientificName returns content containing at least one expected fragment"() {
         when:
+        // Back off between live requests so the workflow does not hit Wikipedia rate limits.
+        sleep(500)
         def response = externalSiteService.searchWikipedia(scientificName, kingdom)
 
         then:
