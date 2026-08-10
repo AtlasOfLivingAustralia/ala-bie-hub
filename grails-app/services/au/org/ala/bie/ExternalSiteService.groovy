@@ -216,7 +216,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
         Pattern snippetPattern = Pattern.compile(wikipediaSnippetPattern)
         String expectedKingdom = kingdom ? normaliseKingdom(kingdom) : ''
 
-        // Try the supplied name first, then a version with any subgenus parenthetical removed.
+        // Try a version with any subgenus parenthetical removed first (if applicable), then the supplied name.
         List<String> searchNames = buildSearchNames(name)
         for (String searchName : searchNames) {
             def candidates = searchWikipediaCandidates(searchName, snippetPattern)
