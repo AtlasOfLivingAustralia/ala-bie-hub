@@ -31,10 +31,9 @@ class WebClientService implements InitializingBean {
     def get(String url){
         get(url,false, [:])
     }
-    def get(String url, boolean throwError, Map<String, String> headers) {
-        log.debug "GET on " + url
-        return get(url, throwError, headers, true)
-    }
+def get(String url, boolean throwError, Map<String, String> headers) {
+    return get(url, throwError, headers, true)
+}
 
     def get(String url, boolean throwError, Map<String, String> headers, boolean followRedirects) {
         log.debug "GET on " + url
