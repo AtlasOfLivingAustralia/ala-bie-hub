@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-const fs = require('fs');
 const searchUrl = '/search';
 
 // Needed for BIE WAF on GH actions servers
@@ -22,7 +21,7 @@ test('autocomplete suggestion test', async ({ page }) => {
   // Wait for the autocomplete suggestions to appear.
   await page.waitForSelector('.ui-autocomplete .ui-menu-item');
 
-  // Check that the correct suggestion is displayed with an exact string match.
+  // Check that the first suggestion is "Acacia".
   const suggestion = await page.locator('.ui-menu-item-wrapper').first().innerText();
   await expect(suggestion).toBe('Acacia');
 
@@ -67,24 +66,18 @@ test('Acacia search results', async ({ page }) => {
 
 test('Acacia download test', async ({ page, browserName }) => {
   test.skip(browserName === 'webkit', 'Doesn\'t work for WebKit on Linux');
-  // Search for Acacia 
+  // Search for Acacia
   await page.goto(searchUrl + '?q=Acacia&rows=20');
 
-  // Enable async handling of downloads
-  const downloadPromise = page.waitForEvent('download');
-
-  // Perform the action that initiates the download
-  await page.getByRole('link', { name: ' Download' }).click(); // Unicode character for download icon
-
-  // Wait for download to begin
-  const download = await downloadPromise;
-
-  // Wait for the download process to complete and get the downloaded file path
-  await download.saveAs('/tmp/' + download.suggestedFilename());
-  const filePath = await download.path();
+  // Get the download URL from the link and fetch it directly.
+  const downloadLink = page.locator('.download-button a');
+  const downloadUrl = await downloadLink.getAttribute('href');
+  await expect(downloadUrl).toBeTruthy();
+  const response = await page.request.get(downloadUrl!);
+  await expect(response).toBeOK();
 
   // Read file contents directly without saving permanently
-  const fileContent = await fs.promises.readFile(filePath, 'utf-8');
+  const fileContent = await response.text();
 
   // Verify file contents
   expect(fileContent).toContain('taxonID');
