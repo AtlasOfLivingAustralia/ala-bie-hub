@@ -1,7 +1,7 @@
 # ala-bie-hub
 ###    [![Build Status](https://app.travis-ci.com/AtlasOfLivingAustralia/ala-bie-hub.svg?branch=develop)](https://app.travis-ci.com/AtlasOfLivingAustralia/ala-bie-hub) [![E2E test status](https://github.com/AtlasOfLivingAustralia/ala-bie-hub/actions/workflows/e2e.yml/badge.svg)](https://github.com/AtlasOfLivingAustralia/ala-bie-hub/actions/workflows/e2e.yml) [![Live Wikipedia check](https://github.com/AtlasOfLivingAustralia/ala-bie-hub/actions/workflows/live-wikipedia-check.yml/badge.svg)](https://github.com/AtlasOfLivingAustralia/ala-bie-hub/actions/workflows/live-wikipedia-check.yml)
 
-This is the BIE (Biodiversity Information Explorer) front end - merge of old ala-bie and bie-plugin. 
+This is the BIE (Biodiversity Information Explorer) front end Grails app - merge of old `ala-bie` and `bie-plugin` repos. 
 
 THE BIE handles general search duties and serves taxon/species pages.
 For more details on the architecture see [BIE index](http://github.com/AtlasOfLivingAustralia/bie-index)
