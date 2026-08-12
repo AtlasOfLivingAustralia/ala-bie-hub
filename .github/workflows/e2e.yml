@@ -70,11 +70,9 @@ jobs:
           ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true 
 
       # Upload test results
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: e2e/playwright-report/
           retention-days: 30
-        env:
-          ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true 
