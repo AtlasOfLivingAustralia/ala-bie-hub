@@ -6,7 +6,9 @@ $(document).ready(function () {
     $.extend( bieParams, autoHints ); // merge autoHints into bieParams
 
     function getMatchingName(item) {
-        if (item.commonNameMatches && item.commonNameMatches.length) {
+        if (item.scientificNameMatches && item.scientificNameMatches.length) {
+            return item.name;
+        } else if (item.commonNameMatches && item.commonNameMatches.length) {
             return item.commonName;
         } else {
             return item.name;

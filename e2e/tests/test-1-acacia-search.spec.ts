@@ -21,9 +21,9 @@ test('autocomplete suggestion test', async ({ page }) => {
   // Wait for the autocomplete suggestions to appear.
   await page.waitForSelector('.ui-autocomplete .ui-menu-item');
 
-  // Check that at least one suggestion contains "Acacia".
-  const suggestions = await page.locator('.ui-menu-item-wrapper').allInnerTexts();
-  await expect(suggestions.some(s => s.toLowerCase().includes('acacia'))).toBe(true);
+  // Check that the first suggestion is "Acacia".
+  const suggestion = await page.locator('.ui-menu-item-wrapper').first().innerText();
+  await expect(suggestion).toBe('Acacia');
 
 });
 
