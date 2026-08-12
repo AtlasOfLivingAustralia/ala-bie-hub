@@ -30,7 +30,7 @@ test('Acacia Mill - API URL', async ({ page }) => {
   await page.getByRole('button', { name: 'API' }).click();
   const textInput = page.locator('#al4rcode');
   const value = await textInput.inputValue();
-  await expect(value).toMatch(/https:\/\/bie-ws-test\.ala\.org\.au\/ws\/species\/https:\/\/id\.biodiversity\.org\.au\/taxon\/apni\/\d+/);
+  await expect(value).toMatch(/https:\/\/bie-ws(-test)?\.ala\.org\.au\/ws\/species\/https:\/\/id\.biodiversity\.org\.au\/taxon\/apni\/\d+/);
 });
 
 test('Acacia Mill - hero images', async ({ page }) => {

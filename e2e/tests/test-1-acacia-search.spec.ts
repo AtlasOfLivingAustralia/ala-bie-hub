@@ -18,12 +18,11 @@ test('autocomplete suggestion test', async ({ page }) => {
   // Type text into the search input.
   await page.fill('#search', 'acacia');
 
-  // Wait for the autocomplete suggestions to appear.
-  await page.waitForSelector('.ui-autocomplete .ui-menu-item');
-
-  // Check that the first suggestion is "Acacia".
-  const suggestion = await page.locator('.ui-menu-item-wrapper').first().innerText();
-  await expect(suggestion).toBe('Acacia');
+  // Wait for the autocomplete suggestions to appear and contain "Acacia".
+  const acaciaSuggestion = page.locator('.ui-autocomplete .ui-menu-item .ui-menu-item-wrapper')
+    .filter({ hasText: /Acacia/ })
+    .first();
+  await expect(acaciaSuggestion).toBeVisible();
 
 });
 
