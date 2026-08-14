@@ -277,7 +277,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
             String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
             String html = webClientService.get(pageUrl, false, ["Accept-Language": wikipediaLang])
             if (html) {
-                return [title: title, url: "https://${host}/wiki/${URLEncoder.encode(title, 'UTF-8')}", html: html]
+                return [title: title, html: html]
             }
             return [title: null, html: '']
         } catch (Exception ex) {

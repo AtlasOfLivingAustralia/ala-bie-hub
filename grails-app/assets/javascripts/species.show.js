@@ -479,16 +479,15 @@ function showWikipediaData(data, testPage, targetName) {
             var redirect = $(item).find('link[rel="mw:PageProp/redirect"]')
             if (redirect.length > 0) {
                 var redirectItem = redirect[0].href.replace(/^.*\//, "")
-                var url = "/externalSite/wikipedia?url=" + encodeURIComponent("https://en.wikipedia.org/wiki/" + redirectItem)
-                if (!targetName || !targetName.match(/^https?:\/\//)) {
-                    url = "/externalSite/wikipedia?name=" + encodeURI(redirectItem)
-                }
-                if (SHOW_CONF.kingdom && (!targetName || !targetName.match(/^https?:\/\//))) {
+                var url = testPage
+                    ? "/externalSite/wikipedia?name=" + encodeURI(redirectItem)
+                    : "/externalSite/wikipedia?url=" + encodeURIComponent("https://en.wikipedia.org/wiki/" + redirectItem)
+                if (SHOW_CONF.kingdom && testPage) {
                     url += "&kingdom=" + encodeURI(SHOW_CONF.kingdom)
                 }
                 $.ajax({url: url, dataType: "json"}).done(function (data) {
                     var html = data && data.html ? data.html : data
-                    var title = data && data.url ? data.url : (data && data.title ? data.title : redirectItem)
+                    var title = data && data.title ? data.title : redirectItem
                     showWikipediaData(html, testPage, title)
                 });
                 return
@@ -583,7 +582,7 @@ function loadExternalSources() {
         var testPage = !SHOW_CONF.wikiUrl.match("^http.*")
         $.ajax({url: url, dataType: "json"}).done(function (data) {
             var html = data && data.html ? data.html : data
-            var title = data && data.url ? data.url : (data && data.title ? data.title : name)
+            var title = data && data.title ? data.title : name
             showWikipediaData(html, testPage, title)
         });
     }
