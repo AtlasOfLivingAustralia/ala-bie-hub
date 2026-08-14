@@ -224,6 +224,7 @@ show:
 wikipedia:
     # https://en.wikipedia.org/api/rest_v1/#/Page%20content/get_page_html__title_
     url: https://en.wikipedia.org/api/rest_v1/page/html/
+    host: wikipedia.org
     # https://www.mediawiki.org/wiki/API:Search
     api: https://en.wikipedia.org/w/api.php
     lang: en

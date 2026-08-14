@@ -39,7 +39,9 @@ class ExternalSiteController {
     def wikipedia = {
         def model = [title: null, html: '']
         def kingdom = params.kingdom ?: ''
-        if (params.name) {
+        if (params.url) {
+            model = externalSiteService.fetchWikipediaUrl(params.url)
+        } else if (params.name) {
             model = externalSiteService.searchWikipedia(params.name, kingdom)
         } else if (params.redirect) {
             model = externalSiteService.searchWikipedia(params.redirect, kingdom)

@@ -42,6 +42,7 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         grailsApplication.config.wikipedia.url = server.httpUrl + '/page/html/'
         grailsApplication.config.wikipedia.api = server.httpUrl + '/api.php'
         grailsApplication.config.wikipedia.lang = 'en'
+        grailsApplication.config.wikipedia.host = 'wikipedia.org'
         grailsApplication.config.wikipedia.snippetPattern = '(?i)species|genus|family|order|class|phylum|kingdom|australia|endemic'
         grailsApplication.config.wikipedia.searchLimit = 20
         service.setConfiguration(grailsApplication.config)
@@ -125,6 +126,58 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         response != null
         response.title == 'Acipenser_brevirostrum'
         response.html.contains('infobox biota')
+    }
+
+    void "test fetch Wikipedia override loads exact page without taxon checks"() {
+        given:
+        service.wikipediaUrl = server.httpUrl + '/page/html/'
+        server.expectations {
+            get('/page/html/Algae_(food)') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><p>Wikipedia content without a kingdom classification.</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.fetchWikipediaUrl('https://en.wikipedia.org/wiki/Algae_(food)')
+
+        then:
+        response.title == 'Algae_(food)'
+        response.html.contains('without a kingdom classification')
+    }
+
+    void "test fetch Wikipedia override rejects non-Wikipedia URL"() {
+        when:
+        def response = service.fetchWikipediaUrl('https://example.org/wiki/Some_page')
+
+        then:
+        response.title == null
+        response.html == ''
+    }
+
+    void "test fetch Wikipedia override uses configured host"() {
+        given:
+        service.wikipediaHost = 'wiki.example.org'
+        service.wikipediaUrl = server.httpUrl + '/page/html/'
+        server.expectations {
+            get('/page/html/Configured_page') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><p>Configured host content.</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.fetchWikipediaUrl('https://wiki.example.org/wiki/Configured_page')
+
+        then:
+        response.title == 'Configured_page'
+        response.html.contains('Configured host content')
     }
 
     void "test search Wikipedia resolves ambiguous name to taxon page"() {
