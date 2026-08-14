@@ -53,6 +53,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
     String wikipediaUrl
     String wikipediaApi
     String wikipediaLang
+    String wikipediaHost
     String wikipediaSnippetPattern
     int wikipediaSearchLimit
 
@@ -71,6 +72,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
         wikipediaUrl = config.getProperty("wikipedia.url")
         wikipediaApi = config.getProperty("wikipedia.api")
         wikipediaLang = config.getProperty("wikipedia.lang")
+        wikipediaHost = config.getProperty("wikipedia.host", "wikipedia.org")
         wikipediaSnippetPattern = config.getProperty("wikipedia.snippetPattern", "(?i)species|genus|family|order|class|phylum|kingdom|australia|endemic")
         wikipediaSearchLimit = config.getProperty("wikipedia.searchLimit", Integer, 20)
     }
@@ -250,7 +252,7 @@ class ExternalSiteService implements GrailsConfigurationAware {
 
     /**
      * Fetch an administrator-supplied Wikipedia article without applying taxon selection checks.
-     * The URL is restricted to the configured Wikipedia host (or a wikipedia.org host), and the
+     * The URL is restricted to the configured Wikipedia host (or a subdomain of it), and the
      * REST API is used so the response receives the same content and rendering treatment as a
      * search result.
      */
@@ -258,8 +260,9 @@ class ExternalSiteService implements GrailsConfigurationAware {
         try {
             URI requested = new URI(url)
             String host = requested.host?.toLowerCase()
-            boolean wikipediaHost = host == 'wikipedia.org' || host?.endsWith('.wikipedia.org')
-            if (!host || !wikipediaHost ||
+            String configuredHost = wikipediaHost?.toLowerCase()?.replaceFirst(/^https?:\/\//, '')?.replaceFirst(/\/$/, '')
+            boolean allowedHost = host == configuredHost || host?.endsWith('.' + configuredHost)
+            if (!host || !configuredHost || !allowedHost ||
                     requested.scheme != 'https' || requested.query || requested.fragment ||
                     !requested.path?.startsWith('/wiki/')) {
                 log.warn "Rejected invalid Wikipedia override URL: ${url}"
