@@ -30,6 +30,7 @@ import org.jsoup.Jsoup
 import org.owasp.html.HtmlPolicyBuilder
 import org.owasp.html.PolicyFactory
 
+import java.net.URI
 import java.util.regex.Pattern
 
 /**
@@ -245,6 +246,41 @@ class ExternalSiteService implements GrailsConfigurationAware {
 
         log.debug "No Wikipedia candidates for ${name} passed taxon validation"
         return [title: null, html: '']
+    }
+
+    /**
+     * Fetch an administrator-supplied Wikipedia article without applying taxon selection checks.
+     * The URL is restricted to the configured Wikipedia host (or a wikipedia.org host), and the
+     * REST API is used so the response receives the same content and rendering treatment as a
+     * search result.
+     */
+    def fetchWikipediaUrl(String url) {
+        try {
+            URI requested = new URI(url)
+            String host = requested.host?.toLowerCase()
+            boolean wikipediaHost = host == 'wikipedia.org' || host?.endsWith('.wikipedia.org')
+            if (!host || !wikipediaHost ||
+                    requested.scheme != 'https' || requested.query || requested.fragment ||
+                    !requested.path?.startsWith('/wiki/')) {
+                log.warn "Rejected invalid Wikipedia override URL: ${url}"
+                return [title: null, html: '']
+            }
+
+            String title = URLDecoder.decode(requested.path.substring('/wiki/'.length()), 'UTF-8')
+            if (!title) {
+                return [title: null, html: '']
+            }
+            title = title.replace(' ', '_')
+            String pageUrl = wikipediaUrl + URLEncoder.encode(title, 'UTF-8')
+            String html = webClientService.get(pageUrl, false, ["Accept-Language": wikipediaLang])
+            if (html) {
+                return [title: title, url: "https://${host}/wiki/${URLEncoder.encode(title, 'UTF-8')}", html: html]
+            }
+            return [title: null, html: '']
+        } catch (Exception ex) {
+            log.warn "Error retrieving Wikipedia override ${url}: ${ex.message}"
+            return [title: null, html: '']
+        }
     }
 
     /**

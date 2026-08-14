@@ -127,6 +127,36 @@ class ExternalSiteServiceSpec extends Specification implements ServiceUnitTest<E
         response.html.contains('infobox biota')
     }
 
+    void "test fetch Wikipedia override loads exact page without taxon checks"() {
+        given:
+        service.wikipediaUrl = server.httpUrl + '/page/html/'
+        server.expectations {
+            get('/page/html/Algae_(food)') {
+                called(1)
+                responder {
+                    code(200)
+                    body('<section><p>Wikipedia content without a kingdom classification.</p></section>', ContentType.TEXT_HTML)
+                }
+            }
+        }
+
+        when:
+        def response = service.fetchWikipediaUrl('https://en.wikipedia.org/wiki/Algae_(food)')
+
+        then:
+        response.title == 'Algae_(food)'
+        response.html.contains('without a kingdom classification')
+    }
+
+    void "test fetch Wikipedia override rejects non-Wikipedia URL"() {
+        when:
+        def response = service.fetchWikipediaUrl('https://example.org/wiki/Some_page')
+
+        then:
+        response.title == null
+        response.html == ''
+    }
+
     void "test search Wikipedia resolves ambiguous name to taxon page"() {
         given:
         server.expectations {
