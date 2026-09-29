@@ -72,3 +72,22 @@ test('Acacia Mill - Wikipedia content', async ({ page }) => {
   }
   await expect(matchedCount).toBeGreaterThanOrEqual(3);
 });
+
+test('Acacia Mill - map basemap and attribution check', async ({ page }) => {
+  await page.goto(searchUrl);
+  await page.locator('a[href="/species/Acacia"]').nth(1).click();
+  await page.waitForSelector('h1 .accepted-name', { timeout: 30000 });
+
+  // Check map container exists
+  const leafletMap = page.locator('#leafletMap');
+  await expect(leafletMap).toBeVisible({ timeout: 30000 });
+
+  // Check MapLibre vector canvas is rendered
+  const maplibreCanvas = page.locator('#leafletMap .leaflet-gl-layer canvas');
+  await expect(maplibreCanvas).toBeVisible({ timeout: 30000 });
+
+  // Check attribution
+  const attribution = page.locator('.leaflet-control-attribution');
+  await expect(attribution).toContainText('CARTO');
+  await expect(attribution).toContainText('OpenStreetMap');
+});

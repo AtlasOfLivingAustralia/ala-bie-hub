@@ -44,8 +44,18 @@ $(document).ready(function() {
 		}
 	});
 
+	$('#imageDialog').on('show.bs.modal', function () {
+		if (window.L_imagesClient) {
+			window.L_mainMap = window.L;
+			window.L = window.L_imagesClient;
+		}
+	});
+
 	// show image only after modal dialog is shown. otherwise, image position will be off the viewing area.
 	$('#imageDialog').on('shown.bs.modal',function () {
+		if (window.L_imagesClient) {
+			window.L = window.L_imagesClient;
+		}
 		imgvwr.viewImage($("#viewerContainerId"), imageId, SHOW_CONF.scientificName, SHOW_CONF.guid, {
 			imageServiceBaseUrl: SHOW_CONF.imageServiceBaseUrl,
 			addSubImageToggle: false,
@@ -65,6 +75,12 @@ $(document).ready(function() {
 			getPreferredSpeciesListUrl: SHOW_CONF.getPreferredSpeciesListUrl,
 			druid: SHOW_CONF.druid
 		});
+	});
+
+	$('#imageDialog').on('hidden.bs.modal', function () {
+		if (window.L_mainMap) {
+			window.L = window.L_mainMap;
+		}
 	});
 
 
