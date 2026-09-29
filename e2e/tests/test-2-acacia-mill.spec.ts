@@ -82,6 +82,10 @@ test('Acacia Mill - map basemap and attribution check', async ({ page }) => {
   const leafletMap = page.locator('#leafletMap');
   await expect(leafletMap).toBeVisible({ timeout: 30000 });
 
+  // Check MapLibre vector canvas is rendered
+  const maplibreCanvas = page.locator('#leafletMap .leaflet-gl-layer canvas');
+  await expect(maplibreCanvas).toBeVisible({ timeout: 30000 });
+
   // Check attribution
   const attribution = page.locator('.leaflet-control-attribution');
   await expect(attribution).toContainText('CARTO');

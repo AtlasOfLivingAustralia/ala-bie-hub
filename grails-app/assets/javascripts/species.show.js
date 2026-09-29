@@ -131,11 +131,33 @@ function loadMap() {
     var defaultBaseLayer;
     if (SHOW_CONF.defaultMapVectorTileUrl && typeof leaflet.maplibreGL === 'function') {
         try {
-            defaultBaseLayer = leaflet.maplibreGL({
+            var vectorOptions = {
                 style: SHOW_CONF.defaultMapVectorTileUrl,
-                attribution: SHOW_CONF.defaultMapAttr,
                 pane: 'tilePane'
-            });
+            };
+            if (SHOW_CONF.defaultMapAttr) {
+                vectorOptions.attributionControl = { customAttribution: SHOW_CONF.defaultMapAttr };
+            }
+            var vectorLayer = leaflet.maplibreGL(vectorOptions);
+            vectorLayer.addTo(SHOW_CONF.map);
+            defaultBaseLayer = vectorLayer;
+
+            var glMap = vectorLayer.getMaplibreMap();
+            if (glMap) {
+                glMap.once('error', function (err) {
+                    if (SHOW_CONF.map && SHOW_CONF.map.hasLayer(vectorLayer)) {
+                        console.warn("MapLibre GL error encountered, falling back to raster tiles:", err);
+                        SHOW_CONF.map.removeLayer(vectorLayer);
+                        var fallbackLayer = leaflet.tileLayer(SHOW_CONF.defaultMapUrl, {
+                            attribution: SHOW_CONF.defaultMapAttr,
+                            subdomains: SHOW_CONF.defaultMapDomain,
+                            mapid: SHOW_CONF.defaultMapId,
+                            token: SHOW_CONF.defaultMapToken
+                        });
+                        fallbackLayer.addTo(SHOW_CONF.map);
+                    }
+                });
+            }
         } catch (e) {
             console.warn("Failed to initialize MapLibre GL layer, falling back to raster tiles:", e);
         }
@@ -148,9 +170,8 @@ function loadMap() {
             mapid: SHOW_CONF.defaultMapId,
             token: SHOW_CONF.defaultMapToken
         });
+        defaultBaseLayer.addTo(SHOW_CONF.map);
     }
-
-    defaultBaseLayer.addTo(SHOW_CONF.map);
     leaflet.control.scale({imperial: false, position: 'bottomright'}).addTo(SHOW_CONF.map);
 
     var baseLayers = {
