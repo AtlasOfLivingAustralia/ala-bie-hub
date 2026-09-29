@@ -102,8 +102,10 @@ function loadMap() {
         return;
     }
 
+    var leaflet = (window.L && window.L.maplibreGL) ? window.L : (window.L_mainMap || window.L);
+
     //add an occurrence layer for this taxon
-    var taxonLayer = L.tileLayer.wms(SHOW_CONF.biocacheServiceUrl + "/mapping/wms/reflect?q=lsid:" +
+    var taxonLayer = leaflet.tileLayer.wms(SHOW_CONF.biocacheServiceUrl + "/mapping/wms/reflect?q=lsid:" +
         SHOW_CONF.guid + (SHOW_CONF.qualityProfile ? "&qualityProfile=" + SHOW_CONF.qualityProfile : "")
         + "&qc=" + SHOW_CONF.mapQueryContext + SHOW_CONF.additionalMapFilter
         , {
@@ -116,36 +118,52 @@ function loadMap() {
             ENV: SHOW_CONF.mapEnvOptions
         });
 
-    var speciesLayers = new L.LayerGroup();
+    var speciesLayers = new leaflet.LayerGroup();
     taxonLayer.addTo(speciesLayers);
 
-    SHOW_CONF.map = L.map('leafletMap', {
+    SHOW_CONF.map = leaflet.map('leafletMap', {
         center: [SHOW_CONF.defaultDecimalLatitude, SHOW_CONF.defaultDecimalLongitude],
         zoom: SHOW_CONF.defaultZoomLevel,
         layers: [speciesLayers],
         scrollWheelZoom: false
     });
 
-    var defaultBaseLayer = L.tileLayer(SHOW_CONF.defaultMapUrl, {
-        attribution: SHOW_CONF.defaultMapAttr,
-        subdomains: SHOW_CONF.defaultMapDomain,
-        mapid: SHOW_CONF.defaultMapId,
-        token: SHOW_CONF.defaultMapToken
-    });
+    var defaultBaseLayer;
+    if (SHOW_CONF.defaultMapVectorTileUrl && typeof leaflet.maplibreGL === 'function') {
+        try {
+            defaultBaseLayer = leaflet.maplibreGL({
+                style: SHOW_CONF.defaultMapVectorTileUrl,
+                attribution: SHOW_CONF.defaultMapAttr,
+                pane: 'tilePane'
+            });
+        } catch (e) {
+            console.warn("Failed to initialize MapLibre GL layer, falling back to raster tiles:", e);
+        }
+    }
+
+    if (!defaultBaseLayer) {
+        defaultBaseLayer = leaflet.tileLayer(SHOW_CONF.defaultMapUrl, {
+            attribution: SHOW_CONF.defaultMapAttr,
+            subdomains: SHOW_CONF.defaultMapDomain,
+            mapid: SHOW_CONF.defaultMapId,
+            token: SHOW_CONF.defaultMapToken
+        });
+    }
 
     defaultBaseLayer.addTo(SHOW_CONF.map);
-    L.control.scale({imperial: false, position: 'bottomright'}).addTo(SHOW_CONF.map);
+    leaflet.control.scale({imperial: false, position: 'bottomright'}).addTo(SHOW_CONF.map);
 
     var baseLayers = {
         "Base layer": defaultBaseLayer
     };
+    var baseLayersControl = Object.keys(baseLayers).length > 1 ? baseLayers : null;
 
     var sciName = SHOW_CONF.scientificName;
 
     var overlays = {};
     overlays[sciName] = taxonLayer;
 
-    L.control.layers(baseLayers, overlays).addTo(SHOW_CONF.map);
+    leaflet.control.layers(baseLayersControl, overlays).addTo(SHOW_CONF.map);
 
     //SHOW_CONF.map.on('click', onMapClick);
     SHOW_CONF.map.invalidateSize(false);
@@ -175,10 +193,11 @@ function fitMapToBounds() {
     $.getJSON(jsonUrl, function (data) {
         if (data.length == 4 && data[0] != 0 && data[1] != 0) {
             //console.log("data", data);
-            var sw = L.latLng(data[1], data[0]);
-            var ne = L.latLng(data[3], data[2]);
+            var leaflet = (window.L && window.L.maplibreGL) ? window.L : (window.L_mainMap || window.L);
+            var sw = leaflet.latLng(data[1], data[0]);
+            var ne = leaflet.latLng(data[3], data[2]);
             //console.log("sw", sw.toString());
-            var dataBounds = L.latLngBounds(sw, ne);
+            var dataBounds = leaflet.latLngBounds(sw, ne);
             //var centre = dataBounds.getCenter();
             var mapBounds = SHOW_CONF.map.getBounds();
 

@@ -180,8 +180,9 @@ map:
     default:
         id:
         token:
-        url: https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png
-        attr: Map data &copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a>, imagery &copy; <a href='https://cartodb.com/attributions'>CartoDB</a>
+        vectorTileUrl: https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
+        url: https://basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png
+        attr: &copy; <a href='https://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap</a> contributors, &copy; <a href='https://carto.com/attribution/' target='_blank' rel='noopener'>CARTO</a>
         domain: abcd
         colour: e6704c
     simpleMapButton: false

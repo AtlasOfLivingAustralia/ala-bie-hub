@@ -57,14 +57,19 @@
     <!-- facebook and twitter tags -->
     <g:render template="facebookTwitterTags"/>
 
-    <asset:javascript src="show.js"/>
-    <asset:javascript src="charts.js"/>
-    <asset:stylesheet src="charts.css"/>
-    <asset:stylesheet src="show.css"/>
     <asset:javascript src="ala/images-client.js"/>
     <asset:stylesheet src="ala/images-client.css"/>
     <asset:javascript src="ala/images-client-gallery.js"/>
     <asset:stylesheet src="ala/images-client-gallery.css"/>
+    <script type="text/javascript">
+        if (window.L) {
+            window.L_imagesClient = window.L;
+        }
+    </script>
+    <asset:javascript src="show.js"/>
+    <asset:javascript src="charts.js"/>
+    <asset:stylesheet src="charts.css"/>
+    <asset:stylesheet src="show.css"/>
     <script type="text/javascript">
         jQuery.i18n.properties({
             name: 'Messages',
@@ -398,6 +403,22 @@
 
 <asset:script type="text/javascript">
     // Global var to pass GSP vars into JS file @TODO replace bhl and trove with literatureSource list
+    <g:set var="defaultMapVectorTileUrl" value="${grailsApplication.config.getProperty('map.default.vectorTileUrl', String) ?: grailsApplication.config.getProperty('map.default.styleUrl', String) ?: ''}"/>
+    <g:set var="defaultMapUrl" value="${grailsApplication.config.getProperty('map.default.url', String) ?: ''}"/>
+    <%
+        if (defaultMapVectorTileUrl && !defaultMapVectorTileUrl.contains('key=')) {
+            def apiKey = grailsApplication.config.getProperty('map.default.apiKey', String)
+            if (!apiKey && defaultMapUrl) {
+                def matcher = (defaultMapUrl =~ /[?&]key=([^&#]+)/)
+                if (matcher.find()) {
+                    apiKey = matcher.group(1)
+                }
+            }
+            if (apiKey) {
+                defaultMapVectorTileUrl += (defaultMapVectorTileUrl.contains('?') ? '&' : '?') + "key=${apiKey}"
+            }
+        }
+    %>
     var SHOW_CONF = {
         biocacheUrl:        "${grailsApplication.config.biocache.baseURL}",
         biocacheServiceUrl: "${grailsApplication.config.biocacheService.baseURL}",
@@ -434,7 +455,8 @@
         defaultDecimalLongitude: ${grailsApplication.config.defaultDecimalLongitude},
         defaultZoomLevel: ${grailsApplication.config.defaultZoomLevel},
         mapAttribution: "${raw(grailsApplication.config.skin.orgNameLong)}",
-        defaultMapUrl: "${grailsApplication.config.map.default.url}",
+        defaultMapVectorTileUrl: "${defaultMapVectorTileUrl}",
+        defaultMapUrl: "${defaultMapUrl}",
         defaultMapAttr: "${raw(grailsApplication.config.map.default.attr)}",
         defaultMapDomain: "${grailsApplication.config.map.default.domain}",
         defaultMapId: "${grailsApplication.config.map.default.id}",

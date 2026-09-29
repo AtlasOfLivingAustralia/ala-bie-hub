@@ -14,6 +14,8 @@
  */
 
 //= require leaflet.js
+//= require maplibre-gl.js
+//= require leaflet-maplibre-gl.js
 //= require jquery.sortElemets.js
 //= require jquery.htmlClean.js
 //= require jquery.jsonp-2.3.1.min.js
@@ -23,3 +25,7 @@
 //= require ekko-lightbox.min.js
 //= require atlas.js
 //= require audiojs/audio.js
+
+if (typeof window !== 'undefined' && window.L) {
+    window.L_mainMap = window.L;
+}
