@@ -84,6 +84,8 @@ a.expand-options {border-top: 1px solid #e3e3e3; display: block; padding-top: 2p
 /* Taxon map */
 .taxon-map {margin-bottom: 20px;}
 #leafletMap {height: 550px; border-radius: 4px 4px 0 0; overflow: hidden; background-color: #ebebeb;}
+.leaflet-control-attribution .carto-logo-link {display: inline-block; vertical-align: middle; margin-right: 4px; line-height: 1;}
+.leaflet-control-attribution .carto-logo {height: 22px; width: auto; vertical-align: middle; margin-top: -1px;}
 .map-buttons {border-top: 1px solid #fff; border-radius: 0 0 4px 4px; overflow: hidden;}
 .map-buttons a.btn-lg {width: 50%; border:0; border-left: 1px solid #fff; float: left; border-radius: 0; font-size: 15px; line-height: 18px; white-space: normal;}
 .map-buttons a.btn-lg:first-child {border-left: 0;}
