@@ -90,4 +90,7 @@ test('Acacia Mill - map basemap and attribution check', async ({ page }) => {
   const attribution = page.locator('.leaflet-control-attribution');
   await expect(attribution).toContainText('CARTO');
   await expect(attribution).toContainText('OpenStreetMap');
+  const cartoLogoLink = attribution.locator('a.carto-logo-link[href="https://carto.com/"]');
+  await expect(cartoLogoLink).toBeVisible();
+  await expect(cartoLogoLink.locator('svg.carto-logo')).toBeVisible();
 });
