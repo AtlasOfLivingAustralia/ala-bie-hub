@@ -51,6 +51,18 @@ java {
     sourceCompatibility = JavaVersion.toVersion("11")
 }
 
+boolean inplace = false
+
+if (inplace) {
+    grails {
+        exploded = true
+        plugins {
+            // in-place plugin dependencies for development
+            implementation project(':ala-admin-plugin')
+        }
+    }
+}
+
 repositories {
     mavenLocal()
     maven { url "https://nexus.ala.org.au/content/groups/public/" }
@@ -137,7 +149,6 @@ dependencies {
     implementation "org.grails.plugins:ala-ws-plugin:$alaSecurityLibsVersion"
     implementation  "au.org.ala:data-quality-filter-service-client:1.0.0"
 
-    implementation  group: "org.grails.plugins", name: "ala-admin-plugin", version: "2.3.0", changing: true
     implementation  group: "au.org.ala.plugins.grails", name: "ala-citation-plugin", version: "1.0"
     implementation  group: "au.org.ala.plugins.grails", name: "ala-charts-plugin", version: "2.3.0"
     implementation  group: "au.org.ala.plugins.grails", name: "images-client-plugin", version: "1.2"
@@ -147,6 +158,9 @@ dependencies {
     implementation 'org.apache.tika:tika-core:2.4.1'
     implementation 'org.apache.tika:tika-langdetect-optimaize:2.4.1'
 
+    if (!inplace) {
+        implementation group: "org.grails.plugins", name: "ala-admin-plugin", version: "2.3.0", changing: true
+    }
 }
 
 bootRun {

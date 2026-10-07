@@ -13,3 +13,11 @@ pluginManagement {
 }
 
 rootProject.name='ala-bie-hub'
+
+// Set to true it needed only for development
+boolean inplace = false
+
+if (inplace) {
+    include ':ala-admin-plugin'
+    project(':ala-admin-plugin').projectDir = new File(settingsDir, '../ala-admin-plugin')
+}
